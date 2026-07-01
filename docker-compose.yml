@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - AI_PROVIDER=ollama
+      - AI_MODEL_NAME=llama3.2
+      - AI_BASE_URL=http://host.docker.internal:11434
+      - VECTOR_DB_PATH=/app/data/vector_store.json
+    volumes:
+      - ./backend:/app
+      - ./ai_layer:/ai_layer
+      - backend_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+
+volumes:
+  backend_data:
