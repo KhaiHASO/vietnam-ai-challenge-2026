@@ -1,5 +1,7 @@
 import time
+import re
 from typing import Dict, Any, List
+from ai_layer.config import settings
 from ai_layer.guardrails.pii import PIIScanner
 from ai_layer.guardrails.input_safety import InputSafetyGuardrail
 from ai_layer.guardrails.output_safety import OutputSafetyGuardrail
@@ -7,6 +9,7 @@ from ai_layer.router.model_router import ModelRouter
 from ai_layer.rag.vector_db import LocalVectorDB
 from ai_layer.agents.planner import AgentPlanner
 from ai_layer.approval.hitl import hitl_manager
+from ai_layer.pytorch_engine.inference import predict_triage
 
 class AIOrchestrator:
     def __init__(self):
@@ -17,15 +20,47 @@ class AIOrchestrator:
         self.vector_db = LocalVectorDB()
         self.planner = AgentPlanner()
 
+    def _extract_metadata_from_query(self, query: str) -> dict:
+        lower = query.lower()
+        domain = settings.ACTIVE_DOMAIN
+        meta = {}
+        
+        if domain == "sme":
+            numbers = re.findall(r'\d+', lower)
+            order_val = 0.0
+            for num in numbers:
+                val = int(num)
+                if val > 1000:
+                    order_val = float(val)
+                    break
+            meta["order_value"] = order_val
+            meta["customer_loyalty_tier"] = 3.0
+            meta["pending_tickets_count"] = 1.0
+            meta["is_financial_transaction"] = 1.0 if any(w in lower for w in ["hủy sân", "hủy đặt sân", "refund", "hoàn tiền", "trừ tiền", "momo"]) else 0.0
+            
+        elif domain == "education":
+            meta["prior_gpa"] = 3.2
+            meta["attendance_rate"] = 0.68 if any(w in lower for w in ["vắng", "nghỉ học", "chuyên cần"]) else 0.92
+            meta["late_submissions_count"] = 4.0 if any(w in lower for w in ["muộn", "trễ", "bài tập"]) else 0.0
+            meta["lms_activity_score"] = 45.0 if any(w in lower for w in ["lms", "online", "hoạt động"]) else 85.0
+            meta["midterm_grade"] = 4.0 if any(w in lower for w in ["thi giữa kỳ", "điểm thấp", "failing"]) else 7.5
+            
+        elif domain == "agriculture":
+            meta["leaf_damage_percent"] = 45.0 if any(w in lower for w in ["sâu bệnh", "đốm nâu", "rầy nâu", "hại", "lá vàng"]) else 5.0
+            meta["temperature"] = 34.0 if any(w in lower for w in ["nóng", "nắng", "nhiệt độ"]) else 28.0
+            meta["humidity"] = 42.0 if any(w in lower for w in ["khô", "ẩm", "độ ẩm"]) else 75.0
+            meta["soil_moisture"] = 35.0 if any(w in lower for w in ["hạn", "nước", "tưới"]) else 65.0
+            meta["days_since_last_treatment"] = 18.0 if any(w in lower for w in ["lâu", "ngày", "trước"]) else 3.0
+            
+        return meta
+
     def process_request(self, user_query: str) -> Dict[str, Any]:
         """
-        Executes the 9-step AI-Native Architecture pipeline.
-        Returns:
-            Dict containing final response, trace steps telemetry, execution stats.
+        Executes the 9-step AI-Native Architecture pipeline dynamically.
         """
         start_time = time.time()
         telemetry = {}
-        trace_steps = []
+        domain = settings.ACTIVE_DOMAIN
         
         # Step 1: PII Scan
         step_start = time.time()
@@ -80,40 +115,73 @@ class AIOrchestrator:
             "duration_ms": (time.time() - step_start) * 1000
         }
         
-        # Determine how to handle routing
-        final_response = ""
-        agent_steps = []
+        # Step 4.5: PyTorch Impact Triage Engine
+        step_start = time.time()
+        metadata = self._extract_metadata_from_query(redacted_query)
+        pytorch_res = predict_triage(redacted_query, metadata)
+        telemetry["pytorch_engine"] = {
+            "name": "PyTorch Impact Triage Engine",
+            "results": pytorch_res,
+            "duration_ms": (time.time() - step_start) * 1000
+        }
+        
+        # Step 7: Human-in-the-Loop Approval check
         is_hitl_triggered = False
         hitl_approval_id = None
+        final_response = ""
         
-        # Intercept High-Risk actions before sending to planner (e.g. canceling or refunding money)
-        # In a production AI-Native cockpit, we guard high-risk intent proactively
-        is_high_risk_intent = any(w in redacted_query.lower() for w in ["hủy sân", "hủy đặt sân", "refund", "hoàn tiền"])
-        
-        if is_high_risk_intent:
+        # Logic to trigger HITL based on Domain + PyTorch predictions
+        is_high_risk = False
+        if domain == "sme":
+            is_high_risk = any(w in redacted_query.lower() for w in ["hủy sân", "hủy đặt sân", "refund", "hoàn tiền"]) or pytorch_res.get("needs_human_review", False)
+        elif domain == "education":
+            is_high_risk = any(w in redacted_query.lower() for w in ["kỷ luật", "cảnh cáo", "đình chỉ"]) or pytorch_res.get("needs_human_review", False)
+        elif domain == "agriculture":
+            is_high_risk = any(w in redacted_query.lower() for w in ["hóa chất", "thuốc trừ sâu", "phun thuốc"]) or pytorch_res.get("needs_human_review", False)
+
+        if is_high_risk:
             is_hitl_triggered = True
-            # Create a pending approval
-            booking_id = "BKG-88321A"  # Default mock or parsed from query
-            approval_id = hitl_manager.create_pending_approval(
-                action_type="cancel_booking_refund",
-                details={
-                    "booking_id": booking_id,
+            
+            # Formulate dynamic details for Admin HITL Queue
+            if domain == "sme":
+                action_type = "cancel_booking_refund"
+                details = {
+                    "booking_id": "BKG-88321A",
                     "refund_amount": 220000,
-                    "user_query": redacted_query
+                    "user_query": redacted_query,
+                    "risk_level": pytorch_res["risk_level"],
+                    "priority": pytorch_res["priority"]
                 }
+                final_response = f"Yêu cầu hủy sân và hoàn tiền (Mã BKG-88321A) đã được ghi nhận. Do đây là giao dịch ảnh hưởng tài chính được xếp hạng rủi ro '{pytorch_res['risk_level'].upper()}' bởi PyTorch Engine, hệ thống đã chuyển tiếp yêu cầu đến Quản trị viên để phê duyệt thủ công."
+            elif domain == "education":
+                action_type = "student_discipline_warning"
+                details = {
+                    "student_id": "STU-1002",
+                    "issue": "Academic Warning / Dropout Alert",
+                    "user_query": redacted_query,
+                    "risk_level": pytorch_res["risk_level"],
+                    "priority": pytorch_res["priority"]
+                }
+                final_response = f"Yêu cầu gửi cảnh báo học vụ cho sinh viên STU-1002 đã được chuyển đến Cố vấn học tập phê duyệt (Mã rủi ro: {pytorch_res['risk_level'].upper()})."
+            elif domain == "agriculture":
+                action_type = "chemical_pesticide_approval"
+                details = {
+                    "crop_id": "CRP-304",
+                    "chemical": "Fungicide NPK-II",
+                    "user_query": redacted_query,
+                    "risk_level": pytorch_res["risk_level"],
+                    "priority": pytorch_res["priority"]
+                }
+                final_response = f"Khuyến nghị phun thuốc hóa chất trị nấm cho vườn sầu riêng (Mã CRP-304) đang chờ chuyên gia phê duyệt để đảm bảo an toàn sinh học môi trường."
+                
+            approval_id = hitl_manager.create_pending_approval(
+                action_type=action_type,
+                details=details
             )
             hitl_approval_id = approval_id
-            final_response = f"Yêu cầu hủy sân và hoàn tiền cho mã đặt chỗ {booking_id} của bạn đã được ghi nhận. Do đây là giao dịch ảnh hưởng tài chính, hệ thống đã chuyển tiếp yêu cầu đến Quản trị viên để phê duyệt thủ công (Mã yêu cầu: {approval_id})."
             
-            telemetry["step_5_planner"] = {
-                "name": "Agent Planner",
-                "skipped": True,
-                "reason": "Intercepted due to High Risk intent"
-            }
-            telemetry["step_6_executor"] = {
-                "name": "Tool Executor",
-                "skipped": True
-            }
+            telemetry["step_5_planner"] = {"name": "Agent Planner", "skipped": True, "reason": "HITL Intercept"}
+            telemetry["step_6_executor"] = {"name": "Tool Executor", "skipped": True}
             telemetry["step_7_hitl"] = {
                 "name": "Human-in-the-Loop",
                 "triggered": True,
@@ -164,7 +232,7 @@ class AIOrchestrator:
         if output_blocked and not is_hitl_triggered:
             final_response = "Tôi xin lỗi, câu trả lời đang gặp vấn đề xác thực thông tin. Vui lòng thử lại sau."
             
-        # Restore PII details if any were redacted, so the final response looks personalized to the user
+        # Restore PII details
         final_response = self.pii_scanner.restore_pii(final_response, pii_mapping)
         
         # Step 9: Smart Response Dispatcher
@@ -183,5 +251,6 @@ class AIOrchestrator:
             "telemetry": telemetry,
             "duration_ms": total_duration,
             "hitl_triggered": is_hitl_triggered,
-            "hitl_approval_id": hitl_approval_id
+            "hitl_approval_id": hitl_approval_id,
+            "pytorch_triage": pytorch_res
         }

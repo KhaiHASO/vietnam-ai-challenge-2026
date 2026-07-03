@@ -5,7 +5,7 @@ class ToolRegistry:
     def __init__(self):
         self.tools: Dict[str, Dict[str, Any]] = {}
 
-    def register(self, name: str = None) -> Callable:
+    def register(self, name: str = None, domain: str = None) -> Callable:
         """Decorator to register a tool and extract its schema."""
         def decorator(func: Callable) -> Callable:
             tool_name = name or func.__name__
@@ -48,6 +48,7 @@ class ToolRegistry:
                 "name": tool_name,
                 "description": desc,
                 "callable": func,
+                "domain": domain,
                 "parameters": {
                     "type": "object",
                     "properties": properties,
@@ -57,10 +58,12 @@ class ToolRegistry:
             return func
         return decorator
 
-    def get_tool_schemas(self) -> List[Dict[str, Any]]:
-        """Returns JSON schemas for all registered tools (ready for OpenAI/Gemini/Ollama tool calling)."""
+    def get_tool_schemas(self, domain: str = None) -> List[Dict[str, Any]]:
+        """Returns JSON schemas for registered tools matching the given domain (ready for OpenAI/Gemini/Ollama tool calling)."""
         schemas = []
         for name, data in self.tools.items():
+            if domain and data.get("domain") and data.get("domain") != domain:
+                continue
             schemas.append({
                 "type": "function",
                 "function": {

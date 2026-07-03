@@ -6,7 +6,7 @@ from ai_layer.config import settings
 
 class LocalVectorDB:
     def __init__(self):
-        self.db_path = settings.VECTOR_DB_PATH
+        self.db_path = settings.vector_db_path
         self.documents: List[Dict[str, Any]] = []
         self.embeddings: List[np.ndarray] = []
         self.model = None
@@ -97,6 +97,7 @@ class LocalVectorDB:
                 "doc": doc,
                 "embedding": emb.tolist()
             })
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         with open(self.db_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
