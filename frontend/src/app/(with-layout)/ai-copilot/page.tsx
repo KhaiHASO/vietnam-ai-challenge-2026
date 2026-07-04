@@ -357,10 +357,12 @@ export default function AICopilotDashboard() {
                   ))}
                   {loading && (
                     <div className="d-flex mb-3 justify-content-start">
-                      <div className="bg-light p-3 rounded-3">
+                      <div className="bg-light p-3 rounded-3 text-dark" style={{ maxWidth: "80%" }}>
                         <span className="fw-bold fs-12 d-block mb-1">AI AGENT</span>
-                        <span className="spinner-border spinner-border-sm me-2 text-primary" role="status" />
-                        <span className="fs-14 text-muted">Đang xử lý luồng kiến trúc 9 bước...</span>
+                        <div className="d-flex align-items-center">
+                          <span className="spinner-border spinner-border-sm me-2 text-primary" role="status" />
+                          <span className="fs-14">Đang xử lý luồng kiến trúc 9 bước...</span>
+                        </div>
                       </div>
                     </div>
                   )}
