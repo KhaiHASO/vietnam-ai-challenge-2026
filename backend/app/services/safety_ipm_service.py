@@ -2,6 +2,20 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+STRONG_CHEMICAL_KEYWORDS = (
+    "ridomil",
+    "metalaxyl",
+    "mancozeb",
+    "chlorothalonil",
+    "propiconazole",
+    "difenoconazole",
+    "thuốc đặc trị",
+    "thuốc hóa học",
+    "hóa chất",
+    "phun bao vây dập dịch",
+    "liều lượng lớn",
+)
+
 
 def _now() -> datetime:
     return datetime.now(timezone.utc)
@@ -12,6 +26,29 @@ def _new_id(prefix: str) -> str:
 
 
 class SafetyIpmService:
+    def has_strong_chemical_recommendation(self, recommended_actions: list[str]) -> bool:
+        combined_actions = " ".join(recommended_actions).lower()
+        return any(keyword in combined_actions for keyword in STRONG_CHEMICAL_KEYWORDS)
+
+    def expert_review_reasons(
+        self,
+        risk_level: str,
+        recommended_actions: list[str],
+    ) -> list[str]:
+        reasons = []
+        if risk_level == "high":
+            reasons.append("high_risk")
+        if self.has_strong_chemical_recommendation(recommended_actions):
+            reasons.append("strong_chemical_recommendation")
+        return reasons
+
+    def requires_expert_review(
+        self,
+        risk_level: str,
+        recommended_actions: list[str],
+    ) -> bool:
+        return bool(self.expert_review_reasons(risk_level, recommended_actions))
+
     def build_follow_up_questions(
         self,
         vision_result: dict[str, Any],
@@ -64,8 +101,12 @@ class SafetyIpmService:
             actions.append("Liên hệ chuyên gia hoặc cán bộ khuyến nông trước khi dùng biện pháp hóa học.")
         return actions
 
-    def expert_required(self, risk_level: str) -> bool:
-        return risk_level == "high"
+    def expert_required(
+        self,
+        risk_level: str,
+        recommended_actions: list[str] | None = None,
+    ) -> bool:
+        return self.requires_expert_review(risk_level, recommended_actions or [])
 
     def build_diagnosis(
         self,
@@ -93,15 +134,16 @@ class SafetyIpmService:
     ) -> dict[str, Any]:
         vision_result = vision_report.get("raw", {})
         risk_level = triage_result.get("risk_level", "medium")
+        recommended_actions = self.build_recommended_actions(reasoning_result, risk_level)
         return {
             "image_quality": vision_report.get("image_quality", {}),
             "top_predictions": vision_report.get("top_predictions", []),
             "diagnosis": self.build_diagnosis(vision_result, reasoning_result),
-            "recommended_actions": self.build_recommended_actions(reasoning_result, risk_level),
+            "recommended_actions": recommended_actions,
             "follow_up_questions": self.build_follow_up_questions(vision_result, reasoning_result),
             "risk_level": risk_level,
             "confidence": vision_result.get("confidence", triage_result.get("confidence", 0.0)),
-            "expert_required": self.expert_required(risk_level),
+            "expert_required": self.expert_required(risk_level, recommended_actions),
             "agent_logs": agent_logs or [],
         }
 
@@ -113,13 +155,17 @@ class SafetyIpmService:
     ) -> dict[str, Any]:
         content = reasoning_result.get("content", {})
         now = _now()
+        recommendations = self.build_recommended_actions(reasoning_result, risk_level)
+        needs_approval = self.expert_required(risk_level, recommendations)
         return {
             "plan_id": _new_id("plan"),
             "case_id": case_id,
-            "status": "draft",
+            "status": "pending_approval" if needs_approval else "draft",
             "diagnosis_level": content.get("diagnosis_level", "uncertain"),
             "short_diagnosis": content.get("short_diagnosis", "Chưa đủ dữ liệu chẩn đoán"),
-            "recommendations": self.build_recommended_actions(reasoning_result, risk_level),
+            "recommendations": recommendations,
+            "approval_required": needs_approval,
+            "approval_reasons": self.expert_review_reasons(risk_level, recommendations),
             "safety_notes": content.get("why", []),
             "when_to_call_expert": content.get("when_to_call_expert", []),
             "disclaimer": content.get("disclaimer", ""),
@@ -127,8 +173,15 @@ class SafetyIpmService:
             "updated_at": now,
         }
 
-    def build_expert_review(self, case_id: str, risk_level: str) -> dict[str, Any] | None:
-        if not self.expert_required(risk_level):
+    def build_expert_review(
+        self,
+        case_id: str,
+        risk_level: str,
+        treatment_plan: dict[str, Any],
+    ) -> dict[str, Any] | None:
+        recommendations = treatment_plan.get("recommendations", [])
+        reasons = self.expert_review_reasons(risk_level, recommendations)
+        if not reasons:
             return None
 
         now = _now()
@@ -137,9 +190,12 @@ class SafetyIpmService:
             "case_id": case_id,
             "status": "pending",
             "reviewer_id": None,
-            "notes": "Tự động tạo do ca chẩn đoán có rủi ro cao.",
+            "notes": "Tự động tạo vì kế hoạch xử lý cần chuyên gia phê duyệt trước khi áp dụng.",
             "risk_level": risk_level,
-            "reason": "high_risk_diagnosis_case",
+            "treatment_plan_id": treatment_plan["plan_id"],
+            "reason": ",".join(reasons),
+            "reasons": reasons,
+            "recommended_actions": recommendations,
             "created_at": now,
             "updated_at": now,
         }

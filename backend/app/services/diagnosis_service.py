@@ -359,9 +359,27 @@ class DiagnosisService:
         )
         await self.repository.insert_one("treatment_plans", treatment_plan)
 
-        expert_review = self.safety_ipm_service.build_expert_review(case_id, risk_level)
+        expert_review = self.safety_ipm_service.build_expert_review(
+            case_id=case_id,
+            risk_level=risk_level,
+            treatment_plan=treatment_plan,
+        )
         if expert_review:
             await self.repository.insert_one("expert_reviews", expert_review)
+            await self.agent_log_service.record(
+                case_id=case_id,
+                agent="ExpertReviewCreationAgent",
+                status="pending",
+                trace={
+                    "review_id": expert_review["review_id"],
+                    "treatment_plan_id": treatment_plan["plan_id"],
+                    "treatment_plan_status": treatment_plan["status"],
+                    "risk_level": risk_level,
+                    "reasons": expert_review.get("reasons", []),
+                    "recommended_actions": expert_review.get("recommended_actions", []),
+                },
+                duration_ms=0.0,
+            )
 
         duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
         agent_log = await self.agent_log_service.record(
@@ -371,7 +389,10 @@ class DiagnosisService:
             trace={
                 "reasoning_engine": reasoning_result.get("engine"),
                 "treatment_plan_id": treatment_plan["plan_id"],
+                "treatment_plan_status": treatment_plan["status"],
                 "expert_review_id": expert_review["review_id"] if expert_review else None,
+                "expert_review_status": expert_review["status"] if expert_review else None,
+                "expert_review_reasons": expert_review.get("reasons", []) if expert_review else [],
             },
             duration_ms=duration_ms,
         )
