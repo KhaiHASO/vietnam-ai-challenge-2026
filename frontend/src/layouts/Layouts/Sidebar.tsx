@@ -2,14 +2,6 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
 import SimpleBar from "simplebar-react";
-import Image from "next/image";
-
-//import logo
-const logoSm = "/images/logo-sm.png";
-const logoDark = "/images/logo-dark.png";
-const logoLight = "/images/logo-light.png";
-
-const avatar1 = "/images/users/avatar-1.jpg";
 
 //Import Components
 import VerticalLayout from "./VerticalLayouts";
@@ -21,6 +13,80 @@ import {
   UncontrolledDropdown,
 } from "reactstrap";
 import HorizontalLayout from "./HorizontalLayout";
+
+// CropDoctor AI Logo Component
+const CropDoctorLogo = ({ size = "lg" }: { size?: "sm" | "lg" }) => {
+  if (size === "sm") {
+    return (
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect width="32" height="32" rx="8" fill="#2dce89" />
+        <path
+          d="M16 6C16 6 8 10 8 18C8 22.4 11.6 26 16 26C20.4 26 24 22.4 24 18C24 10 16 6 16 6Z"
+          fill="white"
+          fillOpacity="0.9"
+        />
+        <path
+          d="M16 14C16 14 12 16 12 20C12 22.2 13.8 24 16 24"
+          stroke="#2dce89"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M16 14C16 14 20 16 20 20"
+          stroke="#16a570"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+    );
+  }
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+      <svg
+        width="28"
+        height="28"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect width="32" height="32" rx="8" fill="#2dce89" />
+        <path
+          d="M16 6C16 6 8 10 8 18C8 22.4 11.6 26 16 26C20.4 26 24 22.4 24 18C24 10 16 6 16 6Z"
+          fill="white"
+          fillOpacity="0.9"
+        />
+        <path
+          d="M16 14C16 14 12 16 12 20C12 22.2 13.8 24 16 24"
+          stroke="#2dce89"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+        <path
+          d="M16 14C16 14 20 16 20 20"
+          stroke="#16a570"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+        />
+      </svg>
+      <span
+        style={{
+          fontWeight: 700,
+          fontSize: "15px",
+          letterSpacing: "-0.3px",
+          color: "var(--vz-sidebar-menu-item-color)",
+        }}
+      >
+        CropDoctor<span style={{ color: "#2dce89" }}> AI</span>
+      </span>
+    </div>
+  );
+};
 
 const Sidebar = ({ layoutType }: any) => {
   useEffect(() => {
@@ -48,27 +114,21 @@ const Sidebar = ({ layoutType }: any) => {
     <React.Fragment>
       <div className="app-menu navbar-menu">
         <div className="navbar-brand-box">
-          <Link href="/" className="logo logo-dark">
+          <Link href="/dashboard" className="logo logo-dark">
             <span className="logo-sm">
-              <Image src={logoSm} alt="Logo Small" width={22} height={22} />
+              <CropDoctorLogo size="sm" />
             </span>
             <span className="logo-lg">
-              <Image src={logoDark} alt="Logo Dark" width={100} height={17} />
+              <CropDoctorLogo size="lg" />
             </span>
           </Link>
 
-          <Link href="/" className="logo logo-light">
+          <Link href="/dashboard" className="logo logo-light">
             <span className="logo-sm">
-              <Image src={logoSm} alt="Logo Small" width={22} height={22} />
+              <CropDoctorLogo size="sm" />
             </span>
             <span className="logo-lg">
-              <Image
-                src={logoLight}
-                alt="Logo Light"
-                width={100}
-                height={17}
-                style={{ width: "100px", height: "17px" }}
-              />
+              <CropDoctorLogo size="lg" />
             </span>
           </Link>
 
@@ -82,6 +142,7 @@ const Sidebar = ({ layoutType }: any) => {
           </button>
         </div>
 
+        {/* User Profile */}
         <UncontrolledDropdown className="sidebar-user m-1 rounded">
           <DropdownToggle
             tag="button"
@@ -90,64 +151,57 @@ const Sidebar = ({ layoutType }: any) => {
             id="page-header-user-dropdown"
           >
             <span className="d-flex align-items-center gap-2">
-              <Image
-                className="rounded header-profile-user"
-                src={avatar1}
-                alt="Header Avatar"
-                width={40}
-                height={40}
-              />
+              <span
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #2dce89 0%, #11998e 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  color: "white",
+                  flexShrink: 0,
+                }}
+              >
+                NA
+              </span>
               <span className="text-start">
                 <span className="d-block fw-medium sidebar-user-name-text">
-                  Anna Adame
+                  Nguyễn Văn A
                 </span>
                 <span className="d-block fs-14 sidebar-user-name-sub-text">
                   <i className="ri ri-circle-fill fs-10 text-success align-baseline"></i>{" "}
-                  <span className="align-middle">Online</span>
+                  <span className="align-middle">Nông dân</span>
                 </span>
               </span>
             </span>
           </DropdownToggle>
           <DropdownMenu className="dropdown-menu-end">
-            <h6 className="dropdown-header">Welcome Anna!</h6>
-            <a className="dropdown-item" href="/profile">
+            <h6 className="dropdown-header">Xin chào, Nguyễn Văn A!</h6>
+            <a className="dropdown-item" href="/settings/profile">
               <i className="mdi mdi-account-circle text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Profile</span>
+              <span className="align-middle">Hồ sơ của tôi</span>
             </a>
-            <a className="dropdown-item" href="/apps-chat">
-              <i className="mdi mdi-message-text-outline text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Messages</span>
+            <a className="dropdown-item" href="/reminders">
+              <i className="mdi mdi-bell-outline text-muted fs-16 align-middle me-1"></i>{" "}
+              <span className="align-middle">Lịch nhắc</span>
             </a>
-            <a className="dropdown-item" href="/apps-tasks-kanban">
-              <i className="mdi mdi-calendar-check-outline text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Taskboard</span>
-            </a>
-            <a className="dropdown-item" href="/pages-faqs">
-              <i className="mdi mdi-lifebuoy text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Help</span>
+            <a className="dropdown-item" href="/diagnosis/new">
+              <i className="mdi mdi-leaf text-muted fs-16 align-middle me-1"></i>{" "}
+              <span className="align-middle">Chẩn đoán mới</span>
             </a>
             <div className="dropdown-divider"></div>
-            <a className="dropdown-item" href="/pages-profile">
-              <i className="mdi mdi-wallet text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">
-                Balance : <b>$5971.67</b>
-              </span>
-            </a>
-            <a className="dropdown-item" href="/pages-profile-settings">
-              <span className="badge bg-success-subtle text-success mt-1 float-end">
-                New
-              </span>
+            <a className="dropdown-item" href="/settings/system">
               <i className="mdi mdi-cog-outline text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Settings</span>
+              <span className="align-middle">Cài đặt</span>
             </a>
-            <a className="dropdown-item" href="/auth-lockscreen-basic">
-              <i className="mdi mdi-lock text-muted fs-16 align-middle me-1"></i>{" "}
-              <span className="align-middle">Lock screen</span>
-            </a>
-            <a className="dropdown-item" href="/auth-logout-basic">
-              <i className="mdi mdi-logout text-muted fs-16 align-middle me-1"></i>{" "}
+            <a className="dropdown-item text-danger" href="#">
+              <i className="mdi mdi-logout text-danger fs-16 align-middle me-1"></i>{" "}
               <span className="align-middle" data-key="t-logout">
-                Logout
+                Đăng xuất
               </span>
             </a>
           </DropdownMenu>
