@@ -288,38 +288,38 @@ export default function AICopilotDashboard() {
         {/* Top Header Card */}
         <Row className="mb-4">
           <Col lg={12}>
-            <Card className="bg-dark text-white border-0 overflow-hidden" style={{ borderRadius: "12px" }}>
+            <Card className="card overflow-hidden" style={{ borderRadius: "12px" }}>
               <CardBody className="p-4">
                 <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
                   <div>
-                    <h4 className="text-white mb-1">
+                    <h4 className="mb-1">
                       <Badge color="success" className="me-2 align-middle">Live</Badge>
                       Vietnam AI Challenge - Operations Copilot Cockpit
                     </h4>
-                    <p className="text-white-50 mb-0">Hệ thống giám sát vận hành AI-Native tích hợp Guardrails & HITL</p>
+                    <p className="text-muted mb-0">Hệ thống giám sát vận hành AI-Native tích hợp Guardrails & HITL</p>
                   </div>
                   
                   {/* Dynamic Domain Switcher */}
-                  <div className="d-flex align-items-center gap-2 bg-light-subtle p-1 rounded">
-                    <span className="fs-12 text-white-50 me-2 ps-2">WORKSPACE DOMAIN:</span>
-                    <Button color={activeDomain === "sme" ? "primary" : "outline-light"} size="sm" onClick={() => handleSwitchDomain("sme")}>SME</Button>
-                    <Button color={activeDomain === "education" ? "primary" : "outline-light"} size="sm" onClick={() => handleSwitchDomain("education")}>Education</Button>
-                    <Button color={activeDomain === "agriculture" ? "primary" : "outline-light"} size="sm" onClick={() => handleSwitchDomain("agriculture")}>Agriculture</Button>
+                  <div className="d-flex align-items-center gap-2 bg-light p-1 rounded">
+                    <span className="fs-12 text-muted me-2 ps-2">WORKSPACE DOMAIN:</span>
+                    <Button color={activeDomain === "sme" ? "primary" : "outline-secondary"} size="sm" onClick={() => handleSwitchDomain("sme")}>SME</Button>
+                    <Button color={activeDomain === "education" ? "primary" : "outline-secondary"} size="sm" onClick={() => handleSwitchDomain("education")}>Education</Button>
+                    <Button color={activeDomain === "agriculture" ? "primary" : "outline-secondary"} size="sm" onClick={() => handleSwitchDomain("agriculture")}>Agriculture</Button>
                   </div>
 
-                  <div className="d-flex align-items-center gap-4 text-white-50 flex-wrap">
+                  <div className="d-flex align-items-center gap-4 text-muted flex-wrap">
                     <div className="d-flex align-items-center gap-2">
                       <FeatherIcon icon="cpu" className="text-success" />
                       <div>
                         <div className="fs-12 text-muted">ACTIVE MODEL</div>
-                        <div className="text-white fw-bold fs-14">{modelName}</div>
+                        <div className="fw-bold fs-14">{modelName}</div>
                       </div>
                     </div>
                     <div className="d-flex align-items-center gap-2">
                       <FeatherIcon icon="activity" className="text-info" />
                       <div>
                         <div className="fs-12 text-muted">LATENCY</div>
-                        <div className="text-white fw-bold fs-14">
+                        <div className="fw-bold fs-14">
                           {telemetry?.step_9_dispatcher?.total_duration_ms ? `${telemetry.step_9_dispatcher.total_duration_ms.toFixed(1)} ms` : "0 ms"}
                         </div>
                       </div>
