@@ -39,3 +39,15 @@ class SymptomAnswersRequest(BaseModel):
 class FinalizeDiagnosisRequest(BaseModel):
     crop_hint: str | None = None
     additional_notes: str | None = None
+
+
+class AIResponse(BaseModel):
+    image_quality: dict[str, Any]
+    top_predictions: list[dict[str, Any]]
+    diagnosis: dict[str, Any]
+    recommended_actions: list[str]
+    follow_up_questions: list[str]
+    risk_level: str
+    confidence: float
+    expert_required: bool
+    agent_logs: list[dict[str, Any]]

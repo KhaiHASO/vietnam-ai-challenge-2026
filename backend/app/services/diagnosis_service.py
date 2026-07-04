@@ -6,10 +6,6 @@ from typing import Any
 
 from fastapi import HTTPException, UploadFile
 
-from ai_layer.cropdoctor.agents.deepseek_reasoning_agent import DeepSeekReasoningAgent
-from ai_layer.cropdoctor.agents.vision_consensus_agent import VisionConsensusAgent
-from ai_layer.pytorch_engine.inference import predict_triage
-
 from app.core.config import settings
 from app.repositories.diagnosis_repository import DiagnosisRepository
 from app.schemas.diagnosis import (
@@ -18,13 +14,15 @@ from app.schemas.diagnosis import (
     FinalizeDiagnosisRequest,
     SymptomAnswersRequest,
 )
+from app.services.agent_log_service import AgentLogService
+from app.services.pytorch_report_service import PyTorchReportService
+from app.services.reasoning_service import ReasoningService
+from app.services.safety_ipm_service import SafetyIpmService
+from app.services.vision_service import VisionService
 
 logger = logging.getLogger("backend.diagnosis")
 
 ALLOWED_IMAGE_EXTENSIONS = {"jpg", "jpeg", "png", "webp"}
-
-vision_agent = VisionConsensusAgent()
-reasoning_agent = DeepSeekReasoningAgent()
 
 
 def _now() -> datetime:
@@ -39,33 +37,6 @@ def _case_not_found(case_id: str) -> HTTPException:
     return HTTPException(status_code=404, detail=f"Diagnosis case '{case_id}' not found")
 
 
-def _question_texts(vision_result: dict[str, Any]) -> list[str]:
-    label = vision_result.get("final_disease_label", "").lower()
-    decision_status = vision_result.get("decision_status", "")
-
-    questions = [
-        "Vết bệnh xuất hiện đầu tiên ở lá già sát mặt đất hay lá non phía trên?",
-        "Trong 7 ngày gần đây vườn có mưa lớn, sương đêm hoặc tưới phun lên lá không?",
-        "Tỷ lệ cây hoặc diện tích lá bị ảnh hưởng ước tính là bao nhiêu phần trăm?",
-    ]
-
-    if "late_blight" in label:
-        questions.append("Mặt dưới lá có lớp tơ trắng mỏng khi trời ẩm không?")
-    elif "early_blight" in label:
-        questions.append("Vết đốm có dạng vòng tròn đồng tâm như hình bia bắn không?")
-    elif "bacterial" in label:
-        questions.append("Trên quả hoặc mặt dưới lá có nốt sần nhỏ như mụn cóc không?")
-    elif "healthy" in label:
-        questions.append("Cây có dấu hiệu héo rũ ban ngày dù đất vẫn đủ ẩm không?")
-    else:
-        questions.append("Triệu chứng có lan nhanh sang cây bên cạnh trong 48 giờ gần nhất không?")
-
-    if decision_status == "low_confidence_need_better_image_or_expert":
-        questions.append("Bạn có thể chụp thêm ảnh cận cảnh mặt trên và mặt dưới lá trong ánh sáng tự nhiên không?")
-
-    return questions
-
-
 def _join_answers(answers: list[dict[str, Any]], questions: list[dict[str, Any]]) -> str:
     question_by_id = {item["question_id"]: item["text"] for item in questions}
     lines = []
@@ -75,30 +46,21 @@ def _join_answers(answers: list[dict[str, Any]], questions: list[dict[str, Any]]
     return "\n".join(lines)
 
 
-def _treatment_plan_from_reasoning(
-    case_id: str,
-    reasoning_result: dict[str, Any],
-) -> dict[str, Any]:
-    content = reasoning_result.get("content", {})
-    recommendations = content.get("safe_recommendations", [])
-    return {
-        "plan_id": _new_id("plan"),
-        "case_id": case_id,
-        "status": "draft",
-        "diagnosis_level": content.get("diagnosis_level", "uncertain"),
-        "short_diagnosis": content.get("short_diagnosis", "Chưa đủ dữ liệu chẩn đoán"),
-        "recommendations": recommendations,
-        "safety_notes": content.get("why", []),
-        "when_to_call_expert": content.get("when_to_call_expert", []),
-        "disclaimer": content.get("disclaimer", ""),
-        "created_at": _now(),
-        "updated_at": _now(),
-    }
-
-
 class DiagnosisService:
-    def __init__(self, repository: DiagnosisRepository | None = None) -> None:
+    def __init__(
+        self,
+        repository: DiagnosisRepository | None = None,
+        vision_service: VisionService | None = None,
+        reasoning_service: ReasoningService | None = None,
+        safety_ipm_service: SafetyIpmService | None = None,
+        pytorch_report_service: PyTorchReportService | None = None,
+    ) -> None:
         self.repository = repository or DiagnosisRepository()
+        self.vision_service = vision_service or VisionService()
+        self.reasoning_service = reasoning_service or ReasoningService()
+        self.safety_ipm_service = safety_ipm_service or SafetyIpmService()
+        self.pytorch_report_service = pytorch_report_service or PyTorchReportService()
+        self.agent_log_service = AgentLogService(self.repository)
 
     async def create_case(self, request: DiagnosisCaseCreate) -> dict[str, Any]:
         now = _now()
@@ -186,71 +148,54 @@ class DiagnosisService:
         started_at = time.perf_counter()
 
         try:
-            vision_result = vision_agent.predict(
+            vision_report = self.vision_service.analyze_image(
                 image_path=image_path,
                 crop_hint=crop_hint,
                 original_filename=image.get("original_filename", ""),
             )
-        except Exception:
+        except RuntimeError:
             logger.exception("Vision analysis failed for case %s", case_id)
             raise HTTPException(status_code=500, detail="Vision analysis failed")
 
-        description = " ".join(
-            str(part)
-            for part in (
-                vision_result.get("final_disease_vi"),
-                vision_result.get("final_disease_label"),
-                vision_result.get("decision_status"),
-            )
-            if part
+        vision_result = vision_report["raw"]
+        triage_result = self.pytorch_report_service.assess_risk(
+            vision_result=vision_result,
+            metadata=request.metadata,
         )
-        metadata = dict(request.metadata)
-        metadata.setdefault("leaf_damage_percent", 0.0)
-        try:
-            triage_result = predict_triage(description, metadata)
-        except Exception:
-            logger.exception("PyTorch triage failed for case %s", case_id)
-            triage_result = {
-                "risk_level": "medium",
-                "priority": 0.5,
-                "needs_human_review": True,
-                "confidence": 0.0,
-                "top_factors": ["pytorch_error_fallback"],
-                "model_version": "fallback",
-                "engine": "error_fallback",
-            }
 
         now = _now()
+        duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
+        result_id = _new_id("vision")
+        agent_log = await self.agent_log_service.record(
+            case_id=case_id,
+            agent="VisionPyTorchAnalysisAgent",
+            status="done",
+            trace={
+                "result_id": result_id,
+                "image_id": image["image_id"],
+                "vision_engine": vision_result.get("primary_engine"),
+                "triage_engine": triage_result.get("engine"),
+            },
+            duration_ms=duration_ms,
+        )
+        ai_response = self.safety_ipm_service.build_ai_response(
+            vision_report=vision_report,
+            triage_result=triage_result,
+            agent_logs=[agent_log],
+        )
         result_document = {
-            "result_id": _new_id("vision"),
+            "result_id": result_id,
             "case_id": case_id,
             "image_id": image["image_id"],
             "crop_hint": crop_hint,
             "vision": vision_result,
+            "image_quality": vision_report["image_quality"],
             "pytorch_triage": triage_result,
+            "ai_response": ai_response,
             "created_at": now,
             "updated_at": now,
         }
         await self.repository.insert_one("vision_results", result_document)
-
-        duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
-        await self.repository.insert_one(
-            "agent_logs",
-            {
-                "log_id": _new_id("log"),
-                "case_id": case_id,
-                "agent": "VisionPyTorchAnalysisAgent",
-                "status": "done",
-                "trace": {
-                    "image_id": image["image_id"],
-                    "vision_engine": vision_result.get("primary_engine"),
-                    "triage_engine": triage_result.get("engine"),
-                },
-                "duration_ms": duration_ms,
-                "created_at": now,
-                "updated_at": now,
-            },
-        )
 
         await self.repository.update_one(
             "diagnosis_cases",
@@ -259,10 +204,11 @@ class DiagnosisService:
                 "status": "image_analyzed",
                 "risk_level": triage_result.get("risk_level"),
                 "summary": vision_result.get("final_disease_vi"),
+                "needs_expert_review": ai_response["expert_required"],
                 "updated_at": now,
             },
         )
-        return result_document
+        return {**result_document, **ai_response}
 
     async def get_symptom_questions(self, case_id: str) -> dict[str, Any]:
         case = await self.repository.find_one("diagnosis_cases", {"case_id": case_id})
@@ -287,7 +233,13 @@ class DiagnosisService:
 
         now = _now()
         question_docs = []
-        for order, text in enumerate(_question_texts(vision_document.get("vision", {})), start=1):
+        questions = vision_document.get("ai_response", {}).get("follow_up_questions")
+        if not questions:
+            questions = self.safety_ipm_service.build_follow_up_questions(
+                vision_document.get("vision", {})
+            )
+
+        for order, text in enumerate(questions, start=1):
             question_docs.append(
                 {
                     "question_id": _new_id("question"),
@@ -388,53 +340,55 @@ class DiagnosisService:
 
         started_at = time.perf_counter()
         try:
-            reasoning_result = reasoning_agent.reason(
+            reasoning_result = self.reasoning_service.finalize_diagnosis(
                 vision_result=vision_document["vision"],
                 symptoms=symptoms_text,
                 crop_hint=request.crop_hint or case.get("crop", ""),
             )
-        except Exception:
+        except RuntimeError:
             logger.exception("Reasoning finalization failed for case %s", case_id)
             raise HTTPException(status_code=500, detail="Diagnosis finalization failed")
 
         now = _now()
-        treatment_plan = _treatment_plan_from_reasoning(case_id, reasoning_result)
-        await self.repository.insert_one("treatment_plans", treatment_plan)
-
         triage = vision_document.get("pytorch_triage", {})
         risk_level = triage.get("risk_level", "medium")
-        expert_review = None
-        if risk_level == "high":
-            expert_review = {
-                "review_id": _new_id("review"),
-                "case_id": case_id,
-                "status": "pending",
-                "reviewer_id": None,
-                "notes": "Tự động tạo do ca chẩn đoán có rủi ro cao.",
-                "risk_level": risk_level,
-                "reason": "high_risk_diagnosis_case",
-                "created_at": now,
-                "updated_at": now,
-            }
+        treatment_plan = self.safety_ipm_service.build_treatment_plan(
+            case_id=case_id,
+            reasoning_result=reasoning_result,
+            risk_level=risk_level,
+        )
+        await self.repository.insert_one("treatment_plans", treatment_plan)
+
+        expert_review = self.safety_ipm_service.build_expert_review(case_id, risk_level)
+        if expert_review:
             await self.repository.insert_one("expert_reviews", expert_review)
 
         duration_ms = round((time.perf_counter() - started_at) * 1000, 2)
-        await self.repository.insert_one(
-            "agent_logs",
-            {
-                "log_id": _new_id("log"),
-                "case_id": case_id,
-                "agent": "DiagnosisFinalizationAgent",
-                "status": "done",
-                "trace": {
-                    "reasoning_engine": reasoning_result.get("engine"),
-                    "treatment_plan_id": treatment_plan["plan_id"],
-                    "expert_review_id": expert_review["review_id"] if expert_review else None,
-                },
-                "duration_ms": duration_ms,
-                "created_at": now,
-                "updated_at": now,
+        agent_log = await self.agent_log_service.record(
+            case_id=case_id,
+            agent="DiagnosisFinalizationAgent",
+            status="done",
+            trace={
+                "reasoning_engine": reasoning_result.get("engine"),
+                "treatment_plan_id": treatment_plan["plan_id"],
+                "expert_review_id": expert_review["review_id"] if expert_review else None,
             },
+            duration_ms=duration_ms,
+        )
+
+        previous_ai_response = vision_document.get("ai_response", {})
+        vision_report = {
+            "raw": vision_document["vision"],
+            "image_quality": vision_document.get("image_quality")
+            or previous_ai_response.get("image_quality", {}),
+            "top_predictions": previous_ai_response.get("top_predictions")
+            or vision_document["vision"].get("top_predictions", []),
+        }
+        ai_response = self.safety_ipm_service.build_ai_response(
+            vision_report=vision_report,
+            triage_result=triage,
+            reasoning_result=reasoning_result,
+            agent_logs=previous_ai_response.get("agent_logs", []) + [agent_log],
         )
 
         updated_case = await self.repository.update_one(
@@ -443,16 +397,18 @@ class DiagnosisService:
             {
                 "status": "finalized",
                 "risk_level": risk_level,
-                "needs_expert_review": expert_review is not None,
+                "needs_expert_review": ai_response["expert_required"],
                 "summary": treatment_plan["short_diagnosis"],
                 "updated_at": now,
             },
         )
 
-        return {
+        result = {
             "case": updated_case,
             "vision_result": vision_document,
             "reasoning": reasoning_result,
             "treatment_plan": treatment_plan,
             "expert_review": expert_review,
+            "ai_response": ai_response,
         }
+        return {**result, **ai_response}
