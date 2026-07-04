@@ -48,24 +48,22 @@ class ApprovalActionRequest(BaseModel):
 @app.post("/api/domain/switch")
 def switch_domain(request: SwitchDomainRequest):
     """
-    Switch the active domain of the AI system dynamically.
+    Switch the active domain of the AI system dynamically (Locked to agriculture).
     """
     domain = request.domain.lower().strip()
-    if domain not in ["sme", "education", "agriculture"]:
-        raise HTTPException(status_code=400, detail="Invalid domain. Choose 'sme', 'education', or 'agriculture'.")
+    if domain != "agriculture":
+        raise HTTPException(status_code=400, detail="Hệ thống đã được cấu hình chuyên biệt và chỉ hỗ trợ miền Nông nghiệp (agriculture).")
         
-    settings.ACTIVE_DOMAIN = domain
-    
-    # Re-seed vector db and load/create db state file
+    settings.ACTIVE_DOMAIN = "agriculture"
     seed_knowledge_base()
-    current_db = load_db()
+    load_db()
     
     return {
         "success": True,
-        "active_domain": domain,
+        "active_domain": "agriculture",
         "db_path": settings.db_path,
         "vector_db_path": settings.vector_db_path,
-        "message": f"Successfully switched to domain '{domain.upper()}'."
+        "message": "Hệ thống đã khóa cố định ở miền Nông nghiệp (AGRICULTURE)."
     }
 
 @app.get("/api/domain/status")
@@ -74,7 +72,7 @@ def get_domain_status():
     Get the currently active domain and model configuration.
     """
     return {
-        "active_domain": settings.ACTIVE_DOMAIN,
+        "active_domain": "agriculture",
         "model_name": settings.MODEL_NAME,
         "db_path": settings.db_path,
         "vector_db_path": settings.vector_db_path
@@ -104,16 +102,9 @@ def reset_database_state():
     """
     Reset the simulated database to defaults.
     """
-    from ai_layer.tools.db_mock import DEFAULT_SME_STATE, DEFAULT_EDUCATION_STATE, DEFAULT_AGRICULTURE_STATE
-    domain = settings.ACTIVE_DOMAIN
-    if domain == "education":
-        default_state = DEFAULT_EDUCATION_STATE
-    elif domain == "agriculture":
-        default_state = DEFAULT_AGRICULTURE_STATE
-    else:
-        default_state = DEFAULT_SME_STATE
-    save_db(default_state)
-    return {"success": True, "message": f"Database for domain '{domain.upper()}' reset to defaults."}
+    from ai_layer.tools.db_mock import DEFAULT_AGRICULTURE_STATE
+    save_db(DEFAULT_AGRICULTURE_STATE)
+    return {"success": True, "message": "Cơ sở dữ liệu Nông nghiệp (AGRICULTURE) đã được đặt lại mặc định."}
 
 @app.get("/api/approvals")
 def get_approvals():

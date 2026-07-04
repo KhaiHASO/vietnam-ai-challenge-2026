@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 class AISettings(BaseSettings):
     # Active Domain
-    ACTIVE_DOMAIN: str = os.getenv("ACTIVE_DOMAIN", "sme")  # sme, education, agriculture
+    ACTIVE_DOMAIN: str = os.getenv("ACTIVE_DOMAIN", "agriculture")  # sme, education, agriculture
     
     # LLM Settings
     PROVIDER: str = os.getenv("AI_PROVIDER", "ollama")  # ollama, openai, gemini

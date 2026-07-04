@@ -56,86 +56,27 @@ class AgentPlanner:
         return self._simulate_llm_response(prompt)
 
     def _simulate_llm_response(self, prompt: str) -> str:
-        """Simulates agent thoughts and actions if LLM is offline or not configured."""
+        """Simulates agent thoughts and actions if LLM is offline or not configured (Agriculture only)."""
         lower_prompt = prompt.lower()
-        domain = settings.ACTIVE_DOMAIN
         
-        # Domain: Education Simulation
-        if domain == "education":
-            if "get_student_details" in lower_prompt or "stu-" in lower_prompt or "sinh viên" in lower_prompt:
-                return (
-                    "Thought: Người dùng muốn kiểm tra thông tin sinh viên học vụ. Tôi cần gọi get_student_details.\n"
-                    "Action: get_student_details\n"
-                    "Action Input: {\"student_id\": \"STU-1001\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
-            elif "intervention" in lower_prompt or "can thiệp" in lower_prompt or "ghi nhận" in lower_prompt:
-                return (
-                    "Thought: Người dùng muốn ghi nhận một hành động can thiệp học tập. Tôi cần gọi create_intervention_log.\n"
-                    "Action: create_intervention_log\n"
-                    "Action Input: {\"student_id\": \"STU-1002\", \"intervention_type\": \"advisory_meeting\", \"note\": \"Hẹn gặp cố vấn học vụ vào ngày mai\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
+        if "get_farm_details" in lower_prompt or "frm-" in lower_prompt or "nông trại" in lower_prompt:
             return (
-                "Thought: Không cần gọi công cụ.\n"
-                "Final Answer: Tôi đã nhận được câu hỏi về học vụ. Sinh viên cần hoàn thành tối thiểu 120 tín chỉ và đạt GPA trên 2.0 để xét tốt nghiệp."
+                "Thought: Người dùng muốn kiểm tra thông tin vườn trồng hoặc nông trại. Tôi cần gọi get_farm_details.\n"
+                "Action: get_farm_details\n"
+                "Action Input: {\"farm_id\": \"FRM-501\"}\n"
+                "Observation: [Will be populated by executor]"
             )
-            
-        # Domain: Agriculture Simulation
-        elif domain == "agriculture":
-            if "get_farm_details" in lower_prompt or "frm-" in lower_prompt or "nông trại" in lower_prompt:
-                return (
-                    "Thought: Người dùng muốn kiểm tra thông tin vườn trồng hoặc nông trại. Tôi cần gọi get_farm_details.\n"
-                    "Action: get_farm_details\n"
-                    "Action Input: {\"farm_id\": \"FRM-501\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
-            elif "treatment" in lower_prompt or "phun thuốc" in lower_prompt or "bón phân" in lower_prompt:
-                return (
-                    "Thought: Người dùng muốn lưu nhật ký điều trị vườn. Tôi cần gọi log_treatment.\n"
-                    "Action: log_treatment\n"
-                    "Action Input: {\"crop_id\": \"CRP-304\", \"treatment_type\": \"irrigation\", \"notes\": \"Tưới nước bổ sung 2 giờ liên tục\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
+        elif "treatment" in lower_prompt or "phun thuốc" in lower_prompt or "bón phân" in lower_prompt:
             return (
-                "Thought: Không cần gọi công cụ.\n"
-                "Final Answer: Chào bạn, tôi có thể hỗ trợ giám sát sức khỏe cây trồng, theo dõi độ ẩm đất và kiểm tra lịch sử tưới nước/bón phân."
+                "Thought: Người dùng muốn lưu nhật ký điều trị vườn. Tôi cần gọi log_treatment.\n"
+                "Action: log_treatment\n"
+                "Action Input: {\"crop_id\": \"CRP-304\", \"treatment_type\": \"irrigation\", \"notes\": \"Tưới nước bổ sung 2 giờ liên tục\"}\n"
+                "Observation: [Will be populated by executor]"
             )
-            
-        # Domain: SME / Booking Simulation (Default)
-        else:
-            # Scenario: Service status check
-            if "get_service_status" in lower_prompt or "service payment" in lower_prompt:
-                return (
-                    "Thought: Người dùng muốn kiểm tra trạng thái dịch vụ thanh toán. Tôi cần gọi công cụ get_service_status.\n"
-                    "Action: get_service_status\n"
-                    "Action Input: {\"service_name\": \"payment\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
-                
-            # Scenario: Create ticket
-            elif "ticket" in lower_prompt or "tạo ticket" in lower_prompt:
-                return (
-                    "Thought: Người dùng cần tạo ticket vì bị trừ tiền momo không nhận được booking code. Đây là lỗi tài chính, nên đặt priority là High.\n"
-                    "Action: create_support_ticket\n"
-                    "Action Input: {\"title\": \"Lỗi thanh toán MoMo\", \"service\": \"payment\", \"description\": \"Trừ tiền nhưng không tạo mã booking\", \"priority\": \"high\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
-                
-            # Scenario: Booking detail check
-            elif "bkg-88321a" in lower_prompt:
-                return (
-                    "Thought: Khách hàng hỏi thông tin về booking code BKG-88321A. Tôi sẽ gọi check_booking_details.\n"
-                    "Action: check_booking_details\n"
-                    "Action Input: {\"booking_id\": \"BKG-88321A\"}\n"
-                    "Observation: [Will be populated by executor]"
-                )
-                
-            # Standard fallback conversational response
-            return (
-                "Thought: Không cần dùng công cụ đặc biệt nào.\n"
-                "Final Answer: Tôi đã nhận được yêu cầu của bạn. Tôi có thể giúp bạn kiểm tra trạng thái dịch vụ hoặc chính sách đặt sân bằng các công cụ tích hợp."
-            )
+        return (
+            "Thought: Không cần gọi công cụ.\n"
+            "Final Answer: Chào bạn, tôi có thể hỗ trợ giám sát sức khỏe cây trồng, theo dõi độ ẩm đất và kiểm tra lịch sử tưới nước/bón phân."
+        )
 
     def plan_and_execute(self, query: str, context: List[str] = None) -> Tuple[str, List[Dict[str, Any]]]:
         """
