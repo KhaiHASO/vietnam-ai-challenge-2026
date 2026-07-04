@@ -349,7 +349,7 @@ export default function AICopilotDashboard() {
                 <div className="overflow-auto pe-2 mb-3" style={{ flexGrow: 1 }}>
                   {messages.map((m, idx) => (
                     <div key={idx} className={`d-flex mb-3 ${m.role === "user" ? "justify-content-end" : "justify-content-start"}`}>
-                      <div className={`p-3 rounded-3 ${m.role === "user" ? "bg-primary text-white" : "bg-light text-dark"}`} style={{ maxWidth: "80%" }}>
+                      <div className={`p-3 rounded-3 ${m.role === "user" ? "bg-primary text-white" : "bg-light text-body"}`} style={{ maxWidth: "80%" }}>
                         <span className="fw-bold fs-12 d-block mb-1">{m.role === "user" ? "BẠN" : "AI AGENT"}</span>
                         <div className="fs-14" style={{ whiteSpace: "pre-line" }}>{m.content}</div>
                       </div>
@@ -357,7 +357,7 @@ export default function AICopilotDashboard() {
                   ))}
                   {loading && (
                     <div className="d-flex mb-3 justify-content-start">
-                      <div className="bg-light p-3 rounded-3 text-dark" style={{ maxWidth: "80%" }}>
+                      <div className="bg-light p-3 rounded-3 text-body" style={{ maxWidth: "80%" }}>
                         <span className="fw-bold fs-12 d-block mb-1">AI AGENT</span>
                         <div className="d-flex align-items-center">
                           <span className="spinner-border spinner-border-sm me-2 text-primary" role="status" />
