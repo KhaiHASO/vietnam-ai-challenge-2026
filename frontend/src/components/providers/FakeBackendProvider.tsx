@@ -9,7 +9,8 @@ export default function FakeBackendProvider({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_DEFAULT_AUTH === "fake") {
+    const authType = process.env.NEXT_PUBLIC_DEFAULT_AUTH || "fake";
+    if (authType === "fake") {
       initFakeBackend();
     }
   }, []);

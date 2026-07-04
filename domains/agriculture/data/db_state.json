@@ -43,5 +43,19 @@
       "notes": "Emergency watering for drought stress",
       "status": "Applied"
     }
+  ],
+  "pending_approvals": [
+    {
+      "approval_id": "APP-18801C",
+      "action_type": "chemical_pesticide_approval",
+      "details": {
+        "crop_id": "CRP-304",
+        "chemical": "Fungicide NPK-II",
+        "user_query": "bạn có thể làm được những công việc gì",
+        "risk_level": "medium",
+        "priority": 0.5914
+      },
+      "status": "Approved"
+    }
   ]
 }

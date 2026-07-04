@@ -16,7 +16,8 @@ export const loginUser = (user: any, router: any) => async (dispatch: any) => {
     // Determine authentication method
     const defaultAuth =
       process.env.NEXT_PUBLIC_DEFAULT_AUTH ||
-      process.env.NEXT_PUBLIC_DEFAULTAUTH;
+      process.env.NEXT_PUBLIC_DEFAULTAUTH ||
+      "fake";
     let response;
     if (defaultAuth === "firebase") {
       const fireBaseBackend: any = getFirebaseBackend();

@@ -43,5 +43,19 @@
       "note": "Sent email warning due to attendance below 70%",
       "status": "Logged"
     }
+  ],
+  "pending_approvals": [
+    {
+      "approval_id": "APP-AAD90F",
+      "action_type": "student_discipline_warning",
+      "details": {
+        "student_id": "STU-1002",
+        "issue": "Academic Warning / Dropout Alert",
+        "user_query": "Tuần này sinh viên STU-1002 Trần Thị B vắng mặt liên tiếp 3 buổi học phần Lập trình Python, hãy kiểm tra học lực và đề xuất can thiệp.",
+        "risk_level": "medium",
+        "priority": 0.7051
+      },
+      "status": "Approved"
+    }
   ]
 }
