@@ -16,6 +16,7 @@ from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.db.mongo import close_mongo_connection, connect_to_mongo
 from app.routes import (
+    ai,
     approvals,
     chat,
     cooperative,
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
 
     app.include_router(health.router)
     app.include_router(status.router)
+    app.include_router(ai.router)
     app.include_router(domain.router)
     app.include_router(diagnosis.router)
     app.include_router(expert.router)
