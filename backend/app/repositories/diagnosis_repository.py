@@ -1,5 +1,6 @@
 from copy import deepcopy
 from datetime import datetime
+import logging
 from typing import Any
 
 from fastapi import HTTPException
@@ -21,6 +22,18 @@ COLLECTIONS = (
     "reminders",
     "model_reports",
 )
+
+logger = logging.getLogger("backend.diagnosis_repository")
+
+MONGO_UNAVAILABLE_DETAIL = {
+    "code": "MONGO_UNAVAILABLE",
+    "message": "MongoDB is not available; try again later or enable DEMO_MODE.",
+}
+
+MONGO_OPERATION_FAILED_DETAIL = {
+    "code": "MONGO_OPERATION_FAILED",
+    "message": "MongoDB operation failed gracefully; try again later.",
+}
 
 _MEMORY_STORE: dict[str, list[dict[str, Any]]] = {name: [] for name in COLLECTIONS}
 
@@ -46,10 +59,17 @@ class DiagnosisRepository:
     def database(self):
         if self.use_memory:
             return None
+        if not mongo_state.connected:
+            raise HTTPException(status_code=503, detail=MONGO_UNAVAILABLE_DETAIL)
         try:
             return get_database()
         except RuntimeError as exc:
-            raise HTTPException(status_code=503, detail="MongoDB is not available") from exc
+            raise HTTPException(status_code=503, detail=MONGO_UNAVAILABLE_DETAIL) from exc
+
+    def _handle_mongo_error(self, operation: str, exc: Exception) -> None:
+        logger.warning("MongoDB %s failed: %s", operation, exc.__class__.__name__)
+        mongo_state.last_error = exc.__class__.__name__
+        raise HTTPException(status_code=503, detail=MONGO_OPERATION_FAILED_DETAIL) from exc
 
     async def insert_one(self, collection_name: str, document: dict[str, Any]) -> dict[str, Any]:
         if self.use_memory:
@@ -57,8 +77,13 @@ class DiagnosisRepository:
             _MEMORY_STORE[collection_name].append(stored)
             return deepcopy(stored)
 
-        await self.database[collection_name].insert_one(document)
-        return _serialize_document(document) or document
+        try:
+            await self.database[collection_name].insert_one(document)
+            return _serialize_document(document) or document
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("insert_one", exc)
 
     async def insert_many(
         self, collection_name: str, documents: list[dict[str, Any]]
@@ -71,8 +96,13 @@ class DiagnosisRepository:
             _MEMORY_STORE[collection_name].extend(stored_docs)
             return deepcopy(stored_docs)
 
-        await self.database[collection_name].insert_many(documents)
-        return [_serialize_document(document) or document for document in documents]
+        try:
+            await self.database[collection_name].insert_many(documents)
+            return [_serialize_document(document) or document for document in documents]
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("insert_many", exc)
 
     async def find_one(
         self,
@@ -90,8 +120,13 @@ class DiagnosisRepository:
                     )
             return deepcopy(matches[0]) if matches else None
 
-        document = await self.database[collection_name].find_one(query, sort=sort)
-        return _serialize_document(document)
+        try:
+            document = await self.database[collection_name].find_one(query, sort=sort)
+            return _serialize_document(document)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("find_one", exc)
 
     async def find_many(
         self,
@@ -109,10 +144,15 @@ class DiagnosisRepository:
                     )
             return deepcopy(matches)
 
-        cursor = self.database[collection_name].find(query)
-        if sort:
-            cursor = cursor.sort(sort)
-        return [_serialize_document(doc) async for doc in cursor]
+        try:
+            cursor = self.database[collection_name].find(query)
+            if sort:
+                cursor = cursor.sort(sort)
+            return [_serialize_document(doc) async for doc in cursor]
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("find_many", exc)
 
     async def update_one(
         self,
@@ -129,12 +169,22 @@ class DiagnosisRepository:
                     return deepcopy(updated)
             return None
 
-        await self.database[collection_name].update_one(query, {"$set": update})
-        return await self.find_one(collection_name, query)
+        try:
+            await self.database[collection_name].update_one(query, {"$set": update})
+            return await self.find_one(collection_name, query)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("update_one", exc)
 
     async def count(self, collection_name: str, query: dict[str, Any] | None = None) -> int:
         query = query or {}
         if self.use_memory:
             return len([doc for doc in _MEMORY_STORE[collection_name] if _matches(doc, query)])
 
-        return await self.database[collection_name].count_documents(query)
+        try:
+            return await self.database[collection_name].count_documents(query)
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("count", exc)

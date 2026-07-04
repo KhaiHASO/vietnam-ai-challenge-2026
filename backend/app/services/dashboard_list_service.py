@@ -1,10 +1,19 @@
 from collections import Counter
+import logging
 from typing import Any
 
-from ai_layer.cropdoctor.agents.crop_health_agent import MOCK_DISEASE_DETAILS
 from ai_layer.tools.db_mock import load_db
 
 from app.repositories.diagnosis_repository import DiagnosisRepository
+
+try:
+    from ai_layer.cropdoctor.agents.crop_health_agent import MOCK_DISEASE_DETAILS
+except Exception:
+    MOCK_DISEASE_DETAILS = {}
+
+logger = logging.getLogger("backend.dashboard_list_service")
+
+KNOWLEDGE_FALLBACK_MESSAGE = "không đủ căn cứ"
 
 
 class DashboardListService:
@@ -84,42 +93,63 @@ class DashboardListService:
         return {"reminders": reminders}
 
     def knowledge_diseases(self) -> dict[str, Any]:
-        diseases = []
-        for disease_id, details in MOCK_DISEASE_DETAILS.items():
-            diseases.append(
-                {
-                    "disease_id": disease_id,
-                    "name": details.get("disease_name"),
-                    "symptoms": details.get("symptoms"),
-                    "description": details.get("description"),
-                    "severity": details.get("severity"),
-                    "treatment": details.get("treatment"),
-                }
+        try:
+            if not MOCK_DISEASE_DETAILS:
+                return self._knowledge_fallback("diseases")
+
+            diseases = []
+            for disease_id, details in MOCK_DISEASE_DETAILS.items():
+                diseases.append(
+                    {
+                        "disease_id": disease_id,
+                        "name": details.get("disease_name"),
+                        "symptoms": details.get("symptoms"),
+                        "description": details.get("description"),
+                        "severity": details.get("severity"),
+                        "treatment": details.get("treatment"),
+                    }
+                )
+            return {"diseases": diseases, "fallback_used": False}
+        except Exception as exc:
+            logger.warning(
+                "Knowledge disease lookup failed; returning fallback: %s",
+                exc.__class__.__name__,
             )
-        return {"diseases": diseases}
+            return self._knowledge_fallback("diseases")
 
     def knowledge_ipm(self) -> dict[str, Any]:
-        ipm_items = []
-        for disease_id, details in MOCK_DISEASE_DETAILS.items():
-            treatment = details.get("treatment", {})
-            ipm_items.append(
-                {
-                    "disease_id": disease_id,
-                    "diagnosis": details.get("disease_name"),
-                    "biological": treatment.get("biological"),
-                    "prevention": treatment.get("prevention"),
-                    "chemical_requires_expert_review": bool(treatment.get("chemical")),
-                    "chemical": treatment.get("chemical"),
-                }
+        try:
+            if not MOCK_DISEASE_DETAILS:
+                return self._knowledge_fallback("ipm")
+
+            ipm_items = []
+            for disease_id, details in MOCK_DISEASE_DETAILS.items():
+                treatment = details.get("treatment", {})
+                ipm_items.append(
+                    {
+                        "disease_id": disease_id,
+                        "diagnosis": details.get("disease_name"),
+                        "biological": treatment.get("biological"),
+                        "prevention": treatment.get("prevention"),
+                        "chemical_requires_expert_review": bool(treatment.get("chemical")),
+                        "chemical": treatment.get("chemical"),
+                    }
+                )
+            return {
+                "principles": [
+                    "Ưu tiên vệ sinh đồng ruộng, tỉa lá bệnh và giảm nguồn lây.",
+                    "Theo dõi triệu chứng và điều kiện thời tiết trước khi can thiệp.",
+                    "Chỉ dùng hóa chất khi cần thiết và cần chuyên gia duyệt với ca rủi ro cao.",
+                ],
+                "ipm": ipm_items,
+                "fallback_used": False,
+            }
+        except Exception as exc:
+            logger.warning(
+                "Knowledge IPM lookup failed; returning fallback: %s",
+                exc.__class__.__name__,
             )
-        return {
-            "principles": [
-                "Ưu tiên vệ sinh đồng ruộng, tỉa lá bệnh và giảm nguồn lây.",
-                "Theo dõi triệu chứng và điều kiện thời tiết trước khi can thiệp.",
-                "Chỉ dùng hóa chất khi cần thiết và cần chuyên gia duyệt với ca rủi ro cao.",
-            ],
-            "ipm": ipm_items,
-        }
+            return self._knowledge_fallback("ipm")
 
     async def cooperative_disease_map(self) -> dict[str, Any]:
         farms = (await self.list_farms())["farms"]
@@ -151,3 +181,13 @@ class DashboardListService:
     def _demo_farms(self) -> list[dict[str, Any]]:
         state = load_db()
         return state.get("farms", [])
+
+    def _knowledge_fallback(self, key: str) -> dict[str, Any]:
+        payload = {
+            key: [],
+            "message": KNOWLEDGE_FALLBACK_MESSAGE,
+            "fallback_used": True,
+        }
+        if key == "ipm":
+            payload["principles"] = []
+        return payload

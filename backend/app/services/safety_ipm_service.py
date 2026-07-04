@@ -135,6 +135,13 @@ class SafetyIpmService:
         vision_result = vision_report.get("raw", {})
         risk_level = triage_result.get("risk_level", "medium")
         recommended_actions = self.build_recommended_actions(reasoning_result, risk_level)
+        fallback_sources = []
+        if vision_result.get("fallback_used"):
+            fallback_sources.append("vision")
+        if triage_result.get("fallback_used"):
+            fallback_sources.append("pytorch")
+        if (reasoning_result or {}).get("fallback_used"):
+            fallback_sources.append("reasoning")
         return {
             "image_quality": vision_report.get("image_quality", {}),
             "top_predictions": vision_report.get("top_predictions", []),
@@ -144,6 +151,8 @@ class SafetyIpmService:
             "risk_level": risk_level,
             "confidence": vision_result.get("confidence", triage_result.get("confidence", 0.0)),
             "expert_required": self.expert_required(risk_level, recommended_actions),
+            "fallback_used": bool(fallback_sources),
+            "fallback_sources": fallback_sources,
             "agent_logs": agent_logs or [],
         }
 

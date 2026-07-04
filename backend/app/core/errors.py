@@ -9,6 +9,19 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 logger = logging.getLogger("backend.errors")
 
+SENSITIVE_DETAIL_KEYS = {
+    "exception",
+    "password",
+    "secret",
+    "stack",
+    "stack_trace",
+    "token",
+    "trace",
+    "traceback",
+}
+
+PUBLIC_SERVER_ERROR_PREFIXES = ("MONGO_", "UPLOAD_")
+
 
 def _status_phrase(status_code: int) -> str:
     try:
@@ -17,20 +30,44 @@ def _status_phrase(status_code: int) -> str:
         return "Error"
 
 
-def _safe_detail(detail: Any, status_code: int) -> str:
+def _public_details(detail: Any) -> dict[str, Any] | None:
+    if not isinstance(detail, dict):
+        return None
+
+    details = {
+        key: value
+        for key, value in detail.items()
+        if key not in {"code", "detail", "message"}
+        and key.lower() not in SENSITIVE_DETAIL_KEYS
+    }
+    return details or None
+
+
+def _safe_error_fields(detail: Any, status_code: int) -> tuple[str, str | None, dict[str, Any] | None]:
     if status_code >= 500:
-        return "Internal server error"
+        if isinstance(detail, dict) and isinstance(detail.get("message"), str):
+            code = detail.get("code") if isinstance(detail.get("code"), str) else None
+            if not code or not code.startswith(PUBLIC_SERVER_ERROR_PREFIXES):
+                return "Internal server error", None, None
+            return detail["message"], code, _public_details(detail)
+        return "Internal server error", None, None
     if isinstance(detail, str):
-        return detail
+        return detail, None, None
     if isinstance(detail, dict):
         message = detail.get("message") or detail.get("detail")
         if isinstance(message, str):
-            return message
-    return _status_phrase(status_code)
+            code = detail.get("code") if isinstance(detail.get("code"), str) else None
+            return message, code, _public_details(detail)
+    return _status_phrase(status_code), None, None
 
 
-def error_payload(status_code: int, code: str, message: str) -> dict[str, Any]:
-    return {
+def error_payload(
+    status_code: int,
+    code: str,
+    message: str,
+    details: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    payload = {
         "success": False,
         "error": {
             "code": code,
@@ -38,6 +75,9 @@ def error_payload(status_code: int, code: str, message: str) -> dict[str, Any]:
             "status_code": status_code,
         },
     }
+    if details:
+        payload["error"]["details"] = details
+    return payload
 
 
 def register_exception_handlers(app: FastAPI) -> None:
@@ -45,11 +85,11 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def http_exception_handler(
         request: Request, exc: StarletteHTTPException
     ) -> JSONResponse:
-        message = _safe_detail(exc.detail, exc.status_code)
-        code = f"HTTP_{exc.status_code}"
+        message, detail_code, details = _safe_error_fields(exc.detail, exc.status_code)
+        code = detail_code or f"HTTP_{exc.status_code}"
         return JSONResponse(
             status_code=exc.status_code,
-            content=error_payload(exc.status_code, code, message),
+            content=error_payload(exc.status_code, code, message, details),
         )
 
     @app.exception_handler(RequestValidationError)

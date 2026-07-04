@@ -37,6 +37,17 @@ def _case_not_found(case_id: str) -> HTTPException:
     return HTTPException(status_code=404, detail=f"Diagnosis case '{case_id}' not found")
 
 
+def _upload_error(
+    status_code: int,
+    code: str,
+    message: str,
+    **details: Any,
+) -> HTTPException:
+    payload = {"code": code, "message": message}
+    payload.update({key: value for key, value in details.items() if value is not None})
+    return HTTPException(status_code=status_code, detail=payload)
+
+
 def _join_answers(answers: list[dict[str, Any]], questions: list[dict[str, Any]]) -> str:
     question_by_id = {item["question_id"]: item["text"] for item in questions}
     lines = []
@@ -85,22 +96,53 @@ class DiagnosisService:
             raise _case_not_found(case_id)
 
         if not image.filename:
-            raise HTTPException(status_code=400, detail="Uploaded image must have a filename")
+            raise _upload_error(
+                400,
+                "UPLOAD_MISSING_FILENAME",
+                "Uploaded image must have a filename.",
+            )
 
         extension = image.filename.rsplit(".", 1)[-1].lower()
         if extension not in ALLOWED_IMAGE_EXTENSIONS:
-            raise HTTPException(status_code=400, detail=f"Unsupported image extension: .{extension}")
+            raise _upload_error(
+                400,
+                "UPLOAD_INVALID_EXTENSION",
+                "Unsupported image extension.",
+                extension=extension,
+                allowed_extensions=sorted(ALLOWED_IMAGE_EXTENSIONS),
+            )
 
         image_id = _new_id("img")
         case_dir = settings.upload_root_path / "diagnosis_cases" / case_id
-        case_dir.mkdir(parents=True, exist_ok=True)
         file_path = case_dir / f"{image_id}.{extension}"
 
-        content = await image.read()
-        if not content:
-            raise HTTPException(status_code=400, detail="Uploaded image is empty")
+        try:
+            content = await image.read()
+        except Exception as exc:
+            logger.warning("Could not read uploaded image: %s", exc.__class__.__name__)
+            raise _upload_error(
+                400,
+                "UPLOAD_READ_ERROR",
+                "Could not read uploaded image.",
+            ) from exc
 
-        file_path.write_bytes(content)
+        if not content:
+            raise _upload_error(
+                400,
+                "UPLOAD_EMPTY_FILE",
+                "Uploaded image is empty.",
+            )
+
+        try:
+            case_dir.mkdir(parents=True, exist_ok=True)
+            file_path.write_bytes(content)
+        except OSError as exc:
+            logger.warning("Could not store uploaded image: %s", exc.__class__.__name__)
+            raise _upload_error(
+                500,
+                "UPLOAD_STORAGE_ERROR",
+                "Could not store uploaded image.",
+            ) from exc
 
         now = _now()
         original_filename = image.filename.replace("\\", "/").split("/")[-1]
@@ -154,7 +196,7 @@ class DiagnosisService:
                 original_filename=image.get("original_filename", ""),
             )
         except RuntimeError:
-            logger.exception("Vision analysis failed for case %s", case_id)
+            logger.warning("Vision analysis failed for case %s", case_id)
             raise HTTPException(status_code=500, detail="Vision analysis failed")
 
         vision_result = vision_report["raw"]
@@ -175,6 +217,8 @@ class DiagnosisService:
                 "image_id": image["image_id"],
                 "vision_engine": vision_result.get("primary_engine"),
                 "triage_engine": triage_result.get("engine"),
+                "vision_fallback_used": bool(vision_result.get("fallback_used")),
+                "triage_fallback_used": bool(triage_result.get("fallback_used")),
             },
             duration_ms=duration_ms,
         )
@@ -346,7 +390,7 @@ class DiagnosisService:
                 crop_hint=request.crop_hint or case.get("crop", ""),
             )
         except RuntimeError:
-            logger.exception("Reasoning finalization failed for case %s", case_id)
+            logger.warning("Reasoning finalization failed for case %s", case_id)
             raise HTTPException(status_code=500, detail="Diagnosis finalization failed")
 
         now = _now()
@@ -388,6 +432,7 @@ class DiagnosisService:
             status="done",
             trace={
                 "reasoning_engine": reasoning_result.get("engine"),
+                "reasoning_fallback_used": bool(reasoning_result.get("fallback_used")),
                 "treatment_plan_id": treatment_plan["plan_id"],
                 "treatment_plan_status": treatment_plan["status"],
                 "expert_review_id": expert_review["review_id"] if expert_review else None,
