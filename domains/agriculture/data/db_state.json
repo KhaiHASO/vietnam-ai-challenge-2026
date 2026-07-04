@@ -1,0 +1,85 @@
+{
+  "services": {
+    "iot_telemetry": {
+      "status": "operational",
+      "log": "Sensors logging telemetry every 15s."
+    },
+    "pest_classifier": {
+      "status": "operational",
+      "log": "PyTorch ResNet weights loaded on GPU."
+    },
+    "irrigation_relay": {
+      "status": "degraded",
+      "log": "Solenoid valve 4 disconnected since 02:00 AM."
+    }
+  },
+  "farms": [
+    {
+      "farm_id": "FRM-501",
+      "name": "Plot A - Durian",
+      "crop_type": "Durian Monthong",
+      "leaf_damage_percent": 8.2,
+      "temperature": 28.5,
+      "humidity": 78.0,
+      "soil_moisture": 62.0,
+      "days_since_last_treatment": 3
+    },
+    {
+      "farm_id": "FRM-502",
+      "name": "Plot B - Rice",
+      "crop_type": "Rice ST25",
+      "leaf_damage_percent": 45.0,
+      "temperature": 33.5,
+      "humidity": 45.0,
+      "soil_moisture": 32.0,
+      "days_since_last_treatment": 18
+    }
+  ],
+  "treatment_logs": [
+    {
+      "log_id": "TRT-4001",
+      "crop_id": "CRP-302",
+      "treatment_type": "irrigation",
+      "notes": "Emergency watering for drought stress",
+      "status": "Applied"
+    }
+  ],
+  "pending_approvals": [
+    {
+      "approval_id": "APP-18801C",
+      "action_type": "chemical_pesticide_approval",
+      "details": {
+        "crop_id": "CRP-304",
+        "chemical": "Fungicide NPK-II",
+        "user_query": "bạn có thể làm được những công việc gì",
+        "risk_level": "medium",
+        "priority": 0.5914
+      },
+      "status": "Approved"
+    },
+    {
+      "approval_id": "APP-5C757D",
+      "action_type": "student_discipline_warning",
+      "details": {
+        "student_id": "STU-1002",
+        "issue": "Academic Warning / Dropout Alert",
+        "user_query": "Tuần này sinh viên STU-1002 Trần Thị B vắng mặt liên tiếp 3 buổi học phần Lập trình Python, hãy kiểm tra học lực và đề xuất can thiệp.",
+        "risk_level": "low",
+        "priority": 0.6162
+      },
+      "status": "Pending"
+    },
+    {
+      "approval_id": "APP-54A64B",
+      "action_type": "chemical_pesticide_approval",
+      "details": {
+        "crop_id": "CRP-304",
+        "chemical": "Fungicide NPK-II",
+        "user_query": "Lô vườn sầu riêng FRM-502 phát hiện vệt nấm đốm nâu đạo ôn lúa nặng gây héo lá 45%, hãy kiểm tra cảm biến đất và đề xuất phun thuốc điều trị.",
+        "risk_level": "high",
+        "priority": 0.7259
+      },
+      "status": "Pending"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "wallet": {
+    "balance": 1500000,
+    "currency": "VND"
+  },
+  "services": {
+    "payment": {
+      "status": "degraded",
+      "log": "Timeout error in MoMo callback API since 14:30 PM."
+    },
+    "booking": {
+      "status": "operational",
+      "log": "All systems operational."
+    },
+    "vector_search": {
+      "status": "operational",
+      "log": "Local CUDA GPU index query response time < 5ms."
+    }
+  },
+  "bookings": [
+    {
+      "booking_id": "BKG-88321A",
+      "sport": "Pickleball",
+      "court": "Court 1 - Premium",
+      "date": "2026-07-02",
+      "time": "18:00 - 20:00",
+      "amount": 220000,
+      "status": "Paid"
+    },
+    {
+      "booking_id": "BKG-99212B",
+      "sport": "Badminton",
+      "court": "Court A",
+      "date": "2026-07-03",
+      "time": "08:00 - 10:00",
+      "amount": 120000,
+      "status": "Paid"
+    }
+  ],
+  "tickets": [
+    {
+      "ticket_id": "TCK-5541A",
+      "title": "Momo Deducted but no Booking",
+      "service": "payment",
+      "description": "User was deducted 220,000 VND but did not get booking code.",
+      "priority": "High",
+      "status": "Open"
+    }
+  ]
+}
