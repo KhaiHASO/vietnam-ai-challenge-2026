@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -13,6 +14,7 @@ class Settings(BaseSettings):
     ai_service_url: str = "http://localhost:8001"
     demo_mode: bool = True
     cors_origins: str = "*"
+    upload_dir: str = "uploads"
 
     model_config = SettingsConfigDict(
         env_file=(".env", "../.env"),
@@ -26,6 +28,14 @@ class Settings(BaseSettings):
         if self.cors_origins.strip() == "*":
             return ["*"]
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def upload_root_path(self) -> Path:
+        upload_path = Path(self.upload_dir)
+        if upload_path.is_absolute():
+            return upload_path
+        backend_dir = Path(__file__).resolve().parents[2]
+        return backend_dir / upload_path
 
 
 @lru_cache

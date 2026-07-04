@@ -15,7 +15,7 @@ from ai_layer.cropdoctor.api.router import router as cropdoctor_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.db.mongo import close_mongo_connection, connect_to_mongo
-from app.routes import approvals, chat, database, domain, health, status
+from app.routes import approvals, chat, database, diagnosis, domain, health, status
 from app.services.startup_service import initialize_demo_state
 
 logger = logging.getLogger("backend")
@@ -53,6 +53,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(status.router)
     app.include_router(domain.router)
+    app.include_router(diagnosis.router)
     app.include_router(chat.router)
     app.include_router(database.router)
     app.include_router(approvals.router)
