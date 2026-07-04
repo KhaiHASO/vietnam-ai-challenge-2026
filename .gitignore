@@ -19,6 +19,9 @@ ENV/
 env/
 vector_store.json
 ai_layer/tools/db_state.json
+ai_layer/cropdoctor/data/external/PlantDoc-Dataset/
+ai_layer/cropdoctor/data/external/PlantDoc-Dataset.zip
+ai_layer/cropdoctor/reports/fontlist-*.json
 
 # Node/Next.js
 node_modules/

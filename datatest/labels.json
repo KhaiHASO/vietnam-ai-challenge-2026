@@ -1,0 +1,1002 @@
+{
+  "leaf_001.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_002.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_003.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_004.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_005.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_006.jpg": {
+    "class_name": "Apple___Black_rot",
+    "label_vi": "Táo - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_007.jpg": {
+    "class_name": "Apple___Black_rot",
+    "label_vi": "Táo - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_008.jpg": {
+    "class_name": "Apple___Black_rot",
+    "label_vi": "Táo - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_009.jpg": {
+    "class_name": "Apple___Black_rot",
+    "label_vi": "Táo - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_010.jpg": {
+    "class_name": "Apple___Black_rot",
+    "label_vi": "Táo - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_011.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_012.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_013.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_014.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_015.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_016.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "Táo - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_017.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "Táo - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_018.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "Táo - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_019.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "Táo - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_020.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "Táo - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_021.jpg": {
+    "class_name": "Blueberry___healthy",
+    "label_vi": "Việt quất - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_022.jpg": {
+    "class_name": "Blueberry___healthy",
+    "label_vi": "Việt quất - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_023.jpg": {
+    "class_name": "Blueberry___healthy",
+    "label_vi": "Việt quất - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_024.jpg": {
+    "class_name": "Blueberry___healthy",
+    "label_vi": "Việt quất - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_025.jpg": {
+    "class_name": "Blueberry___healthy",
+    "label_vi": "Việt quất - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_026.jpg": {
+    "class_name": "Cherry_(including_sour)___Powdery_mildew",
+    "label_vi": "Anh đào - Bệnh phấn trắng",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_027.jpg": {
+    "class_name": "Cherry_(including_sour)___Powdery_mildew",
+    "label_vi": "Anh đào - Bệnh phấn trắng",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_028.jpg": {
+    "class_name": "Cherry_(including_sour)___Powdery_mildew",
+    "label_vi": "Anh đào - Bệnh phấn trắng",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_029.jpg": {
+    "class_name": "Cherry_(including_sour)___Powdery_mildew",
+    "label_vi": "Anh đào - Bệnh phấn trắng",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_030.jpg": {
+    "class_name": "Cherry_(including_sour)___Powdery_mildew",
+    "label_vi": "Anh đào - Bệnh phấn trắng",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_031.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "Anh đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_032.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "Anh đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_033.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "Anh đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_034.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "Anh đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_035.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "Anh đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_036.jpg": {
+    "class_name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "label_vi": "Ngô - Bệnh đốm lá xám (Cercospora)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_037.jpg": {
+    "class_name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "label_vi": "Ngô - Bệnh đốm lá xám (Cercospora)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_038.jpg": {
+    "class_name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "label_vi": "Ngô - Bệnh đốm lá xám (Cercospora)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_039.jpg": {
+    "class_name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "label_vi": "Ngô - Bệnh đốm lá xám (Cercospora)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_040.jpg": {
+    "class_name": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+    "label_vi": "Ngô - Bệnh đốm lá xám (Cercospora)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_041.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_042.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_043.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_044.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_045.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_046.jpg": {
+    "class_name": "Corn_(maize)___Northern_Leaf_Blight",
+    "label_vi": "Ngô - Bệnh cháy lá muộn (Northern Leaf Blight)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_047.jpg": {
+    "class_name": "Corn_(maize)___Northern_Leaf_Blight",
+    "label_vi": "Ngô - Bệnh cháy lá muộn (Northern Leaf Blight)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_048.jpg": {
+    "class_name": "Corn_(maize)___Northern_Leaf_Blight",
+    "label_vi": "Ngô - Bệnh cháy lá muộn (Northern Leaf Blight)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_049.jpg": {
+    "class_name": "Corn_(maize)___Northern_Leaf_Blight",
+    "label_vi": "Ngô - Bệnh cháy lá muộn (Northern Leaf Blight)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_050.jpg": {
+    "class_name": "Corn_(maize)___Northern_Leaf_Blight",
+    "label_vi": "Ngô - Bệnh cháy lá muộn (Northern Leaf Blight)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_051.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "Ngô - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_052.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "Ngô - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_053.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "Ngô - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_054.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "Ngô - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_055.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "Ngô - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_056.jpg": {
+    "class_name": "Grape___Black_rot",
+    "label_vi": "Nho - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_057.jpg": {
+    "class_name": "Grape___Black_rot",
+    "label_vi": "Nho - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_058.jpg": {
+    "class_name": "Grape___Black_rot",
+    "label_vi": "Nho - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_059.jpg": {
+    "class_name": "Grape___Black_rot",
+    "label_vi": "Nho - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_060.jpg": {
+    "class_name": "Grape___Black_rot",
+    "label_vi": "Nho - Bệnh thối đen (Black rot)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_061.jpg": {
+    "class_name": "Grape___Esca_(Black_Measles)",
+    "label_vi": "Nho - Bệnh Esca (Lốm đốm đen)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_062.jpg": {
+    "class_name": "Grape___Esca_(Black_Measles)",
+    "label_vi": "Nho - Bệnh Esca (Lốm đốm đen)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_063.jpg": {
+    "class_name": "Grape___Esca_(Black_Measles)",
+    "label_vi": "Nho - Bệnh Esca (Lốm đốm đen)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_064.jpg": {
+    "class_name": "Grape___Esca_(Black_Measles)",
+    "label_vi": "Nho - Bệnh Esca (Lốm đốm đen)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_065.jpg": {
+    "class_name": "Grape___Esca_(Black_Measles)",
+    "label_vi": "Nho - Bệnh Esca (Lốm đốm đen)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_066.jpg": {
+    "class_name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "label_vi": "Nho - Bệnh cháy lá (Isariopsis)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_067.jpg": {
+    "class_name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "label_vi": "Nho - Bệnh cháy lá (Isariopsis)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_068.jpg": {
+    "class_name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "label_vi": "Nho - Bệnh cháy lá (Isariopsis)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_069.jpg": {
+    "class_name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "label_vi": "Nho - Bệnh cháy lá (Isariopsis)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_070.jpg": {
+    "class_name": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "label_vi": "Nho - Bệnh cháy lá (Isariopsis)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_071.jpg": {
+    "class_name": "Grape___healthy",
+    "label_vi": "Nho - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_072.jpg": {
+    "class_name": "Grape___healthy",
+    "label_vi": "Nho - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_073.jpg": {
+    "class_name": "Grape___healthy",
+    "label_vi": "Nho - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_074.jpg": {
+    "class_name": "Grape___healthy",
+    "label_vi": "Nho - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_075.jpg": {
+    "class_name": "Grape___healthy",
+    "label_vi": "Nho - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_076.jpg": {
+    "class_name": "Orange___Haunglongbing_(Citrus_greening)",
+    "label_vi": "Cam - Bệnh vàng lá gân xanh (Citrus greening)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_077.jpg": {
+    "class_name": "Orange___Haunglongbing_(Citrus_greening)",
+    "label_vi": "Cam - Bệnh vàng lá gân xanh (Citrus greening)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_078.jpg": {
+    "class_name": "Orange___Haunglongbing_(Citrus_greening)",
+    "label_vi": "Cam - Bệnh vàng lá gân xanh (Citrus greening)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_079.jpg": {
+    "class_name": "Orange___Haunglongbing_(Citrus_greening)",
+    "label_vi": "Cam - Bệnh vàng lá gân xanh (Citrus greening)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_080.jpg": {
+    "class_name": "Orange___Haunglongbing_(Citrus_greening)",
+    "label_vi": "Cam - Bệnh vàng lá gân xanh (Citrus greening)",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_081.jpg": {
+    "class_name": "Peach___Bacterial_spot",
+    "label_vi": "Đào - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_082.jpg": {
+    "class_name": "Peach___Bacterial_spot",
+    "label_vi": "Đào - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_083.jpg": {
+    "class_name": "Peach___Bacterial_spot",
+    "label_vi": "Đào - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_084.jpg": {
+    "class_name": "Peach___Bacterial_spot",
+    "label_vi": "Đào - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_085.jpg": {
+    "class_name": "Peach___Bacterial_spot",
+    "label_vi": "Đào - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_086.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "Đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_087.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "Đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_088.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "Đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_089.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "Đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_090.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "Đào - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_091.jpg": {
+    "class_name": "Pepper,_bell___Bacterial_spot",
+    "label_vi": "Ớt chuông - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_092.jpg": {
+    "class_name": "Pepper,_bell___Bacterial_spot",
+    "label_vi": "Ớt chuông - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_093.jpg": {
+    "class_name": "Pepper,_bell___Bacterial_spot",
+    "label_vi": "Ớt chuông - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_094.jpg": {
+    "class_name": "Pepper,_bell___Bacterial_spot",
+    "label_vi": "Ớt chuông - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_095.jpg": {
+    "class_name": "Pepper,_bell___Bacterial_spot",
+    "label_vi": "Ớt chuông - Bệnh đốm vi khuẩn",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_096.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "Ớt chuông - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_097.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "Ớt chuông - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_098.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "Ớt chuông - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_099.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "Ớt chuông - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "leaf_100.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "Ớt chuông - Khỏe mạnh",
+    "source": "PlantVillage (Lab control)"
+  },
+  "complex_leaf_001.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_002.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_003.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_004.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_005.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_006.jpg": {
+    "class_name": "Apple___Apple_scab",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh ghẻ (Apple scab)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple Scab Leaf'"
+  },
+  "complex_leaf_007.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_008.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_009.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_010.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_011.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_012.jpg": {
+    "class_name": "Apple___healthy",
+    "label_vi": "[Ảnh thực địa] Táo - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple leaf'"
+  },
+  "complex_leaf_013.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_014.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_015.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_016.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_017.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_018.jpg": {
+    "class_name": "Apple___Cedar_apple_rust",
+    "label_vi": "[Ảnh thực địa] Táo - Bệnh rỉ sắt táo Cedar",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Apple rust leaf'"
+  },
+  "complex_leaf_019.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_020.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_021.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_022.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_023.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_024.jpg": {
+    "class_name": "Pepper,_bell___healthy",
+    "label_vi": "[Ảnh thực địa] Ớt chuông - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Bell_pepper leaf'"
+  },
+  "complex_leaf_025.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_026.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_027.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_028.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_029.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_030.jpg": {
+    "class_name": "Cherry_(including_sour)___healthy",
+    "label_vi": "[Ảnh thực địa] Anh đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Cherry leaf'"
+  },
+  "complex_leaf_031.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_032.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_033.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_034.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_035.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_036.jpg": {
+    "class_name": "Corn_(maize)___healthy",
+    "label_vi": "[Ảnh thực địa] Ngô - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn leaf blight'"
+  },
+  "complex_leaf_037.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_038.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_039.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_040.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_041.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_042.jpg": {
+    "class_name": "Corn_(maize)___Common_rust_",
+    "label_vi": "[Ảnh thực địa] Ngô - Bệnh rỉ sắt thông thường",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Corn rust leaf'"
+  },
+  "complex_leaf_043.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_044.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_045.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_046.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_047.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_048.jpg": {
+    "class_name": "Peach___healthy",
+    "label_vi": "[Ảnh thực địa] Đào - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Peach leaf'"
+  },
+  "complex_leaf_049.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_050.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_051.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_052.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_053.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_054.jpg": {
+    "class_name": "Potato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf early blight'"
+  },
+  "complex_leaf_055.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_056.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_057.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_058.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_059.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_060.jpg": {
+    "class_name": "Potato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Khoai tây - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Potato leaf late blight'"
+  },
+  "complex_leaf_061.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_062.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_063.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_064.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_065.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_066.jpg": {
+    "class_name": "Squash___Powdery_mildew",
+    "label_vi": "[Ảnh thực địa] Bí ngòi/Bí đỏ - Bệnh phấn trắng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Squash Powdery mildew leaf'"
+  },
+  "complex_leaf_067.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_068.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_069.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_070.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_071.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_072.jpg": {
+    "class_name": "Tomato___Early_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh úa sớm (Early blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato Early blight leaf'"
+  },
+  "complex_leaf_073.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_074.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_075.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_076.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_077.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_078.jpg": {
+    "class_name": "Tomato___healthy",
+    "label_vi": "[Ảnh thực địa] Cà chua - Khỏe mạnh",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf'"
+  },
+  "complex_leaf_079.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_080.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_081.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_082.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_083.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_084.jpg": {
+    "class_name": "Tomato___Bacterial_spot",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh đốm vi khuẩn",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf bacterial spot'"
+  },
+  "complex_leaf_085.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_086.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_087.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_088.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_089.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_090.jpg": {
+    "class_name": "Tomato___Late_blight",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh mốc sương (Late blight)",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf late blight'"
+  },
+  "complex_leaf_091.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_092.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_093.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_094.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_095.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_096.jpg": {
+    "class_name": "Tomato___Tomato_mosaic_virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus khảm cà chua",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf mosaic virus'"
+  },
+  "complex_leaf_097.jpg": {
+    "class_name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus xoăn lùn lá vàng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf yellow virus'"
+  },
+  "complex_leaf_098.jpg": {
+    "class_name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus xoăn lùn lá vàng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf yellow virus'"
+  },
+  "complex_leaf_099.jpg": {
+    "class_name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus xoăn lùn lá vàng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf yellow virus'"
+  },
+  "complex_leaf_100.jpg": {
+    "class_name": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "label_vi": "[Ảnh thực địa] Cà chua - Bệnh virus xoăn lùn lá vàng",
+    "source": "PlantDoc (In-the-wild) - Labeled as 'Tomato leaf yellow virus'"
+  }
+}

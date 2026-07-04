@@ -13,6 +13,7 @@ from ai_layer.orchestrator import AIOrchestrator
 from ai_layer.approval.hitl import hitl_manager
 from ai_layer.tools.db_mock import load_db, save_db
 from ai_layer.rag.knowledge_base import seed_knowledge_base
+from ai_layer.cropdoctor.api.router import router as cropdoctor_router
 
 app = FastAPI(title="AI-Native Operations Copilot Backend", version="1.0.0")
 
@@ -24,6 +25,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(cropdoctor_router)
 
 # Seed knowledge base and database on startup
 @app.on_event("startup")
