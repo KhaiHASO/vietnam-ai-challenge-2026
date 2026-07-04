@@ -6,6 +6,7 @@ from app.schemas.diagnosis import (
     FinalizeDiagnosisRequest,
     SymptomAnswersRequest,
 )
+from app.services.dashboard_list_service import DashboardListService
 from app.services.diagnosis_service import DiagnosisService
 
 router = APIRouter(prefix="/api/diagnosis", tags=["Diagnosis"])
@@ -13,6 +14,10 @@ router = APIRouter(prefix="/api/diagnosis", tags=["Diagnosis"])
 
 def get_diagnosis_service() -> DiagnosisService:
     return DiagnosisService()
+
+
+def get_dashboard_list_service() -> DashboardListService:
+    return DashboardListService()
 
 
 @router.post("/cases", status_code=201)
@@ -65,3 +70,17 @@ async def finalize_case(
     service: DiagnosisService = Depends(get_diagnosis_service),
 ) -> dict[str, object]:
     return await service.finalize_case(case_id, request or FinalizeDiagnosisRequest())
+
+
+@router.get("/history")
+async def diagnosis_history(
+    service: DashboardListService = Depends(get_dashboard_list_service),
+) -> dict[str, object]:
+    return await service.diagnosis_history()
+
+
+@router.get("/follow-up")
+async def diagnosis_follow_up(
+    service: DashboardListService = Depends(get_dashboard_list_service),
+) -> dict[str, object]:
+    return await service.diagnosis_follow_up()

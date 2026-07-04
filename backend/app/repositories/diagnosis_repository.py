@@ -8,6 +8,7 @@ from app.core.config import settings
 from app.db.mongo import get_database, mongo_state
 
 COLLECTIONS = (
+    "farms",
     "diagnosis_cases",
     "case_images",
     "vision_results",
@@ -16,6 +17,9 @@ COLLECTIONS = (
     "treatment_plans",
     "expert_reviews",
     "agent_logs",
+    "season_logs",
+    "reminders",
+    "model_reports",
 )
 
 _MEMORY_STORE: dict[str, list[dict[str, Any]]] = {name: [] for name in COLLECTIONS}
@@ -127,3 +131,10 @@ class DiagnosisRepository:
 
         await self.database[collection_name].update_one(query, {"$set": update})
         return await self.find_one(collection_name, query)
+
+    async def count(self, collection_name: str, query: dict[str, Any] | None = None) -> int:
+        query = query or {}
+        if self.use_memory:
+            return len([doc for doc in _MEMORY_STORE[collection_name] if _matches(doc, query)])
+
+        return await self.database[collection_name].count_documents(query)
