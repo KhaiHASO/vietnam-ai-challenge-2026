@@ -82,8 +82,24 @@ interface DbState {
   intervention_logs?: InterventionLog[];
   farms?: Farm[];
   treatment_logs?: TreatmentLog[];
-  pending_approvals?: Approval[];
 }
+const demoPrompts: Record<string, Array<{ label: string; text: string }>> = {
+  sme: [
+    { label: "💳 Hủy đặt sân & Hoàn tiền (HITL)", text: "Tôi muốn hủy đặt sân Pickleball mã BKG-88321A tối nay lúc 18h và hoàn tiền ví Momo cho tôi, số điện thoại là 0912345678" },
+    { label: "📜 Tra cứu chính sách hoàn hủy (RAG)", text: "Chính sách hủy sân và hoàn tiền của trung tâm mình như thế nào nếu hủy trước 6 tiếng?" },
+    { label: "🛠️ Báo lỗi thanh toán (Tool Call)", text: "Cổng thanh toán MoMo đang bị lỗi trừ tiền nhưng không xuất booking, hãy tạo ticket hỗ trợ kỹ thuật" }
+  ],
+  education: [
+    { label: "🎓 Phát hiện nguy cơ & Can thiệp (HITL)", text: "Tuần này sinh viên STU-1002 Trần Thị B vắng mặt liên tiếp 3 buổi học phần Lập trình Python, hãy kiểm tra học lực và đề xuất can thiệp." },
+    { label: "📖 Tra cứu quy chế đào tạo (RAG)", text: "Sinh viên vắng bao nhiêu phần trăm số buổi học thì bị cấm thi học phần?" },
+    { label: "📝 Cập nhật hỗ trợ học vụ (Tool Call)", text: "Đã liên hệ với sinh viên STU-1001 để nhắc nhở nộp bài tập môn Java, hãy cập nhật nhật ký can thiệp học vụ" }
+  ],
+  agriculture: [
+    { label: "🌾 Chẩn đoán bệnh hại & Đơn thuốc (HITL)", text: "Lô vườn sầu riêng FRM-502 phát hiện vệt nấm đốm nâu đạo ôn lúa nặng gây héo lá 45%, hãy kiểm tra cảm biến đất và đề xuất phun thuốc điều trị." },
+    { label: "🍎 Tra cứu thời gian cách ly (RAG)", text: "Quy chuẩn VietGAP quy định thời gian cách ly tối thiểu sau khi phun thuốc bảo vệ thực vật là bao nhiêu ngày?" },
+    { label: "🚜 Ghi nhật ký bón phân (Tool Call)", text: "Đã thực hiện bón phân hữu cơ sinh học cho Lô vườn FRM-501, hãy lưu nhật ký xử lý vườn" }
+  ]
+};
 
 export default function AICopilotDashboard() {
   const [query, setQuery] = useState("");
@@ -367,6 +383,24 @@ export default function AICopilotDashboard() {
                     </div>
                   )}
                 </div>
+                
+                {/* Quick Demo Suggestions */}
+                <div className="mb-2 d-flex flex-wrap gap-2 pt-2 border-top">
+                  <span className="fs-12 text-muted w-100 mb-1">💡 Kịch bản Demo Gợi ý (Click để chọn):</span>
+                  {demoPrompts[activeDomain]?.map((p, idx) => (
+                    <Button
+                      key={idx}
+                      color="light"
+                      size="sm"
+                      className="text-start fs-11 py-1 px-2 text-wrap"
+                      style={{ border: "1px dashed #ced4da" }}
+                      onClick={() => setQuery(p.text)}
+                    >
+                      {p.label}
+                    </Button>
+                  ))}
+                </div>
+
                 <form onSubmit={handleSendMessage} className="d-flex gap-2">
                   <Input
                     type="text"
