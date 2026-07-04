@@ -56,6 +56,30 @@
         "priority": 0.5914
       },
       "status": "Approved"
+    },
+    {
+      "approval_id": "APP-5C757D",
+      "action_type": "student_discipline_warning",
+      "details": {
+        "student_id": "STU-1002",
+        "issue": "Academic Warning / Dropout Alert",
+        "user_query": "Tuần này sinh viên STU-1002 Trần Thị B vắng mặt liên tiếp 3 buổi học phần Lập trình Python, hãy kiểm tra học lực và đề xuất can thiệp.",
+        "risk_level": "low",
+        "priority": 0.6162
+      },
+      "status": "Pending"
+    },
+    {
+      "approval_id": "APP-54A64B",
+      "action_type": "chemical_pesticide_approval",
+      "details": {
+        "crop_id": "CRP-304",
+        "chemical": "Fungicide NPK-II",
+        "user_query": "Lô vườn sầu riêng FRM-502 phát hiện vệt nấm đốm nâu đạo ôn lúa nặng gây héo lá 45%, hãy kiểm tra cảm biến đất và đề xuất phun thuốc điều trị.",
+        "risk_level": "high",
+        "priority": 0.7259
+      },
+      "status": "Pending"
     }
   ]
 }
