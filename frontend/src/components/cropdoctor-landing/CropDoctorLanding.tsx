@@ -2,137 +2,170 @@ import Image from "next/image";
 import Link from "next/link";
 import styles from "./CropDoctorLanding.module.scss";
 
+const navItems = [
+  ["Problems", "#problem"],
+  ["Solution", "#solution"],
+  ["Agents", "#agents"],
+  ["Demo Flow", "#demo"],
+];
+
+const featureTiles = [
+  {
+    title: "Vision Diagnosis",
+    text: "Upload a crop image and let AI detect visible disease signs.",
+    icon: "ri-camera-lens-line",
+  },
+  {
+    title: "Safe IPM Care",
+    text: "Recommendations are checked against Integrated Pest Management principles.",
+    icon: "ri-shield-check-line",
+  },
+  {
+    title: "Crop Health Diary",
+    text: "Every diagnosis, action plan, log, and 48h reminder is saved.",
+    icon: "ri-book-open-line",
+  },
+];
+
 const problemCards = [
   {
-    title: "Phát hiện bệnh cây muộn",
-    text: "Triệu chứng nhỏ trên lá thường bị bỏ qua cho đến khi bệnh lan rộng trong vườn.",
+    title: "Diseases are detected too late",
+    text: "Early leaf spots and stress signs are easy to miss until infection spreads across the field.",
     icon: "ri-alarm-warning-line",
   },
   {
-    title: "Dễ dùng thuốc sai cách",
-    text: "Quyết định xử lý phụ thuộc kinh nghiệm rời rạc, dễ phun quá liều hoặc sai thời điểm.",
-    icon: "ri-flask-line",
+    title: "Treatment choices can be risky",
+    text: "Incorrect pesticide timing or dosage can harm crops, people, soil health, and nearby ecosystems.",
+    icon: "ri-shield-flash-line",
   },
   {
-    title: "Thiếu nhật ký mùa vụ",
-    text: "Ảnh bệnh, triệu chứng, khuyến nghị và lần xử lý sau không được lưu theo một hồ sơ chuẩn.",
-    icon: "ri-book-open-line",
+    title: "Crop records are scattered",
+    text: "Photos, symptoms, weather, treatment notes, and follow-up results rarely live in one diary.",
+    icon: "ri-file-list-3-line",
   },
   {
-    title: "Chậm hỗ trợ tại ruộng",
-    text: "Nông hộ cần một công cụ chẩn đoán nhanh ngay khi phát hiện dấu hiệu bất thường.",
+    title: "Farmers need field-ready help",
+    text: "Diagnosis support should be fast, mobile-friendly, and useful while the farmer is still in the field.",
     icon: "ri-smartphone-line",
   },
 ];
 
 const solutionSteps = [
   {
-    title: "Upload ảnh cây bệnh",
-    text: "Nông hộ chụp ảnh lá, quả hoặc thân cây ngay tại ruộng.",
+    title: "Upload Image",
+    text: "Capture the affected leaves, stems, fruit, or whole plant directly from the field.",
+    icon: "ri-image-add-line",
   },
   {
-    title: "AI phân tích ảnh",
-    text: "PyTorch inference nhận diện dấu hiệu bệnh và độ tin cậy ban đầu.",
+    title: "AI Vision",
+    text: "PyTorch inference identifies visible disease patterns and an initial confidence signal.",
+    icon: "ri-eye-line",
   },
   {
-    title: "Agent hỏi thêm triệu chứng",
-    text: "Symptom Agent bổ sung thời điểm xuất hiện, tốc độ lan, điều kiện chăm sóc.",
+    title: "Symptom Questions",
+    text: "The agent collects spread, severity, affected parts, and recent field conditions.",
+    icon: "ri-question-answer-line",
   },
   {
-    title: "Lấy bối cảnh thời tiết",
-    text: "Context Agent xem mưa, độ ẩm và lịch chăm sóc để giảm chẩn đoán sai.",
+    title: "Weather Context",
+    text: "Crop type, location, humidity, rain, and farm notes help reduce one-shot diagnosis errors.",
+    icon: "ri-cloud-line",
   },
   {
-    title: "Khuyến nghị IPM an toàn",
-    text: "Reasoning và Safety Agent ưu tiên biện pháp quản lý dịch hại tổng hợp.",
+    title: "IPM Recommendation",
+    text: "Reasoning and Safety Agents turn evidence into practical, lower-risk crop care steps.",
+    icon: "ri-seedling-line",
   },
   {
-    title: "Lưu nhật ký, nhắc 48h",
-    text: "Diary Agent tạo hồ sơ bệnh án và lịch follow-up sau 48 giờ.",
+    title: "48h Follow-up",
+    text: "The case, agent logs, treatment plan, and reminder become part of the crop health diary.",
+    icon: "ri-notification-3-line",
   },
 ];
 
 const agents = [
   {
     name: "Vision Agent",
-    text: "Đọc ảnh cây bệnh và trích xuất dấu hiệu thị giác.",
+    text: "Analyzes uploaded crop images and detects visible disease signs.",
     icon: "ri-eye-line",
   },
   {
     name: "Symptom Agent",
-    text: "Hỏi thêm triệu chứng để tránh kết luận vội.",
+    text: "Asks farmers about spread, affected leaves, stems, fruit, and field conditions.",
     icon: "ri-question-answer-line",
   },
   {
     name: "Context Agent",
-    text: "Ghép bối cảnh thời tiết, nông trại và lịch chăm sóc.",
+    text: "Uses farm context, crop type, location, and weather to support diagnosis.",
     icon: "ri-cloud-line",
   },
   {
     name: "Reasoning Agent",
-    text: "Tổng hợp bằng chứng bằng DeepSeek reasoning.",
+    text: "Combines image results, symptoms, and context to generate a likely diagnosis.",
     icon: "ri-brain-line",
   },
   {
     name: "Safety Agent",
-    text: "Chặn khuyến nghị rủi ro, ưu tiên IPM an toàn.",
+    text: "Checks recommendations against safe IPM principles and avoids risky chemical advice.",
     icon: "ri-shield-check-line",
   },
   {
     name: "Diary Agent",
-    text: "Lưu bệnh án, agent logs và lịch nhắc chăm sóc.",
+    text: "Saves the diagnosis, treatment plan, agent logs, and follow-up reminders.",
     icon: "ri-calendar-check-line",
   },
 ];
 
 const highlights = [
-  ["AI-native workflow", "Luồng chẩn đoán được thiết kế quanh agent, log và truy vết."],
-  ["PyTorch inference", "Mô hình thị giác chạy inference cho ảnh bệnh cây."],
-  ["DeepSeek reasoning", "Lớp suy luận tổng hợp ảnh, triệu chứng và bối cảnh."],
-  ["Safety guardrail IPM", "Khuyến nghị ưu tiên an toàn sinh học trước hóa chất."],
-  ["Agent logs/audit trace", "Mỗi bước agent đều có dấu vết để giải thích với giám khảo."],
-  ["Reminder chăm sóc", "Tự tạo lịch kiểm tra lại sau 48 giờ cho từng ca bệnh."],
+  ["AI-native workflow", "Multi-step diagnosis flow powered by specialized agents.", "ri-flow-chart"],
+  ["PyTorch inference", "Image classification and disease recognition using a trained model.", "ri-cpu-line"],
+  ["DeepSeek reasoning", "Reasoning support for diagnosis explanation and treatment suggestions.", "ri-brain-line"],
+  ["IPM safety guardrails", "Safer recommendations based on Integrated Pest Management principles.", "ri-shield-keyhole-line"],
+  ["Agent logs and audit trace", "Transparent workflow logs for demo, review, and debugging.", "ri-file-list-3-line"],
+  ["Crop care reminders", "Follow-up reminders after 48 hours to check crop recovery.", "ri-notification-3-line"],
 ];
 
 const demoFlow = [
-  "Chọn nông trại",
-  "Upload ảnh",
-  "Nhập triệu chứng",
-  "AI chẩn đoán",
-  "Lưu bệnh án",
-  "Xem agent logs",
+  "Select a farm",
+  "Upload crop image",
+  "Enter symptoms",
+  "AI generates diagnosis",
+  "Save crop case",
+  "View agent logs",
 ];
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className={styles.sectionLabel}>
+      <i className="ri-leaf-line"></i>
+      {children}
+    </span>
+  );
+}
 
 export default function CropDoctorLanding() {
   return (
     <main className={styles.page}>
       <nav className={styles.nav} aria-label="CropDoctor AI navigation">
-        <div className={`container d-flex align-items-center justify-content-between ${styles.navInner}`}>
-          <Link href="/" className="d-inline-flex align-items-center gap-2 text-decoration-none">
+        <div className={`container ${styles.navInner}`}>
+          <Link href="/" className={styles.brand}>
             <span className={styles.brandMark}>
               <i className="ri-plant-line"></i>
             </span>
-            <span className={styles.brandText}>CropDoctor AI</span>
+            <span>CropDoctor AI</span>
           </Link>
 
-          <div className={`d-flex align-items-center gap-4 ${styles.navLinks}`}>
-            <Link href="#problem" className={styles.navLink}>
-              Vấn đề
-            </Link>
-            <Link href="#solution" className={styles.navLink}>
-              Giải pháp
-            </Link>
-            <Link href="#agents" className={styles.navLink}>
-              6 Agent
-            </Link>
-            <Link href="#demo" className={styles.navLink}>
-              Demo flow
-            </Link>
+          <div className={styles.navLinks}>
+            {navItems.map(([label, href]) => (
+              <Link href={href} className={styles.navLink} key={href}>
+                {label}
+              </Link>
+            ))}
           </div>
 
-          <Link href="/diagnosis/new" className={styles.primaryButton}>
-            Dùng thử
-            <i className="ri-arrow-right-line"></i>
+          <Link href="/diagnosis/new" className={styles.navButton}>
+            Try Diagnosis
+            <i className="ri-arrow-right-up-line"></i>
           </Link>
         </div>
       </nav>
@@ -141,73 +174,77 @@ export default function CropDoctorLanding() {
         <div className={styles.heroImage}>
           <Image
             src="/images/cropdoctor/dashboard-overview.png"
-            alt="Giao diện tổng quan CropDoctor AI"
+            alt="CropDoctor AI dashboard overview"
             fill
             priority
             sizes="100vw"
           />
         </div>
         <div className={styles.heroOverlay}></div>
-        <div className={styles.heroPattern}></div>
+        <div className={styles.heroLines} aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
 
         <div className="container position-relative">
-          <div className={styles.eyebrow}>
-            <i className="ri-sparkling-2-line"></i>
-            AI-native crop diagnosis for Vietnam AI Challenge 2026
-          </div>
-          <h1 className={styles.heroTitle}>CropDoctor AI</h1>
-          <p className={styles.heroLead}>
-            Trợ lý AI chẩn đoán và chăm sóc cây trồng cho nông hộ: từ ảnh bệnh cây,
-            triệu chứng, thời tiết đến khuyến nghị IPM an toàn và nhật ký theo dõi.
-          </p>
-
-          <div className={styles.heroActions}>
-            <Link href="/diagnosis/new" className={styles.primaryButton}>
-              Dùng thử chẩn đoán
-              <i className="ri-microscope-line"></i>
-            </Link>
-            <Link href="/diagnosis/history" className={styles.secondaryButton}>
-              Xem lịch sử chẩn đoán
-              <i className="ri-history-line"></i>
-            </Link>
-          </div>
-
-          <div className={styles.heroStats} aria-label="Điểm mạnh chính của CropDoctor AI">
-            <div className={styles.heroStat}>
-              <strong>6 Agent</strong>
-              <span>Vision, Symptom, Context, Reasoning, Safety, Diary</span>
+          <div className={styles.heroContent}>
+            <div className={styles.heroKicker}>
+              <i className="ri-leaf-line"></i>
+              AI-powered crop diagnosis and plant care assistant for farmers
             </div>
-            <div className={styles.heroStat}>
-              <strong>48h</strong>
-              <span>Follow-up tự động cho ca cần theo dõi</span>
+            <h1>AI Crop Diagnosis for Healthier Farms</h1>
+            <p>
+              CropDoctor AI helps farmers upload crop images, describe symptoms, receive AI-assisted diagnosis,
+              get safer IPM recommendations, save records, and schedule follow-up care.
+            </p>
+            <div className={styles.heroActions}>
+              <Link href="/diagnosis/new" className={styles.primaryButton}>
+                Try Diagnosis
+                <i className="ri-microscope-line"></i>
+              </Link>
+              <Link href="/diagnosis/history" className={styles.secondaryButton}>
+                View Diagnosis History
+                <i className="ri-history-line"></i>
+              </Link>
             </div>
-            <div className={styles.heroStat}>
-              <strong>IPM</strong>
-              <span>Guardrail an toàn trước khuyến nghị xử lý</span>
+          </div>
+
+          <div className={styles.heroConsole} aria-label="CropDoctor AI diagnosis preview">
+            <div className={styles.consoleImage}>
+              <Image
+                src="/images/cropdoctor/new-diagnosis.png"
+                alt="CropDoctor AI new diagnosis screen"
+                width={920}
+                height={580}
+                sizes="(max-width: 991px) 100vw, 54vw"
+              />
+            </div>
+            <div className={styles.consolePanel}>
+              <span>Likely diagnosis</span>
+              <strong>Tomato leaf blight</strong>
+              <small>Safety Agent approved IPM-first actions.</small>
+            </div>
+            <div className={styles.followBadge}>
+              <i className="ri-notification-3-line"></i>
+              48h follow-up
             </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.section} id="problem">
+      <section className={styles.featureStrip} aria-label="CropDoctor AI key capabilities">
         <div className="container">
-          <div className={styles.sectionHeader}>
-            <span className={styles.sectionKicker}>Vấn đề</span>
-            <h2 className={styles.sectionTitle}>Bệnh cây không chờ nông hộ kịp hỏi chuyên gia.</h2>
-            <p className={styles.sectionText}>
-              CropDoctor AI tập trung vào những điểm nghẽn rất thật ở ruộng: phát hiện muộn,
-              xử lý thiếu căn cứ và không có hồ sơ theo dõi sau chẩn đoán.
-            </p>
-          </div>
-
-          <div className="row g-3 g-lg-4">
-            {problemCards.map((item) => (
-              <div className="col-md-6 col-xl-3" key={item.title}>
-                <article className={styles.problemCard}>
-                  <span className={styles.iconBadge}>
+          <div className="row g-3">
+            {featureTiles.map((item) => (
+              <div className="col-md-4" key={item.title}>
+                <article className={styles.featureTile}>
+                  <span>
                     <i className={item.icon}></i>
                   </span>
-                  <h3>{item.title}</h3>
+                  <h2>{item.title}</h2>
                   <p>{item.text}</p>
                 </article>
               </div>
@@ -216,41 +253,72 @@ export default function CropDoctorLanding() {
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.sectionSoft}`} id="solution">
+      <section className={styles.aboutSection} id="problem">
         <div className="container">
           <div className="row g-4 g-xl-5 align-items-center">
-            <div className="col-lg-6">
-              <div className={styles.sectionKicker}>Giải pháp</div>
-              <h2 className={styles.sectionTitle}>Một ca bệnh đi qua ảnh, agent và nhật ký chăm sóc.</h2>
+            <div className="col-lg-5">
+              <div className={styles.organicImageCard}>
+                <Image
+                  src="/images/cropdoctor/diagnosis-history.png"
+                  alt="CropDoctor AI diagnosis history"
+                  width={900}
+                  height={620}
+                  sizes="(max-width: 991px) 100vw, 40vw"
+                />
+                <div className={styles.roundStamp}>
+                  <strong>Traceable</strong>
+                  <span>AI Workflow</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-7">
+              <SectionLabel>Why farmers need it</SectionLabel>
+              <h2 className={styles.sectionTitle}>Why Farmers Need Faster Crop Diagnosis</h2>
               <p className={styles.sectionText}>
-                Thay vì chỉ trả về một nhãn bệnh, hệ thống gom đủ bằng chứng để đưa ra chẩn đoán
-                có thể giải thích, an toàn hơn và theo dõi được sau demo.
+                Crop diseases move faster than paperwork. Farmers need a clear, field-ready way to identify problems,
+                choose safer actions, and keep useful records for the next visit.
               </p>
 
-              <div className={`mt-4 ${styles.timeline}`}>
-                {solutionSteps.map((step, index) => (
-                  <div className={styles.timelineItem} key={step.title}>
-                    <span className={styles.timelineNumber}>{index + 1}</span>
+              <div className={styles.problemGrid}>
+                {problemCards.map((item) => (
+                  <article className={styles.problemCard} key={item.title}>
+                    <span className={styles.iconCircle}>
+                      <i className={item.icon}></i>
+                    </span>
                     <div>
-                      <h3>{step.title}</h3>
-                      <p>{step.text}</p>
+                      <h3>{item.title}</h3>
+                      <p>{item.text}</p>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="col-lg-6">
-              <div className={styles.solutionImage}>
-                <Image
-                  src="/images/cropdoctor/new-diagnosis.png"
-                  alt="Màn hình chẩn đoán mới của CropDoctor AI"
-                  width={1440}
-                  height={900}
-                  sizes="(max-width: 991px) 100vw, 50vw"
-                />
-              </div>
-            </div>
+      <section className={`${styles.section} ${styles.sectionSoft}`} id="solution">
+        <div className="container">
+          <div className={styles.sectionHeader}>
+            <SectionLabel>How CropDoctor AI helps</SectionLabel>
+            <h2 className={styles.sectionTitle}>From Field Photo to Safer Crop Care</h2>
+            <p className={styles.sectionText}>
+              Inspired by an organic farm service flow, each step is simple for farmers and traceable for judges.
+            </p>
+          </div>
+
+          <div className={styles.processGrid}>
+            {solutionSteps.map((step, index) => (
+              <article className={styles.processCard} key={step.title}>
+                <span className={styles.processNumber}>{String(index + 1).padStart(2, "0")}</span>
+                <div className={styles.processIcon}>
+                  <i className={step.icon}></i>
+                </div>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -258,20 +326,20 @@ export default function CropDoctorLanding() {
       <section className={styles.section} id="agents">
         <div className="container">
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionKicker}>Quy trình 6 Agent</span>
-            <h2 className={styles.sectionTitle}>Pipeline AI có trace rõ ràng cho từng quyết định.</h2>
+            <SectionLabel>Agent workflow</SectionLabel>
+            <h2 className={styles.sectionTitle}>Six Specialized Agents Working Together</h2>
             <p className={styles.sectionText}>
-              Mỗi agent phụ trách một phần bằng chứng, giúp phần demo không chỉ đẹp mà còn có câu chuyện kỹ thuật thuyết phục.
+              A clean AI pipeline gives the product a strong technical story without overwhelming farmers.
             </p>
           </div>
 
           <div className={styles.agentGrid}>
             {agents.map((agent, index) => (
               <article className={styles.agentCard} key={agent.name}>
-                <span className={styles.agentStep}>Agent {index + 1}</span>
-                <div className={`${styles.iconBadge} mt-3`}>
+                <span className={styles.agentIndex}>{index + 1}</span>
+                <span className={styles.iconCircle}>
                   <i className={agent.icon}></i>
-                </div>
+                </span>
                 <h3>{agent.name}</h3>
                 <p>{agent.text}</p>
               </article>
@@ -280,30 +348,35 @@ export default function CropDoctorLanding() {
         </div>
       </section>
 
-      <section className={`${styles.section} ${styles.sectionSoft}`}>
+      <section className={styles.ecoBand}>
+        <div className="container">
+          <div className={styles.ecoContent}>
+            <SectionLabel>Built for AI-native crop care</SectionLabel>
+            <h2>Modern agriculture, safer recommendations, and a traceable AI diary.</h2>
+            <Link href="/diagnosis/new" className={styles.lightButton}>
+              Start Diagnosis Now
+              <i className="ri-arrow-right-line"></i>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className={`${styles.section} ${styles.sectionSoft}`} id="features">
         <div className="container">
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionKicker}>Điểm nổi bật</span>
-            <h2 className={styles.sectionTitle}>Đủ rõ cho người ngoài, đủ sâu cho ban giám khảo.</h2>
+            <SectionLabel>Product highlights</SectionLabel>
+            <h2 className={styles.sectionTitle}>Built for Competition-Ready Crop Care</h2>
+            <p className={styles.sectionText}>
+              The page stays farmer-friendly while still surfacing the AI engineering details judges care about.
+            </p>
           </div>
 
           <div className="row g-3 g-lg-4">
-            {highlights.map(([title, text], index) => (
+            {highlights.map(([title, text, icon]) => (
               <div className="col-md-6 col-xl-4" key={title}>
-                <article className={styles.featureCard}>
-                  <span className={styles.iconBadge}>
-                    <i
-                      className={
-                        [
-                          "ri-flow-chart",
-                          "ri-cpu-line",
-                          "ri-brain-line",
-                          "ri-shield-keyhole-line",
-                          "ri-file-list-3-line",
-                          "ri-notification-3-line",
-                        ][index]
-                      }
-                    ></i>
+                <article className={styles.highlightCard}>
+                  <span className={styles.iconCircle}>
+                    <i className={icon}></i>
                   </span>
                   <h3>{title}</h3>
                   <p>{text}</p>
@@ -317,49 +390,40 @@ export default function CropDoctorLanding() {
       <section className={styles.section} id="demo">
         <div className="container">
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionKicker}>Demo flow</span>
-            <h2 className={styles.sectionTitle}>Một đường chạy ngắn, dễ trình bày trong phòng thi.</h2>
+            <SectionLabel>Judge-friendly walkthrough</SectionLabel>
+            <h2 className={styles.sectionTitle}>Demo Flow</h2>
             <p className={styles.sectionText}>
-              Người xem thấy ngay app hoạt động từ chọn nông trại đến agent logs, không cần backend phức tạp để hiểu giá trị.
+              A short, predictable journey helps judges understand the product in minutes.
             </p>
           </div>
 
-          <div className={styles.demoGrid}>
-            <div className={styles.demoList}>
-              {demoFlow.map((item, index) => (
-                <article className={styles.demoCard} key={item}>
-                  <span className={styles.demoIndex}>{index + 1}</span>
-                  <div>
-                    <h3>{item}</h3>
-                    <p>
-                      {index === 5
-                        ? "Mở trace để xem Vision, Symptom, Context, Reasoning, Safety và Diary Agent đã làm gì."
-                        : "Một bước rõ ràng trong luồng chẩn đoán để ban giám khảo dễ theo dõi."}
-                    </p>
-                  </div>
-                </article>
-              ))}
-            </div>
+          <div className={styles.demoFlow}>
+            {demoFlow.map((step, index) => (
+              <article className={styles.demoStep} key={step}>
+                <span>{index + 1}</span>
+                <h3>{step}</h3>
+              </article>
+            ))}
+          </div>
 
-            <div className={styles.demoScreens}>
-              <div className={styles.screenFrame}>
-                <Image
-                  src="/images/cropdoctor/agent-logs.png"
-                  alt="Màn hình nhật ký Agent của CropDoctor AI"
-                  width={1440}
-                  height={900}
-                  sizes="(max-width: 991px) 100vw, 55vw"
-                />
-              </div>
-              <div className={styles.screenFrame}>
-                <Image
-                  src="/images/cropdoctor/ipm-recommendations.png"
-                  alt="Màn hình khuyến nghị IPM của CropDoctor AI"
-                  width={1440}
-                  height={900}
-                  sizes="(max-width: 991px) 100vw, 55vw"
-                />
-              </div>
+          <div className={styles.demoScreens}>
+            <div className={styles.screenFrame}>
+              <Image
+                src="/images/cropdoctor/agent-logs.png"
+                alt="CropDoctor AI agent log preview"
+                width={1440}
+                height={900}
+                sizes="(max-width: 991px) 100vw, 48vw"
+              />
+            </div>
+            <div className={styles.screenFrame}>
+              <Image
+                src="/images/cropdoctor/ipm-recommendations.png"
+                alt="CropDoctor AI IPM recommendation preview"
+                width={1440}
+                height={900}
+                sizes="(max-width: 991px) 100vw, 48vw"
+              />
             </div>
           </div>
         </div>
@@ -368,15 +432,11 @@ export default function CropDoctorLanding() {
       <section className={styles.ctaBand}>
         <div className="container">
           <div className={styles.ctaContent}>
-            <div>
-              <h2>Bắt đầu chẩn đoán cây trồng ngay.</h2>
-              <p>
-                CropDoctor AI giúp nông hộ có một quy trình chẩn đoán nhanh, có giải thích,
-                có guardrail an toàn và có nhật ký để theo dõi sau 48 giờ.
-              </p>
-            </div>
+            <SectionLabel>Ready for the first case</SectionLabel>
+            <h2>Start Your First Crop Diagnosis</h2>
+            <p>Help farmers detect crop problems earlier, choose safer actions, and track plant recovery with AI.</p>
             <Link href="/diagnosis/new" className={styles.primaryButton}>
-              Bắt đầu chẩn đoán ngay
+              Start Diagnosis Now
               <i className="ri-arrow-right-line"></i>
             </Link>
           </div>
@@ -386,9 +446,7 @@ export default function CropDoctorLanding() {
       <footer className={styles.footer}>
         <div className="container d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
           <span>CropDoctor AI - Vietnam AI Challenge 2026</span>
-          <Link href="/diagnosis/history" className="text-white text-decoration-none">
-            Xem lịch sử chẩn đoán
-          </Link>
+          <Link href="/diagnosis/history">View Diagnosis History</Link>
         </div>
       </footer>
     </main>

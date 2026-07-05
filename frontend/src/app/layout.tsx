@@ -11,9 +11,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 export const metadata: Metadata = {
-  title: "CropDoctor AI - Trợ lý AI chẩn đoán cây trồng",
+  title: "CropDoctor AI - AI Crop Diagnosis for Healthier Farms",
   description:
-    "CropDoctor AI giúp nông hộ chẩn đoán bệnh cây từ ảnh, triệu chứng, thời tiết và khuyến nghị IPM an toàn.",
+    "CropDoctor AI helps farmers upload crop images, receive AI-assisted diagnosis, get safer IPM recommendations, and track follow-up care.",
 };
 
 export default function RootLayout({
@@ -22,9 +22,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="vi" suppressHydrationWarning data-qb-installed="true">
+    <html lang="en" suppressHydrationWarning data-qb-installed="true">
       <head>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        />
       </head>
       <body suppressHydrationWarning={true}>
         <ClientProviders>{children}</ClientProviders>
