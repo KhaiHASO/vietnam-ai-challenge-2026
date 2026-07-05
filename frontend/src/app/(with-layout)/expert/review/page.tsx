@@ -63,8 +63,8 @@ export default function ExpertReview() {
   const fetchReviews = async () => {
     try {
       const response = await axios.get("/api/expert/reviews");
-      if (response.data && response.data.reviews && response.data.reviews.length > 0) {
-        const backendReviews = response.data.reviews.map((r: any) => ({
+      if (response && response.reviews && response.reviews.length > 0) {
+        const backendReviews = response.reviews.map((r: any) => ({
           id: r.review_id,
           emoji: "🌱",
           crop: "Cây trồng",

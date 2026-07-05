@@ -69,8 +69,8 @@ export default function Farms() {
     const fetchFarms = async () => {
       try {
         const response = await axios.get("/api/dashboard/farms");
-        if (response.data && response.data.farms) {
-          const backendFarms = response.data.farms.map((f: any) => ({
+        if (response && response.farms) {
+          const backendFarms = response.farms.map((f: any) => ({
             id: f.farm_id,
             name: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,
             location: "Đồng Nai",

@@ -316,16 +316,16 @@ export default function Dashboard() {
     const fetchDashboardData = async () => {
       try {
         const response = await axios.get("/api/dashboard/overview");
-        if (response.data && response.data.summary) {
-          const s = response.data.summary;
+        if (response && response.summary) {
+          const s = response.summary;
           const updatedKPIs = [...kpiData];
           updatedKPIs[0].value = s.diagnosis_cases || 7;
           updatedKPIs[1].value = s.farms || 6;
           updatedKPIs[2].value = s.active_reminders || 4;
           setKpis(updatedKPIs);
 
-          if (response.data.recent_cases && response.data.recent_cases.length > 0) {
-            const mappedCases = response.data.recent_cases.map((c: any) => ({
+          if (response.recent_cases && response.recent_cases.length > 0) {
+            const mappedCases = response.recent_cases.map((c: any) => ({
               id: c.case_id,
               crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
               farm: c.location || "Vườn local",
@@ -345,8 +345,8 @@ export default function Dashboard() {
 
       try {
         const response = await axios.get("/api/dashboard/farms");
-        if (response.data && response.data.farms) {
-          const mappedHealth = response.data.farms.map((f: any) => ({
+        if (response && response.farms) {
+          const mappedHealth = response.farms.map((f: any) => ({
             farm: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,
             crop: f.crop_type,
             health: Math.round(100 - f.leaf_damage_percent),

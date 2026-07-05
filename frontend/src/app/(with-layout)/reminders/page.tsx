@@ -131,8 +131,8 @@ export default function Reminders() {
     const fetchReminders = async () => {
       try {
         const response = await axios.get("/api/listing/reminders");
-        if (response.data && response.data.reminders && response.data.reminders.length > 0) {
-          const backendReminders = response.data.reminders.map((r: any) => ({
+        if (response && response.reminders && response.reminders.length > 0) {
+          const backendReminders = response.reminders.map((r: any) => ({
             id: r.reminder_id,
             date: new Date(r.due_at).toLocaleDateString("vi-VN"),
             time: new Date(r.due_at).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' }),

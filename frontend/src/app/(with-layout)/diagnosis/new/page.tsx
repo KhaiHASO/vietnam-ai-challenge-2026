@@ -123,8 +123,8 @@ export default function DiagnosisNew() {
       clearInterval(progressInterval);
       setAnalysisProgress(100);
 
-      if (response.data && response.data.status === "success") {
-        setDiagnosisResult(response.data);
+      if (response && response.status === "success") {
+        setDiagnosisResult(response);
         setTimeout(() => {
           setIsAnalyzing(false);
           setStep(2);
@@ -171,7 +171,7 @@ export default function DiagnosisNew() {
         notes: `IPM: ${recs}`,
       });
 
-      if (response.status === 201 || response.status === 200) {
+      if (response && response.case_id) {
         setIsSaved(true);
         alert("Lưu ca bệnh thành công vào cơ sở dữ liệu!");
       }

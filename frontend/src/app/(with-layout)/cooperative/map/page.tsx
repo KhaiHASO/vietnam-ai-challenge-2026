@@ -109,8 +109,8 @@ export default function CooperativeMap() {
     const fetchCooperativeMap = async () => {
       try {
         const response = await axios.get("/api/listing/cooperative-disease-map");
-        if (response.data && response.data.map_points && response.data.map_points.length > 0) {
-          const points = response.data.map_points;
+        if (response && response.map_points && response.map_points.length > 0) {
+          const points = response.map_points;
           const updatedDistricts = mapDistricts.map((d) => {
             const matchCount = points.filter((p: any) => 
               (p.location && p.location.toLowerCase().includes(d.name.toLowerCase())) || 

@@ -136,8 +136,8 @@ export default function FarmLogs() {
     const fetchLogs = async () => {
       try {
         const response = await axios.get("/api/listing/season-logs");
-        if (response.data && response.data.season_logs && response.data.season_logs.length > 0) {
-          const backendLogs = response.data.season_logs.map((l: any) => ({
+        if (response && response.season_logs && response.season_logs.length > 0) {
+          const backendLogs = response.season_logs.map((l: any) => ({
             id: l.log_id,
             date: new Date(l.created_at || new Date()).toLocaleDateString("vi-VN"),
             time: new Date(l.created_at || new Date()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),

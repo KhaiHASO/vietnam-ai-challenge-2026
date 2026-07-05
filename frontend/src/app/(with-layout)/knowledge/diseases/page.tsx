@@ -158,8 +158,8 @@ export default function DiseasesLibrary() {
     const fetchDiseases = async () => {
       try {
         const response = await axios.get("/api/listing/knowledge/diseases");
-        if (response.data && response.data.diseases && response.data.diseases.length > 0) {
-          const mappedDiseases = response.data.diseases.map((d: any) => {
+        if (response && response.diseases && response.diseases.length > 0) {
+          const mappedDiseases = response.diseases.map((d: any) => {
             const treat = d.treatment || {};
             const treatStr = [treat.biological, treat.prevention, treat.chemical].filter(Boolean).join(". ");
             return {

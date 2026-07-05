@@ -130,8 +130,8 @@ export default function DiagnosisHistory() {
     const fetchHistory = async () => {
       try {
         const response = await axios.get("/api/diagnosis/history");
-        if (response.data && response.data.cases) {
-          const backendCases = response.data.cases.map((c: any) => ({
+        if (response && response.cases) {
+          const backendCases = response.cases.map((c: any) => ({
             id: c.case_id,
             crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
             emoji: c.crop === "ot" ? "🌶️" : "🍅",
