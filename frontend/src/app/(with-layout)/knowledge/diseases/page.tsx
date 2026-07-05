@@ -32,7 +32,18 @@ export default function DiseasesLibrary() {
         if (response && response.diseases && response.diseases.length > 0) {
           const mappedDiseases = response.diseases.map((d: any) => {
             const treat = d.treatment || {};
-            const treatStr = [treat.biological, treat.prevention, treat.chemical].filter(Boolean).join(". ");
+            const treatStr = typeof treat === "string"
+              ? treat
+              : [treat.biological, treat.prevention, treat.chemical].filter(Boolean).join(". ");
+
+            const rawSeverity = (d.severity || "").toLowerCase();
+            let normSeverity = "medium";
+            if (rawSeverity.includes("rất cao") || rawSeverity.includes("critical") || rawSeverity.includes("khẩn cấp")) {
+              normSeverity = "critical";
+            } else if (rawSeverity.includes("cao") || rawSeverity.includes("high") || rawSeverity.includes("trung bình đến cao")) {
+              normSeverity = "high";
+            }
+
             return {
               id: d.disease_id,
               name: d.name,
@@ -45,7 +56,7 @@ export default function DiseasesLibrary() {
               symptoms: d.symptoms || "Không có mô tả triệu chứng.",
               conditions: d.description || "Nhiệt độ ấm, độ ẩm cao.",
               treatment: treatStr || "Tỉa lá bệnh, bón phân cân đối.",
-              severity: d.severity || "medium",
+              severity: normSeverity,
               ai_accuracy: 85,
               commonInRegion: true,
             };
