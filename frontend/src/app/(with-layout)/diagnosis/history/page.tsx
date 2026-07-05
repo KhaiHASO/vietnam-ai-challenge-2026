@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Row,
   Col,
@@ -12,6 +12,7 @@ import {
   Input,
 } from "reactstrap";
 import Link from "next/link";
+import axios from "axios";
 
 const allCases = [
   {
@@ -123,8 +124,38 @@ type FilterType = "all" | "follow-up" | "resolved" | "expert";
 export default function DiagnosisHistory() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [search, setSearch] = useState("");
+  const [cases, setCases] = useState<any[]>([]);
 
-  const filtered = allCases.filter((c) => {
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await axios.get("/api/diagnosis/history");
+        if (response.data && response.data.cases) {
+          const backendCases = response.data.cases.map((c: any) => ({
+            id: c.case_id,
+            crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
+            emoji: c.crop === "ot" ? "🌶️" : "🍅",
+            farm: c.location || "Vườn local",
+            disease: c.summary || "Bệnh lý",
+            confidence: c.risk_level === "high" ? 85 : 70,
+            status: c.status === "created" ? "follow-up" : c.status || "follow-up",
+            statusLabel: c.status === "created" ? "Mới tạo" : c.status === "resolved" ? "Đã xử lý" : "Đang theo dõi",
+            date: new Date(c.created_at).toLocaleDateString("vi-VN"),
+            agentSteps: 5,
+          }));
+          setCases([...backendCases, ...allCases]);
+        } else {
+          setCases(allCases);
+        }
+      } catch (err) {
+        console.error(err);
+        setCases(allCases);
+      }
+    };
+    fetchHistory();
+  }, []);
+
+  const filtered = cases.filter((c) => {
     const matchFilter = filter === "all" || c.status === filter;
     const matchSearch =
       c.disease.toLowerCase().includes(search.toLowerCase()) ||
@@ -134,10 +165,10 @@ export default function DiagnosisHistory() {
   });
 
   const counts = {
-    all: allCases.length,
-    "follow-up": allCases.filter((c) => c.status === "follow-up").length,
-    resolved: allCases.filter((c) => c.status === "resolved").length,
-    expert: allCases.filter((c) => c.status === "expert").length,
+    all: cases.length,
+    "follow-up": cases.filter((c) => c.status === "follow-up").length,
+    resolved: cases.filter((c) => c.status === "resolved").length,
+    expert: cases.filter((c) => c.status === "expert").length,
   };
 
   return (
@@ -153,7 +184,7 @@ export default function DiagnosisHistory() {
                   Lịch sử chẩn đoán
                 </h4>
                 <p className="text-muted mb-0 fs-13">
-                  Tổng cộng {allCases.length} ca · 3 vườn canh tác
+                  Tổng cộng {cases.length} ca · 3 vườn canh tác
                 </p>
               </div>
               <Link href="/diagnosis/new">
