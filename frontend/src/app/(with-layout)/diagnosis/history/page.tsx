@@ -44,39 +44,68 @@ export default function DiagnosisHistory() {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState<any | null>(null);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const response: any = await axios.get("/api/diagnosis/history");
-        if (response && response.cases) {
-          const backendCases = response.cases.map((c: any) => ({
-            id: c.case_id,
-            crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
-            emoji: c.crop === "ot" ? "🌶️" : "🍅",
-            farm: c.location || "Vườn local",
-            disease: c.summary || "Bệnh lý",
-            confidence: c.confidence || (c.risk_level === "high" ? 85 : 70),
-            status: c.status === "created" ? "follow-up" : c.status || "follow-up",
-            statusLabel: c.status === "created" ? "Mới tạo" : c.status === "resolved" ? "Đã xử lý" : "Đang theo dõi",
-            date: new Date(c.created_at).toLocaleDateString("vi-VN"),
-            agentSteps: c.agent_logs ? c.agent_logs.length : 6,
-            imageUrl: c.image_url,
-            originalFilename: c.original_filename,
-            agentLogs: c.agent_logs || [],
-            notes: c.notes,
-            diagnosisDetail: c.diagnosis_detail || {},
-          }));
-          setCases(backendCases);
-        } else {
-          setCases([]);
-        }
-      } catch (err) {
-        console.error(err);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [editedNotes, setEditedNotes] = useState("");
+
+  const fetchHistory = async () => {
+    try {
+      const response: any = await axios.get("/api/diagnosis/history");
+      if (response && response.cases) {
+        const backendCases = response.cases.map((c: any) => ({
+          id: c.case_id,
+          crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
+          emoji: c.crop === "ot" ? "🌶️" : "🍅",
+          farm: c.location || "Vườn local",
+          disease: c.summary || "Bệnh lý",
+          confidence: c.confidence || (c.risk_level === "high" ? 85 : 70),
+          status: c.status === "created" ? "follow-up" : c.status || "follow-up",
+          statusLabel: c.status === "created" ? "Mới tạo" : c.status === "resolved" ? "Đã xử lý" : "Đang theo dõi",
+          date: new Date(c.created_at).toLocaleDateString("vi-VN"),
+          agentSteps: c.agent_logs ? c.agent_logs.length : 6,
+          imageUrl: c.image_url,
+          originalFilename: c.original_filename,
+          agentLogs: c.agent_logs || [],
+          notes: c.notes,
+          diagnosisDetail: c.diagnosis_detail || {},
+        }));
+        setCases(backendCases);
+      } else {
         setCases([]);
       }
-    };
+    } catch (err) {
+      console.error(err);
+      setCases([]);
+    }
+  };
+
+  useEffect(() => {
     fetchHistory();
   }, []);
+
+  const handleDeleteCase = async (caseId: string) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa ca chẩn đoán này?")) {
+      try {
+        await axios.delete(`/api/diagnosis/cases/${caseId}`);
+        alert("Đã xóa ca bệnh thành công!");
+        fetchHistory();
+      } catch (err) {
+        console.error(err);
+        alert("Lỗi khi xóa ca bệnh.");
+      }
+    }
+  };
+
+  const handleUpdateNotes = async (caseId: string, notes: string) => {
+    try {
+      await axios.patch(`/api/diagnosis/cases/${caseId}`, { notes });
+      alert("Đã cập nhật ghi chú thành công!");
+      setSelectedCase((prev: any) => prev ? { ...prev, notes } : null);
+      fetchHistory();
+    } catch (err) {
+      console.error(err);
+      alert("Lỗi khi cập nhật ghi chú.");
+    }
+  };
 
   const filtered = cases.filter((c) => {
     const matchFilter = filter === "all" || c.status === filter;
@@ -238,6 +267,8 @@ export default function DiagnosisHistory() {
                                   id={`btn-view-${c.id}`}
                                   onClick={() => {
                                     setSelectedCase(c);
+                                    setEditedNotes(c.notes || "");
+                                    setIsEditingNotes(false);
                                     setModalOpen(true);
                                   }}
                                 >
@@ -248,6 +279,16 @@ export default function DiagnosisHistory() {
                                     <i className="ri-terminal-box-line"></i>
                                   </Button>
                                 </Link>
+                                <Button
+                                  size="sm"
+                                  color="danger"
+                                  outline
+                                  className="btn-icon"
+                                  id={`btn-delete-${c.id}`}
+                                  onClick={() => handleDeleteCase(c.id)}
+                                >
+                                  <i className="ri-delete-bin-line"></i>
+                                </Button>
                               </div>
                             </td>
                           </tr>
@@ -322,10 +363,35 @@ export default function DiagnosisHistory() {
                 <h4 className="fw-bold mb-3">{selectedCase.disease}</h4>
 
                 <div className="mb-4">
-                  <h6 className="fw-semibold text-primary mb-2">🌿 Khuyến cáo IPM (An toàn sinh học)</h6>
-                  <p className="fs-13 text-muted bg-light p-3 rounded border mb-0">
-                    {selectedCase.notes || "Tỉa bớt cành lá bị bệnh, tăng cường thông gió và giảm độ ẩm vườn trồng để hạn chế lây lan dịch bệnh."}
-                  </p>
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <h6 className="fw-semibold text-primary mb-0">🌿 Khuyến cáo IPM (An toàn sinh học)</h6>
+                    <button
+                      className="btn btn-sm btn-link text-primary p-0 fs-12"
+                      onClick={() => {
+                        if (isEditingNotes) {
+                          handleUpdateNotes(selectedCase.id, editedNotes);
+                        } else {
+                          setEditedNotes(selectedCase.notes || "");
+                        }
+                        setIsEditingNotes(!isEditingNotes);
+                      }}
+                    >
+                      <i className={isEditingNotes ? "ri-save-line me-1" : "ri-edit-line me-1"}></i>
+                      {isEditingNotes ? "Lưu" : "Sửa"}
+                    </button>
+                  </div>
+                  {isEditingNotes ? (
+                    <textarea
+                      className="form-control fs-13 text-muted bg-light p-3 rounded border mb-0"
+                      rows={4}
+                      value={editedNotes}
+                      onChange={(e) => setEditedNotes(e.target.value)}
+                    />
+                  ) : (
+                    <p className="fs-13 text-muted bg-light p-3 rounded border mb-0">
+                      {selectedCase.notes || "Tỉa bớt cành lá bị bệnh, tăng cường thông gió và giảm độ ẩm vườn trồng để hạn chế lây lan dịch bệnh."}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -375,6 +441,11 @@ export default function DiagnosisHistory() {
             </Row>
           </ModalBody>
           <ModalFooter className="bg-light py-2">
+            <Link href={`/diagnosis/new?source_case_id=${selectedCase.id}`}>
+              <Button color="info" size="sm" className="d-flex align-items-center gap-1" onClick={() => setModalOpen(false)}>
+                <i className="ri-refresh-line"></i> Dùng làm mẫu chẩn đoán lại
+              </Button>
+            </Link>
             <Link href={`/ai/agent-logs?case_id=${selectedCase.id}`}>
               <Button color="primary" size="sm" className="d-flex align-items-center gap-1">
                 <i className="ri-terminal-box-line"></i> Xem chi tiết Logs Agent

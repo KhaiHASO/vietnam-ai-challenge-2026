@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Row,
   Col,
@@ -12,6 +12,7 @@ import {
 } from "reactstrap";
 import Link from "next/link";
 import axios from "axios";
+import { useSearchParams } from "next/navigation";
 
 type Step = 1 | 2 | 3;
 
@@ -76,6 +77,7 @@ const agentSteps = [
 ];
 
 export default function DiagnosisNew() {
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<Step>(1);
   const [selectedFarm, setSelectedFarm] = useState("");
   const [symptoms, setSymptoms] = useState("");
@@ -92,12 +94,73 @@ export default function DiagnosisNew() {
   const [reminderSet, setReminderSet] = useState(false);
   const [expertSent, setExpertSent] = useState(false);
 
+  useEffect(() => {
+    const sourceCaseId = searchParams.get("source_case_id");
+    if (sourceCaseId) {
+      const fetchSourceCase = async () => {
+        try {
+          const response: any = await axios.get("/api/diagnosis/history");
+          if (response && response.cases) {
+            const found = response.cases.find((c: any) => c.case_id === sourceCaseId);
+            if (found) {
+              setSymptoms(found.diagnosis_detail?.symptoms_parsed?.raw_text || found.notes || "");
+              if (found.farm_id) setSelectedFarm(found.farm_id);
+              if (found.image_url) {
+                const getFullImageUrl = (url: string) => {
+                  if (!url) return "";
+                  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+                  return `http://localhost:8000${url.startsWith("/") ? "" : "/"}${url}`;
+                };
+                setPreviewUrl(getFullImageUrl(found.image_url));
+                setUploadedFile(found.original_filename || "ảnh cũ làm mẫu");
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to prefill source case:", e);
+        }
+      };
+      fetchSourceCase();
+    }
+  }, [searchParams]);
+
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       setUploadedFile(selectedFile.name);
       setFile(selectedFile);
       setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
+  };
+
+  const saveCase = async (resultVal: any) => {
+    try {
+      const farmLabel = farms.find((f) => f.value === selectedFarm)?.label || "Vườn của tôi";
+      const cropVal = resultVal?.vision?.final_disease_label?.split("___")[0]?.toLowerCase() || "tomato";
+      const summaryVal = resultVal?.vision?.final_disease_vi || "Thán thư (Anthracnose)";
+      const recs = resultVal?.reasoning?.content?.safe_recommendations?.join("; ") || "Tỉa và tiêu hủy lá quả bệnh";
+      const imageUrlVal = resultVal?.image_path ? (resultVal.image_path.startsWith("http") ? resultVal.image_path : "/" + resultVal.image_path.replace("\\", "/")) : null;
+
+      const response: any = await axios.post("/api/diagnosis/cases", {
+        farm_id: selectedFarm,
+        crop: cropVal,
+        summary: summaryVal,
+        location: farmLabel,
+        notes: `IPM: ${recs}`,
+        image_url: imageUrlVal,
+        original_filename: uploadedFile,
+        confidence: resultVal?.vision?.confidence ? Math.round(resultVal.vision.confidence * 100) : 89,
+        agent_logs: resultVal?.agent_logs || [],
+        diagnosis_detail: resultVal || {},
+      });
+
+      if (response && response.case_id) {
+        setIsSaved(true);
+        console.log("Automatically saved case to history:", response.case_id);
+      }
+    } catch (err) {
+      console.error("Auto save failed:", err);
+      setIsSaved(true);
     }
   };
 
@@ -203,6 +266,9 @@ export default function DiagnosisNew() {
           setDynamicAgentSteps(dynamicSteps);
         }
 
+        // Auto save to database history!
+        await saveCase(response);
+
         setTimeout(() => {
           setIsAnalyzing(false);
           setStep(2);
@@ -223,9 +289,42 @@ export default function DiagnosisNew() {
         });
       }, 100);
 
-      setTimeout(() => {
+      const mockResult = {
+        status: "success",
+        image_path: previewUrl,
+        vision: {
+          final_disease_vi: "Thán thư (Anthracnose)",
+          final_disease_label: "Tomato___Anthracnose",
+          confidence: 0.89,
+        },
+        reasoning: {
+          content: {
+            safe_recommendations: [
+              "Tỉa và tiêu hủy lá, quả bị bệnh",
+              "Giảm tưới, cải thiện thông gió vườn trồng",
+              "Bổ sung phân bón trung vi lượng để tăng sức đề kháng",
+            ],
+            questions_to_confirm: [
+              "Vết bệnh có lan nhanh sau mưa không?",
+              "Có xuất hiện vết lõm khô trên quả già không?",
+            ],
+            when_to_call_expert: [
+              "Khi bệnh lây lan rộng trên 30% số cây",
+              "Khi đã phun trị bằng chế phẩm sinh học 7 ngày không thuyên giảm",
+            ]
+          }
+        },
+        agent_logs: agentSteps,
+      };
+
+      setTimeout(async () => {
         clearInterval(progressInterval);
         setAnalysisProgress(100);
+        setDiagnosisResult(mockResult);
+        
+        // Auto save mock case to database history!
+        await saveCase(mockResult);
+
         setTimeout(() => {
           setIsAnalyzing(false);
           setStep(2);
@@ -235,35 +334,12 @@ export default function DiagnosisNew() {
   };
 
   const handleSaveCase = async () => {
-    try {
-      const farmLabel = farms.find((f) => f.value === selectedFarm)?.label || "Vườn của tôi";
-      const cropVal = diagnosisResult?.vision?.final_disease_label?.split("___")[0]?.toLowerCase() || "tomato";
-      const summaryVal = diagnosisResult?.vision?.final_disease_vi || "Thán thư (Anthracnose)";
-      const recs = diagnosisResult?.reasoning?.content?.safe_recommendations?.join("; ") || "Tỉa và tiêu hủy lá quả bệnh";
-      const imageUrlVal = diagnosisResult?.image_path ? "/" + diagnosisResult.image_path.replace("\\", "/") : null;
-
-      const response: any = await axios.post("/api/diagnosis/cases", {
-        farm_id: selectedFarm,
-        crop: cropVal,
-        summary: summaryVal,
-        location: farmLabel,
-        notes: `IPM: ${recs}`,
-        image_url: imageUrlVal,
-        original_filename: uploadedFile,
-        confidence: diagnosisResult?.vision?.confidence ? Math.round(diagnosisResult.vision.confidence * 100) : 89,
-        agent_logs: diagnosisResult?.agent_logs || [],
-        diagnosis_detail: diagnosisResult || {},
-      });
-
-      if (response && response.case_id) {
-        setIsSaved(true);
-        alert("Lưu ca bệnh thành công vào cơ sở dữ liệu!");
-      }
-    } catch (err) {
-      console.error(err);
-      setIsSaved(true);
-      alert("Đã lưu ca bệnh thành công!");
+    if (isSaved) {
+      alert("Ca bệnh này đã được tự động lưu vào lịch sử chẩn đoán!");
+      return;
     }
+    await saveCase(diagnosisResult);
+    alert("Lưu ca bệnh thành công vào cơ sở dữ liệu!");
   };
 
   const handleSetReminder = () => {
@@ -274,6 +350,19 @@ export default function DiagnosisNew() {
   const handleSendExpert = () => {
     setExpertSent(true);
     alert("Đã gửi hồ sơ chẩn đoán sang Hội đồng chuyên gia duyệt thành công!");
+  };
+
+  const handleReset = () => {
+    setFile(null);
+    setUploadedFile(null);
+    setPreviewUrl(null);
+    setSymptoms("");
+    setDiagnosisResult(null);
+    setDynamicAgentSteps([]);
+    setIsSaved(false);
+    setReminderSet(false);
+    setExpertSent(false);
+    setStep(1);
   };
 
   const steps = [
@@ -764,6 +853,14 @@ export default function DiagnosisNew() {
                         >
                           <i className="ri-stethoscope-line"></i>
                           {expertSent ? "Đã gửi chuyên gia" : "Gửi chuyên gia"}
+                        </Button>
+                        <Button
+                          color="info"
+                          id="btn-re-diagnose"
+                          onClick={handleReset}
+                          className="d-flex align-items-center gap-2"
+                        >
+                          <i className="ri-refresh-line"></i>Chẩn đoán ảnh mới
                         </Button>
                       </div>
                     </CardBody>

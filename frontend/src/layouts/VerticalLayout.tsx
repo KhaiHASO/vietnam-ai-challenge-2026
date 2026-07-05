@@ -203,7 +203,7 @@ const VerticalLayout = (props: any) => {
                           {item.badgeName ? (
                             <span
                               className={
-                                "badge badge-pill bg-" + item.badgeColor
+                                "badge rounded-pill bg-" + item.badgeColor
                               }
                               data-key="t-new"
                             >
@@ -233,7 +233,7 @@ const VerticalLayout = (props: any) => {
                                           {subItem.badgeName ? (
                                             <span
                                               className={
-                                                "badge badge-pill bg-" +
+                                                "badge rounded-pill bg-" +
                                                 subItem.badgeColor
                                               }
                                               data-key="t-new"
@@ -256,7 +256,7 @@ const VerticalLayout = (props: any) => {
                                           {subItem.badgeName ? (
                                             <span
                                               className={
-                                                "badge badge-pill bg-" +
+                                                "badge rounded-pill bg-" +
                                                 subItem.badgeColor
                                               }
                                               data-key="t-new"
@@ -315,7 +315,7 @@ const VerticalLayout = (props: any) => {
                           {item.badgeName ? (
                             <span
                               className={
-                                "badge badge-pill bg-" + item.badgeColor
+                                "badge rounded-pill bg-" + item.badgeColor
                               }
                               data-key="t-new"
                             >

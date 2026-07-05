@@ -188,3 +188,23 @@ class DiagnosisRepository:
             raise
         except Exception as exc:
             self._handle_mongo_error("count", exc)
+
+    async def delete_one(
+        self,
+        collection_name: str,
+        query: dict[str, Any],
+    ) -> bool:
+        if self.use_memory:
+            for index, document in enumerate(_MEMORY_STORE[collection_name]):
+                if _matches(document, query):
+                    _MEMORY_STORE[collection_name].pop(index)
+                    return True
+            return False
+
+        try:
+            res = await self.database[collection_name].delete_one(query)
+            return res.deleted_count > 0
+        except HTTPException:
+            raise
+        except Exception as exc:
+            self._handle_mongo_error("delete_one", exc)

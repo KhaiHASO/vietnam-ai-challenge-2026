@@ -84,3 +84,20 @@ async def diagnosis_follow_up(
     service: DashboardListService = Depends(get_dashboard_list_service),
 ) -> dict[str, object]:
     return await service.diagnosis_follow_up()
+
+
+@router.delete("/cases/{case_id}")
+async def delete_case(
+    case_id: str,
+    service: DiagnosisService = Depends(get_diagnosis_service),
+) -> dict[str, object]:
+    return await service.delete_case(case_id)
+
+
+@router.patch("/cases/{case_id}")
+async def update_case_notes(
+    case_id: str,
+    notes: str = Body(embed=True),
+    service: DiagnosisService = Depends(get_diagnosis_service),
+) -> dict[str, object]:
+    return await service.update_case_notes(case_id, notes)

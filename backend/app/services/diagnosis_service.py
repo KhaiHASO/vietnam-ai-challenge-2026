@@ -504,3 +504,18 @@ class DiagnosisService:
             "ai_response": ai_response,
         }
         return {**result, **ai_response}
+
+    async def delete_case(self, case_id: str) -> dict[str, Any]:
+        success = await self.repository.delete_one("diagnosis_cases", {"case_id": case_id})
+        await self.repository.delete_one("case_images", {"case_id": case_id})
+        return {"status": "success", "deleted": success}
+
+    async def update_case_notes(self, case_id: str, notes: str) -> dict[str, Any]:
+        updated = await self.repository.update_one(
+            "diagnosis_cases",
+            {"case_id": case_id},
+            {"notes": notes, "updated_at": _now()},
+        )
+        if not updated:
+            raise _case_not_found(case_id)
+        return {"status": "success", "case": updated}
