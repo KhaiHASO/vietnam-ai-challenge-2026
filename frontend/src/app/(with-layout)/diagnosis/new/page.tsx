@@ -12,6 +12,9 @@ import {
 } from "reactstrap";
 import Link from "next/link";
 import axios from "axios";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 type Step = 1 | 2 | 3;
 
@@ -86,6 +89,7 @@ export default function DiagnosisNew() {
   const [diagnosisResult, setDiagnosisResult] = useState<any>(null);
   const [dynamicAgentSteps, setDynamicAgentSteps] = useState<any[]>([]);
   const [isSaved, setIsSaved] = useState(false);
+  const [isOpenLightbox, setIsOpenLightbox] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
   const [expertSent, setExpertSent] = useState(false);
 
@@ -380,7 +384,12 @@ export default function DiagnosisNew() {
                               src={previewUrl}
                               alt="Selected leaf"
                               className="img-thumbnail mb-2"
-                              style={{ maxHeight: 120, objectFit: "cover" }}
+                              style={{ maxHeight: 120, objectFit: "cover", cursor: "zoom-in" }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                setIsOpenLightbox(true);
+                              }}
                             />
                           )}
                           <p className="fw-semibold text-success mb-1 fs-12">
@@ -529,7 +538,8 @@ export default function DiagnosisNew() {
                             src={previewUrl}
                             alt="Diagnosed leaf"
                             className="img-fluid w-100"
-                            style={{ maxHeight: 180, objectFit: "cover" }}
+                            style={{ maxHeight: 180, objectFit: "cover", cursor: "zoom-in" }}
+                            onClick={() => setIsOpenLightbox(true)}
                           />
                         </div>
                       )}
@@ -698,6 +708,14 @@ export default function DiagnosisNew() {
           </Row>
         )}
       </div>
+      {previewUrl && (
+        <Lightbox
+          open={isOpenLightbox}
+          close={() => setIsOpenLightbox(false)}
+          slides={[{ src: previewUrl }]}
+          plugins={[Zoom]}
+        />
+      )}
     </div>
   );
 }
