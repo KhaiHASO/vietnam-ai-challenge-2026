@@ -11,8 +11,9 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 
 export const metadata: Metadata = {
-  title: "Velzon - Next.js TypeScript Admin & Dashboard Template",
-  description: "Admin dashboard template",
+  title: "CropDoctor AI - Trợ lý AI chẩn đoán cây trồng",
+  description:
+    "CropDoctor AI giúp nông hộ chẩn đoán bệnh cây từ ảnh, triệu chứng, thời tiết và khuyến nghị IPM an toàn.",
 };
 
 export default function RootLayout({
@@ -21,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning data-qb-installed="true">
+    <html lang="vi" suppressHydrationWarning data-qb-installed="true">
       <head>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" />
       </head>

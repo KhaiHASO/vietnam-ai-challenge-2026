@@ -56,8 +56,7 @@
       "@styles/*": [
         "./src/styles/*"
       ]
-    },
-    "baseUrl": "."
+    }
   },
   "include": [
     "next-env.d.ts",
