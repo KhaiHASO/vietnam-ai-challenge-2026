@@ -84,6 +84,7 @@ export default function DiagnosisNew() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [diagnosisResult, setDiagnosisResult] = useState<any>(null);
+  const [dynamicAgentSteps, setDynamicAgentSteps] = useState<any[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [reminderSet, setReminderSet] = useState(false);
   const [expertSent, setExpertSent] = useState(false);
@@ -128,6 +129,47 @@ export default function DiagnosisNew() {
 
       if (response && response.status === "success") {
         setDiagnosisResult(response);
+        
+        if (response.agent_logs) {
+          const dynamicSteps = response.agent_logs.map((log: any) => {
+            let icon = "ri-cpu-line";
+            let color = "#6b7280";
+            if (log.agent.includes("Upload")) {
+              icon = "ri-upload-cloud-2-line";
+              color = "#2563eb";
+            } else if (log.agent.includes("Vision")) {
+              icon = "ri-eye-line";
+              color = "#7c3aed";
+            } else if (log.agent.includes("Reasoning") || log.agent.includes("DeepSeek")) {
+              icon = "ri-brain-line";
+              color = "#059669";
+            } else if (log.agent.includes("Safety") || log.agent.includes("Guard")) {
+              icon = "ri-shield-check-line";
+              color = "#d97706";
+            }
+            
+            let message = log.details;
+            if (log.agent === "VisionConsensusAgent") {
+              const disease_vi = response.vision?.final_disease_vi || "Đang phân tích";
+              const conf = Math.round((response.vision?.confidence || 0.8) * 100);
+              message = `Nhận diện ảnh lá bệnh: ${disease_vi} (Độ tin cậy: ${conf}%). ${log.details}`;
+            } else if (log.agent === "DeepSeekReasoningAgent") {
+              const shortDiag = response.reasoning?.content?.short_diagnosis || "Đang chẩn đoán lập luận";
+              message = `Lập luận lâm sàng: ${shortDiag}. ${log.details}`;
+            }
+            
+            return {
+              id: log.agent.toLowerCase(),
+              agent: log.agent,
+              icon: icon,
+              color: color,
+              message: message,
+              done: log.status === "done" || log.status === "guardrail_applied",
+            };
+          });
+          setDynamicAgentSteps(dynamicSteps);
+        }
+
         setTimeout(() => {
           setIsAnalyzing(false);
           setStep(2);
@@ -416,7 +458,7 @@ export default function DiagnosisNew() {
                     Multi-agent system xử lý hình ảnh → hỏi triệu chứng → kết luận
                   </p>
                   <div className="d-flex flex-column gap-3">
-                    {agentSteps.map((ag) => (
+                    {(dynamicAgentSteps.length > 0 ? dynamicAgentSteps : agentSteps).map((ag) => (
                       <div
                         key={ag.id}
                         id={`agent-${ag.id}`}
