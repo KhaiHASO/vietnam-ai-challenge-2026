@@ -4,113 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
 import axios from "axios";
 
-const reminders = [
-  {
-    id: "rem-001",
-    date: "04/07/2026",
-    time: "08:00",
-    isToday: true,
-    type: "camera",
-    typeLabel: "Chụp ảnh theo dõi",
-    typeColor: "primary",
-    typeIcon: "ri-camera-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    desc: "Chụp lại ảnh vùng bị thán thư — theo dõi tiến triển bệnh",
-    done: false,
-    urgent: true,
-  },
-  {
-    id: "rem-002",
-    date: "04/07/2026",
-    time: "14:00",
-    isToday: true,
-    type: "check",
-    typeLabel: "Kiểm tra bệnh",
-    typeColor: "warning",
-    typeIcon: "ri-eye-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    desc: "Kiểm tra ca héo xanh vi khuẩn — bệnh đã lan rộng thêm chưa?",
-    done: false,
-    urgent: true,
-  },
-  {
-    id: "rem-003",
-    date: "04/07/2026",
-    time: "07:00",
-    isToday: true,
-    type: "watering",
-    typeLabel: "Tưới nước",
-    typeColor: "info",
-    typeIcon: "ri-drop-line",
-    farm: "Ruộng cà Long Thành",
-    crop: "🍅 Cà chua",
-    desc: "Tưới nhỏ giọt thường ngày — 45 phút",
-    done: true,
-    urgent: false,
-  },
-  {
-    id: "rem-004",
-    date: "04/07/2026",
-    time: "Cả ngày",
-    isToday: true,
-    type: "harvest",
-    typeLabel: "Thu hoạch được rồi",
-    typeColor: "success",
-    typeIcon: "ri-scissors-cut-line",
-    farm: "Vườn dưa Nhơn Trạch",
-    crop: "🥒 Dưa leo",
-    desc: "Hết thời gian cách ly 7 ngày sau phun — có thể thu hoạch an toàn",
-    done: false,
-    urgent: false,
-  },
-  {
-    id: "rem-005",
-    date: "06/07/2026",
-    time: "08:00",
-    isToday: false,
-    type: "camera",
-    typeLabel: "Chụp ảnh theo dõi",
-    typeColor: "primary",
-    typeIcon: "ri-camera-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    desc: "Chụp lại ảnh ca thán thư lần 2 sau 48h",
-    done: false,
-    urgent: false,
-  },
-  {
-    id: "rem-006",
-    date: "07/07/2026",
-    time: "09:00",
-    isToday: false,
-    type: "fertilizer",
-    typeLabel: "Bón phân",
-    typeColor: "success",
-    typeIcon: "ri-seedling-line",
-    farm: "Ruộng cà Long Thành",
-    crop: "🍅 Cà chua",
-    desc: "Bón bổ sung Kali giai đoạn đậu quả — 25g/gốc",
-    done: false,
-    urgent: false,
-  },
-  {
-    id: "rem-007",
-    date: "09/07/2026",
-    time: "16:00",
-    isToday: false,
-    type: "check",
-    typeLabel: "Kiểm tra",
-    typeColor: "warning",
-    typeIcon: "ri-eye-line",
-    farm: "Vườn dưa Nhơn Trạch",
-    crop: "🥒 Dưa leo",
-    desc: "Kiểm tra phấn trắng — hẹn chuyên gia xem kết quả xác nhận",
-    done: false,
-    urgent: false,
-  },
-];
+// Pure backend reminders data loaded dynamically.
 
 const typeColorMap: Record<string, string> = {
   camera: "primary",
@@ -122,10 +16,8 @@ const typeColorMap: Record<string, string> = {
 };
 
 export default function Reminders() {
-  const [reminderList, setReminderList] = useState<any[]>(reminders);
-  const [done, setDone] = useState<string[]>(
-    reminders.filter((r) => r.done).map((r) => r.id)
-  );
+  const [reminderList, setReminderList] = useState<any[]>([]);
+  const [done, setDone] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchReminders = async () => {
@@ -147,13 +39,14 @@ export default function Reminders() {
             done: r.status === "completed",
             urgent: r.priority === "high",
           }));
-          setReminderList([...backendReminders, ...reminders]);
+          setReminderList(backendReminders);
+          setDone(backendReminders.filter((r: any) => r.done).map((r: any) => r.id));
         } else {
-          setReminderList(reminders);
+          setReminderList([]);
         }
       } catch (err) {
         console.error(err);
-        setReminderList(reminders);
+        setReminderList([]);
       }
     };
     fetchReminders();

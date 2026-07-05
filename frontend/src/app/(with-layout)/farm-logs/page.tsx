@@ -4,119 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
 import axios from "axios";
 
-const logEntries = [
-  {
-    id: "log-001",
-    date: "04/07/2026",
-    time: "08:30",
-    type: "disease",
-    typeLabel: "Phát hiện bệnh",
-    typeColor: "danger",
-    typeIcon: "ri-virus-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    content: "AI chẩn đoán Thán thư (89% confidence). Đốm nâu xuất hiện trên lá và 2-3 quả non.",
-    by: "AI Agent",
-    imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-002",
-    date: "03/07/2026",
-    time: "14:00",
-    type: "treatment",
-    typeLabel: "Xử lý bệnh",
-    typeColor: "warning",
-    typeIcon: "ri-medicine-bottle-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    content: "Tỉa và tiêu hủy 15 lá bệnh. Giảm tưới 30%. Cải thiện thông gió bằng cách tỉa bớt cành.",
-    by: "Nguyễn Văn A",
-    imageUrl: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-003",
-    date: "02/07/2026",
-    time: "09:00",
-    type: "check",
-    typeLabel: "Kiểm tra theo dõi",
-    typeColor: "info",
-    typeIcon: "ri-camera-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    content: "Chụp lại ảnh theo dõi. Bệnh có vẻ chưa lan rộng thêm. Tiếp tục theo dõi 48h.",
-    by: "Nguyễn Văn A",
-    imageUrl: "https://images.unsplash.com/photo-1563514220747-a33533927e99?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-004",
-    date: "01/07/2026",
-    time: "16:30",
-    type: "watering",
-    typeLabel: "Tưới nước",
-    typeColor: "primary",
-    typeIcon: "ri-drop-line",
-    farm: "Ruộng cà Long Thành",
-    crop: "🍅 Cà chua",
-    content: "Tưới nhỏ giọt 45 phút. Độ ẩm đất đạt 65%. Cây phát triển bình thường.",
-    by: "Nguyễn Văn A",
-    imageUrl: "https://images.unsplash.com/photo-1463123081488-729f1a1ee02e?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-005",
-    date: "30/06/2026",
-    time: "07:00",
-    type: "disease",
-    typeLabel: "Phát hiện bệnh",
-    typeColor: "danger",
-    typeIcon: "ri-virus-line",
-    farm: "Vườn ớt Trảng Bom",
-    crop: "🌶️ Ớt",
-    content: "AI chẩn đoán Héo xanh vi khuẩn (78% confidence). Phát hiện 4 cây có triệu chứng héo đột ngột.",
-    by: "AI Agent",
-    imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-006",
-    date: "29/06/2026",
-    time: "10:00",
-    type: "fertilizer",
-    typeLabel: "Bón phân",
-    typeColor: "success",
-    typeIcon: "ri-seedling-line",
-    farm: "Vườn dưa Nhơn Trạch",
-    crop: "🥒 Dưa leo",
-    content: "Bón NPK 20-20-15 lần 2. Liều 30g/gốc. Tổng 54kg cho 1.800m².",
-    by: "Nguyễn Văn A",
-    imageUrl: "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    id: "log-007",
-    date: "27/06/2026",
-    time: "08:00",
-    type: "check",
-    typeLabel: "Kiểm tra",
-    typeColor: "info",
-    typeIcon: "ri-eye-line",
-    farm: "Ruộng cà Long Thành",
-    crop: "🍅 Cà chua",
-    content: "Kiểm tra tổng thể vườn cà. Không phát hiện sâu bệnh mới. Cây đang vào giai đoạn đậu quả tốt.",
-    by: "Nguyễn Văn A",
-  },
-  {
-    id: "log-008",
-    date: "25/06/2026",
-    time: "11:00",
-    type: "disease",
-    typeLabel: "Phát hiện bệnh",
-    typeColor: "danger",
-    typeIcon: "ri-virus-line",
-    farm: "Ruộng cà Long Thành",
-    crop: "🍅 Cà chua",
-    content: "AI phát hiện nghi héo rũ Fusarium (55% confidence). Đã gửi chuyên gia xác nhận.",
-    by: "AI Agent",
-    imageUrl: "https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=600&q=80",
-  },
-];
+// Pure backend season logs loaded dynamically.
 
 const typeOptions = [
   { value: "all", label: "Tất cả" },
@@ -135,14 +23,14 @@ const farmOptions = [
 ];
 
 export default function FarmLogs() {
-  const [logsList, setLogsList] = useState<any[]>(logEntries);
+  const [logsList, setLogsList] = useState<any[]>([]);
   const [typeFilter, setTypeFilter] = useState("all");
   const [farmFilter, setFarmFilter] = useState("all");
 
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.get("/api/listing/season-logs");
+        const response = await axios.get("/api/season-logs");
         if (response && response.season_logs && response.season_logs.length > 0) {
           const backendLogs = response.season_logs.map((l: any) => ({
             id: l.log_id,
@@ -157,13 +45,13 @@ export default function FarmLogs() {
             content: l.notes || "Ghi nhận xử lý mùa vụ.",
             by: "Hệ thống / Nông dân",
           }));
-          setLogsList([...backendLogs, ...logEntries]);
+          setLogsList(backendLogs);
         } else {
-          setLogsList(logEntries);
+          setLogsList([]);
         }
       } catch (err) {
         console.error(err);
-        setLogsList(logEntries);
+        setLogsList([]);
       }
     };
     fetchLogs();

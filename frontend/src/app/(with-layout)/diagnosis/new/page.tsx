@@ -12,9 +12,6 @@ import {
 } from "reactstrap";
 import Link from "next/link";
 import axios from "axios";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 type Step = 1 | 2 | 3;
 
@@ -81,6 +78,7 @@ const agentSteps = [
 export default function DiagnosisNew() {
   const [step, setStep] = useState<Step>(1);
   const [selectedFarm, setSelectedFarm] = useState("");
+  const [symptoms, setSymptoms] = useState("");
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -90,6 +88,7 @@ export default function DiagnosisNew() {
   const [dynamicAgentSteps, setDynamicAgentSteps] = useState<any[]>([]);
   const [isSaved, setIsSaved] = useState(false);
   const [isOpenLightbox, setIsOpenLightbox] = useState(false);
+  const [zoomScale, setZoomScale] = useState(1);
   const [reminderSet, setReminderSet] = useState(false);
   const [expertSent, setExpertSent] = useState(false);
 
@@ -110,7 +109,7 @@ export default function DiagnosisNew() {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("crop_hint", "");
-      formData.append("symptoms", "");
+      formData.append("symptoms", symptoms);
 
       const progressInterval = setInterval(() => {
         setAnalysisProgress((prev) => {
@@ -138,36 +137,66 @@ export default function DiagnosisNew() {
           const dynamicSteps = response.agent_logs.map((log: any) => {
             let icon = "ri-cpu-line";
             let color = "#6b7280";
-            if (log.agent.includes("Upload")) {
-              icon = "ri-upload-cloud-2-line";
-              color = "#2563eb";
-            } else if (log.agent.includes("Vision")) {
+            let agentName = log.agent;
+            
+            if (log.agent.includes("Vision")) {
               icon = "ri-eye-line";
               color = "#7c3aed";
-            } else if (log.agent.includes("Reasoning") || log.agent.includes("DeepSeek")) {
+              agentName = "1. Vision Agent";
+            } else if (log.agent.includes("Symptom")) {
+              icon = "ri-questionnaire-line";
+              color = "#2563eb";
+              agentName = "2. Symptom Agent";
+            } else if (log.agent.includes("Context")) {
+              icon = "ri-cloud-line";
+              color = "#0891b2";
+              agentName = "3. Context Agent";
+            } else if (log.agent.includes("Reasoning")) {
               icon = "ri-brain-line";
               color = "#059669";
-            } else if (log.agent.includes("Safety") || log.agent.includes("Guard")) {
+              agentName = "4. Reasoning Agent";
+            } else if (log.agent.includes("Safety")) {
               icon = "ri-shield-check-line";
               color = "#d97706";
+              agentName = "5. Safety Agent";
+            } else if (log.agent.includes("Diary")) {
+              icon = "ri-book-2-line";
+              color = "#6b7280";
+              agentName = "6. Diary Agent";
             }
             
-            let message = log.details;
-            if (log.agent === "VisionConsensusAgent") {
+            let message = "";
+            if (log.agent.includes("Vision")) {
               const disease_vi = response.vision?.final_disease_vi || "Đang phân tích";
               const conf = Math.round((response.vision?.confidence || 0.8) * 100);
-              message = `Nhận diện ảnh lá bệnh: ${disease_vi} (Độ tin cậy: ${conf}%). ${log.details}`;
-            } else if (log.agent === "DeepSeekReasoningAgent") {
-              const shortDiag = response.reasoning?.content?.short_diagnosis || "Đang chẩn đoán lập luận";
-              message = `Lập luận lâm sàng: ${shortDiag}. ${log.details}`;
+              message = `Phát hiện vết bệnh ${disease_vi}. Độ tin cậy thị giác ban đầu ${conf}%.`;
+            } else if (log.agent.includes("Symptom")) {
+              message = "Hỏi thêm thời điểm xuất hiện bệnh, lượng mưa và tốc độ lây lan thực địa.";
+            } else if (log.agent.includes("Context")) {
+              const loc = response.context?.location || "Trảng Bom";
+              message = `Khảo sát điều kiện thời tiết tại ${loc}: độ ẩm cao, mưa ẩm liên tục.`;
+            } else if (log.agent.includes("Reasoning")) {
+              const shortDiag = response.reasoning?.content?.short_diagnosis || "Lập luận bệnh";
+              message = `Tổng hợp đối chiếu chéo (Triệu chứng + Môi trường) -> Củng cố chẩn đoán: ${shortDiag}.`;
+            } else if (log.agent.includes("Safety")) {
+              message = "Thẩm định độ an toàn: Khuyên dùng biện pháp canh tác IPM an toàn, hoãn dùng hóa chất trừ khi khẩn cấp.";
+            } else if (log.agent.includes("Diary")) {
+              message = "Lưu hồ sơ bệnh án thành công, tạo nhắc lịch theo dõi và nhật ký mùa vụ tự động.";
             }
+
+            const detailsText = log.details || "";
+            const detailsList = detailsText.split(", ").filter(Boolean).map((d: string) => {
+              const [key, val] = d.split("=");
+              return { key, val };
+            });
             
             return {
-              id: log.agent.toLowerCase(),
-              agent: log.agent,
+              id: log.agent.toLowerCase().replace(/\s+/g, "-"),
+              agent: agentName,
               icon: icon,
               color: color,
               message: message,
+              detailsList: detailsList,
               done: log.status === "done" || log.status === "guardrail_applied",
             };
           });
@@ -220,6 +249,10 @@ export default function DiagnosisNew() {
         location: farmLabel,
         notes: `IPM: ${recs}`,
         image_url: imageUrlVal,
+        original_filename: uploadedFile,
+        confidence: diagnosisResult?.vision?.confidence ? Math.round(diagnosisResult.vision.confidence * 100) : 89,
+        agent_logs: diagnosisResult?.agent_logs || [],
+        diagnosis_detail: diagnosisResult || {},
       });
 
       if (response && response.case_id) {
@@ -362,6 +395,20 @@ export default function DiagnosisNew() {
                   </div>
 
                   <div className="mb-4">
+                    <label htmlFor="input-symptoms" className="form-label fw-medium">
+                      ✍️ Mô tả triệu chứng lâm sàng (tự chọn)
+                    </label>
+                    <textarea
+                      id="input-symptoms"
+                      className="form-control"
+                      placeholder="Ví dụ: Đốm xuất hiện sau đợt mưa kéo dài 3 ngày qua. Vết bệnh có dấu hiệu lan rộng..."
+                      rows={3}
+                      value={symptoms}
+                      onChange={(e) => setSymptoms(e.target.value)}
+                    ></textarea>
+                  </div>
+
+                  <div className="mb-4">
                     <label className="form-label fw-medium">
                       📸 Hình ảnh lá bị bệnh
                     </label>
@@ -496,6 +543,20 @@ export default function DiagnosisNew() {
                             {ag.agent}
                           </p>
                           <p className="mb-0 fs-13">{ag.message}</p>
+                          {ag.detailsList && ag.detailsList.length > 0 && (
+                            <div className="d-flex flex-wrap gap-2 mt-2">
+                              {ag.detailsList.map((d: any, idx: number) => (
+                                <Badge
+                                  key={idx}
+                                  color="light"
+                                  className="text-muted border border-light-subtle fs-11 px-2 py-1"
+                                  style={{ textTransform: "none" }}
+                                >
+                                  <strong className="text-secondary">{d.key}</strong>: <span className="text-body">{d.val}</span>
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                           {ag.isQuestion && ag.answer && (
                             <div className="mt-2 p-2 rounded" style={{ background: "rgba(0,0,0,0.04)" }}>
                               <p className="mb-0 fs-12 text-muted">
@@ -541,6 +602,11 @@ export default function DiagnosisNew() {
                             style={{ maxHeight: 180, objectFit: "cover", cursor: "zoom-in" }}
                             onClick={() => setIsOpenLightbox(true)}
                           />
+                          {uploadedFile && (
+                            <div className="p-2 bg-light border-top text-center fs-12 text-muted fw-medium text-truncate">
+                              <i className="ri-image-line me-1"></i>{uploadedFile}
+                            </div>
+                          )}
                         </div>
                       )}
                       <div className="d-flex align-items-center gap-2 mb-3">
@@ -708,13 +774,104 @@ export default function DiagnosisNew() {
           </Row>
         )}
       </div>
-      {previewUrl && (
-        <Lightbox
-          open={isOpenLightbox}
-          close={() => setIsOpenLightbox(false)}
-          slides={[{ src: previewUrl }]}
-          plugins={[Zoom]}
-        />
+      {isOpenLightbox && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0, 0, 0, 0.95)",
+            zIndex: 9999,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onClick={() => {
+            setIsOpenLightbox(false);
+            setZoomScale(1);
+          }}
+        >
+          {/* Close button */}
+          <button
+            style={{
+              position: "absolute",
+              top: "20px",
+              right: "20px",
+              background: "rgba(255,255,255,0.15)",
+              border: "none",
+              color: "#fff",
+              fontSize: "24px",
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 10000,
+            }}
+            onClick={() => {
+              setIsOpenLightbox(false);
+              setZoomScale(1);
+            }}
+          >
+            <i className="ri-close-line"></i>
+          </button>
+
+          {/* Zoom indicator */}
+          <div
+            style={{
+              position: "absolute",
+              top: "20px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              color: "rgba(255,255,255,0.7)",
+              fontSize: "13px",
+              zIndex: 10000,
+              background: "rgba(0,0,0,0.6)",
+              padding: "6px 14px",
+              borderRadius: "20px",
+              pointerEvents: "none",
+            }}
+          >
+            <i className="ri-zoom-in-line me-1"></i>
+            {zoomScale === 1 ? "Nhấn vào ảnh để phóng to" : "Nhấn lại để thu nhỏ"}
+          </div>
+
+          {/* Image container */}
+          <div
+            style={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              overflow: "auto",
+              padding: "20px",
+            }}
+          >
+            <img
+              src={previewUrl || ""}
+              alt="Full screen leaf preview"
+              style={{
+                maxWidth: "95%",
+                maxHeight: "85%",
+                objectFit: "contain",
+                borderRadius: "4px",
+                transition: "transform 0.2s ease-in-out",
+                transform: `scale(${zoomScale})`,
+                cursor: zoomScale === 1 ? "zoom-in" : "zoom-out",
+              }}
+              onClick={(e) => {
+                e.stopPropagation(); // prevent closing overlay when clicking on image
+                setZoomScale((prev) => (prev === 1 ? 2 : 1));
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

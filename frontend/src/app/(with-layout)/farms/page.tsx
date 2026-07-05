@@ -5,56 +5,7 @@ import { Row, Col, Card, CardBody, Badge, Button, Progress } from "reactstrap";
 import Link from "next/link";
 import axios from "axios";
 
-const farms = [
-  {
-    id: "farm-001",
-    name: "Vườn ớt Trảng Bom",
-    location: "Trảng Bom, Đồng Nai",
-    area: "2.000 m²",
-    crop: "Ớt",
-    emoji: "🌶️",
-    stage: "Ra hoa",
-    stageColor: "success",
-    health: 62,
-    healthLabel: "Cần chú ý",
-    healthColor: "warning",
-    activeCases: 2,
-    lastCheck: "Hôm nay, 08:30",
-    notes: "Phát hiện thán thư, đang theo dõi sát",
-  },
-  {
-    id: "farm-002",
-    name: "Ruộng cà Long Thành",
-    location: "Long Thành, Đồng Nai",
-    area: "3.500 m²",
-    crop: "Cà chua",
-    emoji: "🍅",
-    stage: "Đậu quả",
-    stageColor: "info",
-    health: 85,
-    healthLabel: "Tốt",
-    healthColor: "success",
-    activeCases: 1,
-    lastCheck: "Hôm qua, 16:00",
-    notes: "Cây phát triển bình thường, cần theo dõi 1 ca",
-  },
-  {
-    id: "farm-003",
-    name: "Vườn dưa Nhơn Trạch",
-    location: "Nhơn Trạch, Đồng Nai",
-    area: "1.800 m²",
-    crop: "Dưa leo",
-    emoji: "🥒",
-    stage: "Vươn ngọn",
-    stageColor: "primary",
-    health: 91,
-    healthLabel: "Rất tốt",
-    healthColor: "success",
-    activeCases: 1,
-    lastCheck: "02/07/2026",
-    notes: "Phấn trắng nhẹ, đang chờ chuyên gia xác nhận",
-  },
-];
+// Pure backend farms data loaded dynamically.
 
 const stageIcons: Record<string, string> = {
   "Ra hoa": "ri-seedling-line",
@@ -88,11 +39,11 @@ export default function Farms() {
           }));
           setFarmList(backendFarms);
         } else {
-          setFarmList(farms);
+          setFarmList([]);
         }
       } catch (err) {
         console.error(err);
-        setFarmList(farms);
+        setFarmList([]);
       }
     };
     fetchFarms();

@@ -4,136 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Input, Modal, ModalHeader, ModalBody } from "reactstrap";
 import axios from "axios";
 
-const diseases = [
-  {
-    id: "dis-001",
-    name: "Thán thư (Anthracnose)",
-    pathogen: "Colletotrichum spp.",
-    group: "fungal",
-    groupLabel: "Bệnh nấm",
-    groupColor: "danger",
-    crops: ["Ớt", "Cà chua", "Dưa leo", "Xoài"],
-    emoji: "🍄",
-    symptoms: "Đốm nâu tròn, viền vàng trên lá và quả. Tâm đốm lõm xuống, có thể thấy bào tử hồng cam khi ẩm.",
-    conditions: "Nhiệt độ 20-30°C, độ ẩm cao >80%, sau mưa kéo dài",
-    treatment: "Tỉa lá bệnh, giảm ẩm, Copper Hydroxide hoặc Mancozeb",
-    severity: "high",
-    ai_accuracy: 89,
-    commonInRegion: true,
-  },
-  {
-    id: "dis-002",
-    name: "Đốm lá vi khuẩn",
-    pathogen: "Xanthomonas campestris",
-    group: "bacterial",
-    groupLabel: "Vi khuẩn",
-    groupColor: "warning",
-    crops: ["Cà chua", "Ớt", "Cải xanh"],
-    emoji: "🦠",
-    symptoms: "Đốm góc cạnh màu nâu vàng, viền vàng rõ. Mặt dưới lá có dịch nhầy khi ẩm.",
-    conditions: "Nhiệt độ 25-35°C, độ ẩm cao, lây lan qua nước mưa bắn tóe",
-    treatment: "Phun Copper Sulfate, tránh làm ướt lá khi tưới",
-    severity: "medium",
-    ai_accuracy: 92,
-    commonInRegion: true,
-  },
-  {
-    id: "dis-003",
-    name: "Phấn trắng (Powdery Mildew)",
-    pathogen: "Podosphaera xanthii",
-    group: "fungal",
-    groupLabel: "Bệnh nấm",
-    groupColor: "danger",
-    crops: ["Dưa leo", "Bí đỏ", "Dưa lưới"],
-    emoji: "🌫️",
-    symptoms: "Lớp phấn trắng như bột mì trên bề mặt lá. Lá vàng, khô và rụng.",
-    conditions: "Nhiệt độ 17-25°C, độ ẩm tương đối cao nhưng khô bề mặt",
-    treatment: "Lưu huỳnh bột, Myclobutanil hoặc Trifloxystrobin",
-    severity: "medium",
-    ai_accuracy: 85,
-    commonInRegion: false,
-  },
-  {
-    id: "dis-004",
-    name: "Héo xanh vi khuẩn",
-    pathogen: "Ralstonia solanacearum",
-    group: "bacterial",
-    groupLabel: "Vi khuẩn",
-    groupColor: "warning",
-    crops: ["Ớt", "Cà chua", "Khoai tây", "Cà tím"],
-    emoji: "🥀",
-    symptoms: "Cây héo đột ngột dù đất ẩm, hồi phục ban đêm. Bó mạch dẫn nâu khi cắt thân.",
-    conditions: "Đất chua pH<5, nhiệt độ cao, đất ngập nước",
-    treatment: "Không có thuốc đặc trị. Nhổ bỏ cây bệnh, khử trùng đất",
-    severity: "critical",
-    ai_accuracy: 78,
-    commonInRegion: true,
-  },
-  {
-    id: "dis-005",
-    name: "Đạo ôn (Rice Blast)",
-    pathogen: "Magnaporthe oryzae",
-    group: "fungal",
-    groupLabel: "Bệnh nấm",
-    groupColor: "danger",
-    crops: ["Lúa"],
-    emoji: "🌾",
-    symptoms: "Đốm hình thoi trên lá, màu nâu xám, viền nâu đỏ. Nặng: đốt thân thối, gãy cổ bông.",
-    conditions: "Nhiệt độ 24-28°C, sương mù, bón nhiều đạm",
-    treatment: "Tricyclazole, Propiconazole — phun sớm khi mới chớm",
-    severity: "high",
-    ai_accuracy: 83,
-    commonInRegion: false,
-  },
-  {
-    id: "dis-006",
-    name: "Sâu tơ (Diamond-back moth)",
-    pathogen: "Plutella xylostella",
-    group: "pest",
-    groupLabel: "Sâu hại",
-    groupColor: "info",
-    crops: ["Cải xanh", "Bắp cải", "Su hào", "Rau cải"],
-    emoji: "🐛",
-    symptoms: "Lỗ thủng nhỏ trên lá, sâu nhỏ màu xanh lá. Nặng: chỉ còn gân lá.",
-    conditions: "Phổ biến quanh năm, bùng phát mùa khô, kháng thuốc cao",
-    treatment: "Spinosad, BT (Bacillus thuringiensis) — sinh học ưu tiên",
-    severity: "medium",
-    ai_accuracy: 95,
-    commonInRegion: true,
-  },
-  {
-    id: "dis-007",
-    name: "Héo rũ Fusarium",
-    pathogen: "Fusarium oxysporum",
-    group: "fungal",
-    groupLabel: "Bệnh nấm",
-    groupColor: "danger",
-    crops: ["Cà chua", "Dưa hấu", "Dưa leo", "Ớt"],
-    emoji: "🍂",
-    symptoms: "Cây héo từ từ, vàng từ lá dưới lên. Bó mạch nâu khi cắt thân. Khác héo xanh vi khuẩn ở chỗ không có dịch nhầy.",
-    conditions: "Đất acid, nhiệt độ 27-32°C, cây bị tổn thương rễ",
-    treatment: "Trichoderma, Propiconazole — không hiệu quả cao khi nặng",
-    severity: "high",
-    ai_accuracy: 55,
-    commonInRegion: false,
-  },
-  {
-    id: "dis-008",
-    name: "Rầy nâu (Brown planthopper)",
-    pathogen: "Nilaparvata lugens",
-    group: "pest",
-    groupLabel: "Rầy hại",
-    groupColor: "info",
-    crops: ["Lúa"],
-    emoji: "🦗",
-    symptoms: "Cháy rầy từng mảng, cây lúa chết khô đột ngột. Mật độ cao gây cháy toàn ruộng.",
-    conditions: "Giống lúa nhiễm, bón nhiều đạm, trồng dày",
-    treatment: "Buprofezin, Thiamethoxam — theo ngưỡng phòng trừ kinh tế",
-    severity: "critical",
-    ai_accuracy: 88,
-    commonInRegion: false,
-  },
-];
+// Pure backend disease library data loaded dynamically.
 
 const groupFilters = [
   { value: "all", label: "Tất cả" },
@@ -149,7 +20,7 @@ const severityLabel: Record<string, { label: string; color: string }> = {
 };
 
 export default function DiseasesLibrary() {
-  const [diseaseList, setDiseaseList] = useState<any[]>(diseases);
+  const [diseaseList, setDiseaseList] = useState<any[]>([]);
   const [groupFilter, setGroupFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<any | null>(null);
@@ -181,11 +52,11 @@ export default function DiseasesLibrary() {
           });
           setDiseaseList(mappedDiseases);
         } else {
-          setDiseaseList(diseases);
+          setDiseaseList([]);
         }
       } catch (err) {
         console.error(err);
-        setDiseaseList(diseases);
+        setDiseaseList([]);
       }
     };
     fetchDiseases();

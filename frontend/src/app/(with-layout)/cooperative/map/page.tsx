@@ -5,52 +5,13 @@ import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
 import ReactApexChart from "react-apexcharts";
 import axios from "axios";
 
-// Mock disease outbreak locations (simulated as district data)
+// Mock disease outbreak locations (with 0 cases initially, populated from database)
 const mapDistricts = [
-  { id: "trang-bom", name: "Trảng Bom", lat: 10.96, lng: 107.01, cases: 12, trend: "up", severity: "high", crops: ["Ớt", "Cà chua"] },
-  { id: "long-thanh", name: "Long Thành", lat: 10.79, lng: 107.04, cases: 7, trend: "stable", severity: "medium", crops: ["Cà chua", "Lúa"] },
-  { id: "nhon-trach", name: "Nhơn Trạch", lat: 10.72, lng: 106.99, cases: 5, trend: "down", severity: "low", crops: ["Dưa leo"] },
-  { id: "cam-my", name: "Cẩm Mỹ", lat: 10.92, lng: 107.16, cases: 3, trend: "stable", severity: "low", crops: ["Rau cải"] },
-  { id: "xuan-loc", name: "Xuân Lộc", lat: 10.93, lng: 107.42, cases: 8, trend: "up", severity: "medium", crops: ["Lúa", "Tiêu"] },
-];
-
-const recentAlerts = [
-  {
-    id: "alert-1",
-    district: "Trảng Bom",
-    disease: "Thán thư trên ớt",
-    cases: 12,
-    trend: "up",
-    date: "04/07/2026",
-    severity: "high",
-  },
-  {
-    id: "alert-2",
-    district: "Xuân Lộc",
-    disease: "Đạo ôn trên lúa",
-    cases: 8,
-    trend: "up",
-    date: "03/07/2026",
-    severity: "medium",
-  },
-  {
-    id: "alert-3",
-    district: "Long Thành",
-    disease: "Đốm lá vi khuẩn",
-    cases: 7,
-    trend: "stable",
-    date: "02/07/2026",
-    severity: "medium",
-  },
-  {
-    id: "alert-4",
-    district: "Nhơn Trạch",
-    disease: "Phấn trắng dưa leo",
-    cases: 5,
-    trend: "down",
-    date: "01/07/2026",
-    severity: "low",
-  },
+  { id: "trang-bom", name: "Trảng Bom", lat: 10.96, lng: 107.01, cases: 0, trend: "stable", severity: "low", crops: ["Ớt", "Cà chua"] },
+  { id: "long-thanh", name: "Long Thành", lat: 10.79, lng: 107.04, cases: 0, trend: "stable", severity: "low", crops: ["Cà chua", "Lúa"] },
+  { id: "nhon-trach", name: "Nhơn Trạch", lat: 10.72, lng: 106.99, cases: 0, trend: "stable", severity: "low", crops: ["Dưa leo"] },
+  { id: "cam-my", name: "Cẩm Mỹ", lat: 10.92, lng: 107.16, cases: 0, trend: "stable", severity: "low", crops: ["Rau cải"] },
+  { id: "xuan-loc", name: "Xuân Lộc", lat: 10.93, lng: 107.42, cases: 0, trend: "stable", severity: "low", crops: ["Lúa", "Tiêu"] },
 ];
 
 const weeklyTrendSeries = [
@@ -104,12 +65,13 @@ const severityConfig: Record<string, { color: string; label: string; dot: string
 export default function CooperativeMap() {
   const [districts, setDistricts] = useState<any[]>(mapDistricts);
   const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
+  const [alerts, setAlerts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchCooperativeMap = async () => {
       try {
-        const response = await axios.get("/api/listing/cooperative-disease-map");
-        if (response && response.map_points && response.map_points.length > 0) {
+        const response = await axios.get("/api/cooperative/disease-map");
+        if (response && response.map_points) {
           const points = response.map_points;
           const updatedDistricts = mapDistricts.map((d) => {
             const matchCount = points.filter((p: any) => 
@@ -117,20 +79,35 @@ export default function CooperativeMap() {
               (p.farm_name && p.farm_name.toLowerCase().includes(d.name.toLowerCase()))
             ).length;
             
-            const totalCasesCount = d.cases + matchCount;
+            // Start cases count from matching cases only
+            const totalCasesCount = matchCount;
             return {
               ...d,
               cases: totalCasesCount,
-              severity: totalCasesCount > 10 ? "high" : totalCasesCount > 5 ? "medium" : "low",
+              severity: totalCasesCount > 3 ? "high" : totalCasesCount > 1 ? "medium" : "low",
             };
           });
           setDistricts(updatedDistricts);
+
+          // Populate recent alerts dynamically from map_points
+          const mappedAlerts = points.slice(0, 4).map((p: any, idx: number) => ({
+            id: p.case_id || `alert-${idx}`,
+            district: p.location || "Đồng Nai",
+            disease: p.crop === "ot" ? "Thán thư hại ớt" : p.crop === "tomato" ? "Héo xanh cà chua" : "Bệnh lý cây trồng",
+            cases: 1,
+            trend: "stable",
+            date: new Date().toLocaleDateString("vi-VN"),
+            severity: p.risk_level === "high" ? "high" : "medium",
+          }));
+          setAlerts(mappedAlerts);
         } else {
           setDistricts(mapDistricts);
+          setAlerts([]);
         }
       } catch (err) {
         console.error(err);
         setDistricts(mapDistricts);
+        setAlerts([]);
       }
     };
     fetchCooperativeMap();
@@ -282,21 +259,27 @@ export default function CooperativeMap() {
                     <i className="ri-alert-line text-danger me-2"></i>
                     Cảnh báo gần đây
                   </h6>
-                  {recentAlerts.map((a) => (
-                    <div key={a.id} id={a.id} className="d-flex align-items-center gap-3 mb-2 p-2 rounded" style={{ background: "rgba(0,0,0,0.02)" }}>
-                      <div
-                        style={{ width: 8, height: 8, borderRadius: "50%", background: severityConfig[a.severity].dot, flexShrink: 0 }}
-                      ></div>
-                      <div className="flex-grow-1">
-                        <p className="mb-0 fs-13 fw-medium">{a.disease}</p>
-                        <span className="text-muted fs-11">{a.district} · {a.date}</span>
-                      </div>
-                      <div className="d-flex flex-column align-items-end">
-                        <strong className="fs-13">{a.cases}</strong>
-                        <span className="text-muted fs-10">ca</span>
-                      </div>
+                  {alerts.length === 0 ? (
+                    <div className="text-center py-4 text-muted fs-12">
+                      Chưa ghi nhận cảnh báo dịch bệnh mới.
                     </div>
-                  ))}
+                  ) : (
+                    alerts.map((a) => (
+                      <div key={a.id} id={a.id} className="d-flex align-items-center gap-3 mb-2 p-2 rounded" style={{ background: "rgba(0,0,0,0.02)" }}>
+                        <div
+                          style={{ width: 8, height: 8, borderRadius: "50%", background: severityConfig[a.severity].dot, flexShrink: 0 }}
+                        ></div>
+                        <div className="flex-grow-1">
+                          <p className="mb-0 fs-13 fw-medium">{a.disease}</p>
+                          <span className="text-muted fs-11">{a.district} · {a.date}</span>
+                        </div>
+                        <div className="d-flex flex-column align-items-end">
+                          <strong className="fs-13">{a.cases}</strong>
+                          <span className="text-muted fs-10">ca</span>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </CardBody>
               </Card>
 

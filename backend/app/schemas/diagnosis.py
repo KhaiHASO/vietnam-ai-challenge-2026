@@ -10,6 +10,10 @@ class DiagnosisCaseCreate(BaseModel):
     location: str | None = None
     notes: str | None = None
     image_url: str | None = None
+    original_filename: str | None = None
+    confidence: int | None = None
+    agent_logs: list[dict[str, Any]] | None = None
+    diagnosis_detail: dict[str, Any] | None = None
 
 
 class DiagnosisCaseResponse(BaseModel):
@@ -20,6 +24,10 @@ class DiagnosisCaseResponse(BaseModel):
     summary: str | None = None
     risk_level: str | None = None
     needs_expert_review: bool = False
+    original_filename: str | None = None
+    confidence: int | None = None
+    agent_logs: list[dict[str, Any]] | None = None
+    diagnosis_detail: dict[str, Any] | None = None
 
 
 class AnalyzeImageRequest(BaseModel):

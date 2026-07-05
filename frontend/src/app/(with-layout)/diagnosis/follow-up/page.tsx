@@ -1,71 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Progress } from "reactstrap";
 import Link from "next/link";
+import axios from "axios";
 
-const followUpCases = [
-  {
-    id: "fu-001",
-    emoji: "🌶️",
-    crop: "Ớt",
-    farm: "Vườn ớt Trảng Bom",
-    disease: "Thán thư (Anthracnose)",
-    confidence: 89,
-    reason: "camera",
-    reasonLabel: "Chụp lại sau 48h",
-    deadline: "06/07/2026 08:00",
-    hoursLeft: 14,
-    severity: "high",
-    notes: "Đốm bệnh có xu hướng lan rộng, cần theo dõi sát",
-    date: "04/07/2026",
-  },
-  {
-    id: "fu-002",
-    emoji: "🌶️",
-    crop: "Ớt",
-    farm: "Vườn ớt Trảng Bom",
-    disease: "Héo xanh vi khuẩn",
-    confidence: 78,
-    reason: "spreading",
-    reasonLabel: "Bệnh đang lan rộng",
-    deadline: "05/07/2026 14:00",
-    hoursLeft: -2,
-    severity: "critical",
-    notes: "Phát hiện thêm 3 cây mới có triệu chứng tương tự",
-    date: "30/06/2026",
-  },
-  {
-    id: "fu-003",
-    emoji: "🥒",
-    crop: "Dưa leo",
-    farm: "Vườn dưa Nhơn Trạch",
-    disease: "Phấn trắng (Powdery Mildew)",
-    confidence: 61,
-    reason: "low-confidence",
-    reasonLabel: "AI chưa chắc chắn",
-    deadline: "07/07/2026",
-    hoursLeft: 48,
-    severity: "medium",
-    notes: "Confidence thấp, cần ảnh thêm góc độ khác",
-    date: "01/07/2026",
-  },
-  {
-    id: "fu-004",
-    emoji: "🍅",
-    crop: "Cà chua",
-    farm: "Ruộng cà Long Thành",
-    disease: "Héo rũ Fusarium",
-    confidence: 55,
-    reason: "expert",
-    reasonLabel: "Cần chuyên gia xác nhận",
-    deadline: "Chờ phản hồi",
-    hoursLeft: null,
-    severity: "high",
-    notes: "Gửi cho chuyên gia Nguyễn Thị B — đang chờ xác nhận",
-    date: "25/06/2026",
-  },
-];
+// Pure backend data loaded dynamically.
 
 const reasonConfig: Record<string, { color: string; icon: string }> = {
   camera: { color: "primary", icon: "ri-camera-line" },
@@ -87,9 +27,88 @@ const severityBorder: Record<string, string> = {
 };
 
 export default function DiagnosisFollowUp() {
+  const [cases, setCases] = useState<any[]>([]);
   const [dismissed, setDismissed] = useState<string[]>([]);
 
-  const active = followUpCases.filter((c) => !dismissed.includes(c.id));
+  useEffect(() => {
+    const fetchFollowUp = async () => {
+      try {
+        const response = await axios.get("/api/diagnosis/follow-up");
+        if (response) {
+          const list: any[] = [];
+          
+          if (response.cases_waiting_for_symptoms) {
+            response.cases_waiting_for_symptoms.forEach((c: any) => {
+              list.push({
+                id: c.case_id,
+                emoji: c.crop === "ot" ? "🌶️" : "🍅",
+                crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
+                farm: c.location || "Vườn local",
+                disease: c.summary || "Cần cung cấp thêm triệu chứng",
+                confidence: 60,
+                reason: "low-confidence",
+                reasonLabel: "Chờ thông tin lâm sàng",
+                deadline: "Hỏi thêm triệu chứng",
+                hoursLeft: 24,
+                severity: "medium",
+                notes: c.notes || "Hệ thống AI Agent cần thêm câu trả lời từ nông dân để kết luận chính xác.",
+                date: new Date(c.created_at || new Date()).toLocaleDateString("vi-VN"),
+              });
+            });
+          }
+
+          if (response.pending_expert_reviews) {
+            response.pending_expert_reviews.forEach((r: any) => {
+              list.push({
+                id: r.review_id || r.case_id,
+                emoji: "🔬",
+                crop: "Cây trồng",
+                farm: r.location || "Hợp tác xã",
+                disease: r.notes || "Chờ ý kiến chuyên gia",
+                confidence: 85,
+                reason: "expert",
+                reasonLabel: "Chờ chuyên gia duyệt",
+                deadline: "Đang chờ duyệt",
+                hoursLeft: null,
+                severity: "high",
+                notes: r.comments || "Đã gửi mẫu bệnh về trạm bảo vệ thực vật để kiểm định.",
+                date: new Date(r.created_at || new Date()).toLocaleDateString("vi-VN"),
+              });
+            });
+          }
+
+          if (response.active_reminders) {
+            response.active_reminders.forEach((rem: any) => {
+              const due = rem.due_at ? new Date(rem.due_at) : new Date();
+              const hours = Math.round((due.getTime() - new Date().getTime()) / 3600000);
+              list.push({
+                id: rem.reminder_id,
+                emoji: "⏰",
+                crop: "Nông trại",
+                farm: "Khu vực theo dõi",
+                disease: rem.message || "Lịch nhắc chụp lại ảnh kiểm tra",
+                confidence: 90,
+                reason: "camera",
+                reasonLabel: "Theo dõi 48h",
+                deadline: due.toLocaleString("vi-VN"),
+                hoursLeft: hours,
+                severity: rem.priority === "high" ? "critical" : "high",
+                notes: rem.message || "Chụp ảnh lá sau 48h để đánh giá tốc độ phát triển của bệnh.",
+                date: new Date(rem.created_at || new Date()).toLocaleDateString("vi-VN"),
+              });
+            });
+          }
+
+          setCases(list);
+        }
+      } catch (err) {
+        console.error("Fetch follow-up error", err);
+      }
+    };
+    fetchFollowUp();
+  }, []);
+
+  const active = cases.filter((c) => !dismissed.includes(c.id));
 
   return (
     <div className="page-content">
@@ -104,7 +123,7 @@ export default function DiagnosisFollowUp() {
                 </h4>
                 <p className="text-muted mb-0 fs-13">
                   {active.length} ca đang cần hành động ·{" "}
-                  {followUpCases.filter((c) => c.severity === "critical").length} ca nghiêm trọng
+                  {cases.filter((c) => c.severity === "critical").length} ca nghiêm trọng
                 </p>
               </div>
               <Link href="/diagnosis/new">
