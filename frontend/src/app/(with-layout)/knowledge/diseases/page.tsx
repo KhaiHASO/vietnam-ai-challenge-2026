@@ -28,7 +28,7 @@ export default function DiseasesLibrary() {
   useEffect(() => {
     const fetchDiseases = async () => {
       try {
-        const response = await axios.get("/api/listing/knowledge/diseases");
+        const response = await axios.get("/api/knowledge/diseases");
         if (response && response.diseases && response.diseases.length > 0) {
           const mappedDiseases = response.diseases.map((d: any) => {
             const treat = d.treatment || {};

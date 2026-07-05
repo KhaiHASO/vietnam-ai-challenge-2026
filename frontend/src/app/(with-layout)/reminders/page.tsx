@@ -22,7 +22,7 @@ export default function Reminders() {
   useEffect(() => {
     const fetchReminders = async () => {
       try {
-        const response = await axios.get("/api/listing/reminders");
+        const response = await axios.get("/api/reminders");
         if (response && response.reminders && response.reminders.length > 0) {
           const backendReminders = response.reminders.map((r: any) => ({
             id: r.reminder_id,
