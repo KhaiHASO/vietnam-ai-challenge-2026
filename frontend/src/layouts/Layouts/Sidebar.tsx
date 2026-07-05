@@ -143,12 +143,22 @@ const Sidebar = ({ layoutType }: any) => {
         </div>
 
         {/* User Profile */}
-        <UncontrolledDropdown className="sidebar-user m-1 rounded">
+        <UncontrolledDropdown
+          className="sidebar-user mx-2 mt-1 mb-2 rounded"
+          style={{
+            border: "1px solid rgba(255,255,255,0.06)",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
           <DropdownToggle
             tag="button"
             type="button"
             className="btn material-shadow-none"
             id="page-header-user-dropdown"
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+            }}
           >
             <span className="d-flex align-items-center gap-2">
               <span
@@ -168,12 +178,27 @@ const Sidebar = ({ layoutType }: any) => {
               >
                 NA
               </span>
-              <span className="text-start">
-                <span className="d-block fw-medium sidebar-user-name-text">
+              <span className="text-start" style={{ minWidth: 0 }}>
+                <span
+                  className="d-block fw-semibold sidebar-user-name-text text-truncate"
+                  style={{
+                    fontSize: "14px",
+                    lineHeight: 1.2,
+                    letterSpacing: "-0.1px",
+                    marginBottom: "2px",
+                  }}
+                >
                   Nguyễn Văn A
                 </span>
-                <span className="d-block fs-14 sidebar-user-name-sub-text">
-                  <i className="ri ri-circle-fill fs-10 text-success align-baseline"></i>{" "}
+                <span
+                  className="d-flex align-items-center gap-1 sidebar-user-name-sub-text"
+                  style={{
+                    fontSize: "12px",
+                    lineHeight: 1.2,
+                    opacity: 0.88,
+                  }}
+                >
+                  <i className="ri ri-circle-fill fs-10 text-success"></i>{" "}
                   <span className="align-middle">Nông dân</span>
                 </span>
               </span>
@@ -224,7 +249,7 @@ const Sidebar = ({ layoutType }: any) => {
         ) : (
           <>
             <SimpleBar id="scrollbar" className="h-100">
-              <Container fluid>
+              <Container fluid style={{ paddingLeft: "12px", paddingRight: "12px" }}>
                 <div id="two-column-menu"></div>
                 <ul className="navbar-nav" id="navbar-nav">
                   <VerticalLayout layoutType={layoutType} />

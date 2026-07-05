@@ -224,6 +224,9 @@ const quickRoutes = [
   },
 ];
 
+const cropMixLabels = ["Ot", "Ca chua", "Dua leo", "Lua", "Rau cai"];
+const cropMixSeries = [12, 8, 5, 6, 3];
+
 const diseaseTrendSeries = [
   {
     name: "Ca mới",
@@ -244,7 +247,7 @@ const diseaseTrendOptions: any = {
     type: "area",
     height: 280,
     toolbar: { show: false },
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "inherit",
   },
   colors: ["#ef4444", "#2dce89", "#f59e0b"],
   dataLabels: { enabled: false },
@@ -258,7 +261,7 @@ const diseaseTrendOptions: any = {
     },
   },
   grid: { strokeDashArray: 3 },
-  legend: { position: "top", horizontalAlign: "right" },
+  legend: { show: false },
   xaxis: {
     categories: ["28/6", "29/6", "30/6", "01/7", "02/7", "03/7", "04/7"],
     labels: { style: { fontSize: "11px" } },
@@ -271,11 +274,11 @@ const cropMixOptions: any = {
   chart: {
     type: "donut",
     height: 230,
-    fontFamily: "Inter, sans-serif",
+    fontFamily: "inherit",
   },
   labels: ["Ớt", "Cà chua", "Dưa leo", "Lúa", "Rau cải"],
-  colors: ["#ef4444", "#f97316", "#22c55e", "#3b82f6", "#a855f7"],
-  legend: { position: "bottom", fontSize: "11px" },
+  colors: ["#ef4444", "#f59e0b", "#22c55e", "#3b82f6", "#14b8a6"],
+  legend: { show: false },
   dataLabels: { enabled: false },
   plotOptions: {
     pie: {
@@ -286,7 +289,7 @@ const cropMixOptions: any = {
           total: {
             show: true,
             label: "Ca bệnh",
-            formatter: () => "34",
+            formatter: () => `${cropMixSeries.reduce((sum, value) => sum + value, 0)}`,
           },
         },
       },
@@ -300,6 +303,12 @@ const statusColor: Record<string, string> = {
   expert: "danger",
 };
 
+const statusIcon: Record<string, string> = {
+  "follow-up": "ri-time-line",
+  resolved: "ri-checkbox-circle-line",
+  expert: "ri-alert-line",
+};
+
 const confidenceColor = (value: number) => {
   if (value >= 85) return "success";
   if (value >= 70) return "warning";
@@ -311,6 +320,15 @@ export default function Dashboard() {
   const [cases, setCases] = useState<any[]>([]);
   const [reminders, setReminders] = useState<any[]>([]);
   const [healthList, setHealthList] = useState<any[]>([]);
+  const primaryQuickRoute = quickRoutes[0];
+  const secondaryQuickRoutes = quickRoutes.slice(1);
+  const diseaseTrendMeta = [
+    { label: diseaseTrendSeries[0].name, value: diseaseTrendSeries[0].data.at(-1), color: "danger" },
+    { label: diseaseTrendSeries[1].name, value: diseaseTrendSeries[1].data.at(-1), color: "success" },
+    { label: diseaseTrendSeries[2].name, value: diseaseTrendSeries[2].data.at(-1), color: "warning" },
+  ];
+  const cropMixMetaColors = ["danger", "warning", "success", "info", "primary"];
+  const cropMixTotal = cropMixSeries.reduce((sum, value) => sum + value, 0);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -384,11 +402,11 @@ export default function Dashboard() {
   return (
     <div className="page-content">
       <div className="container-fluid">
-        <Row className="mb-3">
+        <Row className="mb-3 g-3">
           <Col>
-            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-              <div>
-                <div className="d-flex align-items-center gap-2 mb-1">
+            <div className="d-flex flex-column flex-xl-row align-items-xl-end justify-content-between gap-3 gap-xl-4">
+              <div className="d-flex flex-column gap-2">
+                <div className="d-flex align-items-center gap-2 flex-wrap">
                   <Badge color="success-subtle" className="text-success">
                     CropDoctor AI
                   </Badge>
@@ -401,15 +419,15 @@ export default function Dashboard() {
                   Thứ Bảy, 04/07/2026 · Đồng Nai · Theo dõi sâu bệnh theo thời gian thực
                 </p>
               </div>
-              <div className="d-flex gap-2 flex-wrap">
+              <div className="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-sm-end gap-2">
                 <Link href="/ai/agent-logs">
-                  <Button color="light" className="d-flex align-items-center gap-2">
+                  <Button color="light" className="d-inline-flex w-100 align-items-center justify-content-center gap-2">
                     <i className="ri-terminal-box-line"></i>
                     Nhật ký Agent
                   </Button>
                 </Link>
                 <Link href="/diagnosis/new">
-                  <Button color="success" className="d-flex align-items-center gap-2">
+                  <Button color="success" className="d-inline-flex w-100 align-items-center justify-content-center gap-2">
                     <i className="ri-microscope-line"></i>
                     Chẩn đoán mới
                   </Button>
@@ -419,40 +437,34 @@ export default function Dashboard() {
           </Col>
         </Row>
 
-        <Row className="mb-3">
+        <Row className="mb-3 g-3">
           <Col>
-            <div
-              className="rounded p-3 p-lg-4"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(45,206,137,0.14), rgba(64,81,137,0.08))",
-                border: "1px solid rgba(45,206,137,0.24)",
-              }}
-            >
-              <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div className="d-flex gap-3 align-items-start">
-                  <div
-                    className="rounded d-flex align-items-center justify-content-center flex-shrink-0"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      background: "#2dce89",
-                    }}
-                  >
-                    <i className="ri-error-warning-line text-white fs-22"></i>
+            <div className="rounded-4 border border-danger-subtle bg-danger-subtle p-3 p-lg-4">
+              <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3">
+                <div className="d-flex flex-column gap-2">
+                  <div className="d-flex align-items-center gap-2 flex-wrap">
+                    <span className="avatar-xs rounded-circle bg-danger d-inline-flex align-items-center justify-content-center flex-shrink-0">
+                      <i className="ri-error-warning-line text-white fs-14"></i>
+                    </span>
+                    <Badge color="danger" className="text-uppercase fw-semibold">
+                      Æ¯u tiÃªn cao
+                    </Badge>
+                    <span className="text-danger-emphasis fw-medium fs-13">
+                      á»” dá»‹ch cáº§n theo dÃµi
+                    </span>
                   </div>
                   <div>
-                    <h5 className="fw-semibold mb-1">
+                    <h5 className="fw-semibold mb-1 text-body-emphasis">
                       Cảnh báo ổ dịch thán thư trên ớt tại Trảng Bom
                     </h5>
-                    <p className="text-muted mb-0 fs-13">
+                    <p className="text-body-secondary mb-0 fs-13">
                       12 ca được ghi nhận trong 7 ngày. AI khuyến nghị tỉa lá bệnh,
                       giảm ẩm, chụp lại ảnh sau 48h và chuyển 2 ca chưa chắc cho chuyên gia.
                     </p>
                   </div>
                 </div>
                 <Link href="/cooperative/map">
-                  <Button color="danger" outline className="d-flex align-items-center gap-2">
+                  <Button color="danger" className="d-inline-flex w-100 w-lg-auto align-items-center justify-content-center gap-2">
                     <i className="ri-map-pin-2-line"></i>
                     Xem bản đồ
                   </Button>
@@ -462,18 +474,26 @@ export default function Dashboard() {
           </Col>
         </Row>
 
-        <Row>
-          {kpis.map((kpi) => (
+        <Row className="g-3">
+          {kpis.map((kpi, index) => {
+            const isPrimaryKpi = index === 0;
+
+            return (
             <Col xl={3} md={6} key={kpi.id} className="mb-3">
               <Link href={kpi.link} className="text-decoration-none">
-                <Card className="card-animate h-100 mb-0" id={kpi.id}>
-                  <CardBody>
+                <Card
+                  className={`card-animate h-100 mb-0 ${isPrimaryKpi ? "border-danger-subtle shadow-sm" : ""}`}
+                  id={kpi.id}
+                >
+                  <CardBody className={isPrimaryKpi ? "p-4" : "p-3"}>
                     <div className="d-flex justify-content-between align-items-start gap-3">
-                      <div>
-                        <p className="text-muted fw-medium mb-2 fs-13">
+                      <div className="d-flex flex-column gap-1">
+                        <p
+                          className={`fw-medium mb-0 ${isPrimaryKpi ? "text-body-emphasis fs-12 text-uppercase" : "text-muted fs-13"}`}
+                        >
                           {kpi.title}
                         </p>
-                        <h3 className="mb-1 fw-bold text-body">
+                        <h3 className={`fw-bold text-body mb-0 ${isPrimaryKpi ? "display-6 lh-1" : ""}`}>
                           <CountUp
                             start={0}
                             end={kpi.value}
@@ -482,13 +502,15 @@ export default function Dashboard() {
                             suffix={` ${kpi.unit}`}
                           />
                         </h3>
-                        <Badge color={`${kpi.color}-subtle`} className={`text-${kpi.color}`}>
+                        <Badge
+                          color={`${kpi.color}-subtle`}
+                          className={`text-${kpi.color} align-self-start ${isPrimaryKpi ? "mt-2 px-2 py-1 fw-semibold" : "mt-1"}`}
+                        >
                           {kpi.change}
                         </Badge>
                       </div>
                       <div
-                        className={`avatar-sm rounded bg-${kpi.color}-subtle d-flex align-items-center justify-content-center`}
-                        style={{ width: 46, height: 46 }}
+                        className={`${isPrimaryKpi ? "avatar-md rounded-3" : "avatar-sm rounded"} bg-${kpi.color}-subtle d-flex align-items-center justify-content-center flex-shrink-0`}
                       >
                         <i className={`${kpi.icon} text-${kpi.color} fs-22`}></i>
                       </div>
@@ -497,15 +519,19 @@ export default function Dashboard() {
                 </Card>
               </Link>
             </Col>
-          ))}
+            );
+          })}
         </Row>
 
-        <Row>
+        <Row className="g-3">
           <Col xl={8} className="mb-3">
-            <Card className="h-100">
-              <CardBody>
-                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <Card className="h-100 border-0 shadow-sm">
+              <CardBody className="p-3 p-lg-4">
+                <div className="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between gap-3 mb-4">
                   <div>
+                    <Badge color="danger-subtle" className="text-danger mb-2">
+                      Disease Trend
+                    </Badge>
                     <h5 className="fw-semibold mb-1">Xu hướng ca bệnh 7 ngày</h5>
                     <p className="text-muted fs-13 mb-0">
                       Tổng hợp từ chẩn đoán ảnh, nhật ký mùa vụ và chuyên gia.
@@ -514,6 +540,13 @@ export default function Dashboard() {
                   <Badge color="light" className="text-muted">
                     Đồng Nai · Tuần 27/2026
                   </Badge>
+                </div>
+                <div className="d-flex flex-wrap gap-2 mb-3">
+                  {diseaseTrendMeta.map((item) => (
+                    <Badge key={item.label} color={`${item.color}-subtle`} className={`text-${item.color} fw-semibold`}>
+                      {item.label}: {item.value}
+                    </Badge>
+                  ))}
                 </div>
                 <ReactApexChart
                   options={diseaseTrendOptions}
@@ -526,26 +559,50 @@ export default function Dashboard() {
           </Col>
 
           <Col xl={4} className="mb-3">
-            <Card className="h-100">
-              <CardBody>
+            <Card className="h-100 border-0 shadow-sm">
+              <CardBody className="p-3 p-lg-4 d-flex flex-column gap-4">
                 <div className="d-flex align-items-center justify-content-between mb-3">
                   <h5 className="fw-semibold mb-0">Tỷ trọng cây bị ảnh hưởng</h5>
                   <Link href="/knowledge/diseases" className="fs-12">
                     Tra cứu bệnh
                   </Link>
                 </div>
+                <div className="d-flex flex-wrap gap-2">
+                  <Badge color="light" className="text-muted">
+                    Total {cropMixTotal} cases
+                  </Badge>
+                  <Badge color="danger-subtle" className="text-danger">
+                    Top: {cropMixLabels[0]}
+                  </Badge>
+                </div>
                 <ReactApexChart
                   options={cropMixOptions}
-                  series={[12, 8, 5, 6, 3]}
+                  series={cropMixSeries}
                   type="donut"
                   height={230}
                 />
+                <div className="d-flex flex-column gap-2">
+                  {cropMixLabels.map((label, index) => (
+                    <div key={label} className="d-flex align-items-center justify-content-between gap-3 rounded-3 bg-light-subtle px-3 py-2">
+                      <div className="d-flex align-items-center gap-2">
+                        <span className={`avatar-xxs rounded-circle bg-${cropMixMetaColors[index]} flex-shrink-0`}></span>
+                        <span className="fw-medium text-body fs-13">{label}</span>
+                      </div>
+                      <div className="d-flex align-items-center gap-2">
+                        <span className="text-body-secondary fs-12">{cropMixSeries[index]} cases</span>
+                        <Badge color="light" className="text-muted">
+                          {Math.round((cropMixSeries[index] / cropMixTotal) * 100)}%
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </CardBody>
             </Card>
           </Col>
         </Row>
 
-        <Row>
+        <Row className="g-3">
           <Col xl={4} className="mb-3">
             <Card className="h-100">
               <CardBody>
@@ -655,45 +712,148 @@ export default function Dashboard() {
           </Col>
         </Row>
 
-        <Row>
-          {quickRoutes.map((route) => (
-            <Col xl={3} md={6} key={route.title} className="mb-3">
-              <Link href={route.link} className="text-decoration-none">
-                <Card className="h-100 mb-0">
-                  <CardBody>
-                    <div
-                      className={`bg-${route.color}-subtle text-${route.color} rounded d-flex align-items-center justify-content-center mb-3`}
-                      style={{ width: 42, height: 42 }}
-                    >
-                      <i className={`${route.icon} fs-20`}></i>
+        <Row className="g-3">
+          <Col xs={12} className="mb-3">
+            <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-2">
+              <div>
+                <h5 className="fw-semibold mb-1 text-body-emphasis">Quick Actions</h5>
+                <p className="text-body-secondary fs-13 mb-0">
+                  Prioritize common actions to reduce handling time.
+                </p>
+              </div>
+              <Badge color="light" className="text-muted align-self-start align-self-lg-auto">
+                4 actions
+              </Badge>
+            </div>
+          </Col>
+
+          <Col xl={5} className="mb-3">
+            <Link href={primaryQuickRoute.link} className="text-decoration-none">
+              <Card className={`h-100 mb-0 border border-${primaryQuickRoute.color}-subtle bg-${primaryQuickRoute.color}-subtle shadow-sm`}>
+                <CardBody className="p-4 d-flex flex-column justify-content-between gap-4 h-100">
+                  <div className="d-flex flex-column gap-3">
+                    <div className={`avatar-sm rounded-3 bg-${primaryQuickRoute.color} d-inline-flex align-items-center justify-content-center text-white`}>
+                      <i className={`${primaryQuickRoute.icon} fs-20`}></i>
                     </div>
-                    <h6 className="fw-semibold text-body mb-1">{route.title}</h6>
-                    <p className="text-muted fs-13 mb-0">{route.text}</p>
-                  </CardBody>
-                </Card>
-              </Link>
-            </Col>
-          ))}
+                    <div className="d-flex flex-column gap-2">
+                      <Badge color={primaryQuickRoute.color} className="align-self-start text-uppercase fw-semibold">
+                        Primary CTA
+                      </Badge>
+                      <div>
+                        <h5 className="fw-semibold text-body mb-2">{primaryQuickRoute.title}</h5>
+                        <p className="text-body-secondary fs-13 mb-0">{primaryQuickRoute.text}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="d-inline-flex align-items-center gap-2 text-success fw-semibold fs-13">
+                    <span>Start now</span>
+                    <i className="ri-arrow-right-line"></i>
+                  </div>
+                </CardBody>
+              </Card>
+            </Link>
+          </Col>
+
+          <Col xl={7} className="mb-3">
+            <Row className="g-3">
+              {secondaryQuickRoutes.map((route) => (
+                <Col xl={4} md={4} sm={6} key={route.title} className="mb-3">
+                  <Link href={route.link} className="text-decoration-none">
+                    <Card className="h-100 mb-0 border-0 shadow-sm">
+                      <CardBody className="p-3 d-flex flex-column gap-3 h-100">
+                        <div className={`avatar-sm rounded-3 bg-${route.color}-subtle text-${route.color} d-inline-flex align-items-center justify-content-center`}>
+                          <i className={`${route.icon} fs-18`}></i>
+                        </div>
+                        <div className="d-flex flex-column gap-1">
+                          <h6 className="fw-semibold text-body mb-0">{route.title}</h6>
+                          <p className="text-body-secondary fs-13 mb-0">{route.text}</p>
+                        </div>
+                        <div className={`d-inline-flex align-items-center gap-2 mt-auto text-${route.color} fw-semibold fs-13`}>
+                          <span>Open</span>
+                          <i className="ri-arrow-right-up-line"></i>
+                        </div>
+                      </CardBody>
+                    </Card>
+                  </Link>
+                </Col>
+              ))}
+            </Row>
+          </Col>
         </Row>
 
-        <Row>
+        <Row className="g-3">
           <Col>
-            <Card>
-              <CardBody>
-                <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <Card className="border-0 shadow-sm">
+              <CardBody className="p-3 p-lg-4">
+                <div className="d-flex flex-column flex-lg-row align-items-lg-end justify-content-between gap-3 mb-4">
                   <div>
+                    <Badge color="primary-subtle" className="text-primary mb-2">
+                      Recent Activity
+                    </Badge>
                     <h5 className="fw-semibold mb-1">Ca chẩn đoán gần đây</h5>
                     <p className="text-muted fs-13 mb-0">
                       Dữ liệu demo cho luồng nông dân, hợp tác xã và chuyên gia.
                     </p>
                   </div>
                   <Link href="/diagnosis/history">
-                    <Button color="light" size="sm">
+                    <Button color="light" size="sm" className="d-inline-flex align-items-center gap-2 align-self-start align-self-lg-auto">
                       Xem lịch sử
                     </Button>
                   </Link>
                 </div>
-                <div className="table-responsive">
+                <div className="d-flex d-lg-none flex-column gap-3">
+                  {cases.length === 0 ? (
+                    <div className="rounded-3 border border-dashed border-secondary-subtle bg-light-subtle px-4 py-5 text-center">
+                      <div className="avatar-sm mx-auto mb-3">
+                        <div className="avatar-title rounded-circle bg-light text-muted">
+                          <i className="ri-inbox-archive-line fs-20"></i>
+                        </div>
+                      </div>
+                      <h6 className="fw-semibold text-body mb-1">No recent activity</h6>
+                      <p className="text-body-secondary fs-13 mb-0">
+                        Recent diagnosis cases will appear here after data is loaded.
+                      </p>
+                    </div>
+                  ) : (
+                    cases.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-3 border ${index === 0 ? "border-primary-subtle bg-primary-subtle" : "border-secondary-subtle bg-body"} p-3`}
+                      >
+                        <div className="d-flex gap-3">
+                          <div className={`avatar-sm rounded-circle bg-${statusColor[item.status]}-subtle text-${statusColor[item.status]} d-inline-flex align-items-center justify-content-center flex-shrink-0`}>
+                            <i className={`${statusIcon[item.status] || "ri-record-circle-line"} fs-18`}></i>
+                          </div>
+                          <div className="d-flex flex-column gap-2 flex-grow-1">
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                              <span className="fw-semibold text-primary">{item.id}</span>
+                              <Badge color={statusColor[item.status]} className="badge-border">
+                                {item.statusLabel}
+                              </Badge>
+                              <span className="text-body-secondary fs-12">{item.date}</span>
+                            </div>
+                            <div>
+                              <h6 className="fw-semibold text-body mb-1">{item.disease}</h6>
+                              <p className="text-body-secondary fs-13 mb-0">
+                                {item.crop} at {item.farm}
+                              </p>
+                            </div>
+                            <div className="d-flex flex-wrap align-items-center gap-2">
+                              <Badge color={`${confidenceColor(item.confidence)}-subtle`} className={`text-${confidenceColor(item.confidence)} fw-semibold`}>
+                                {item.confidence}% confidence
+                              </Badge>
+                              <span className="text-body-secondary fs-13">
+                                Reporter: {item.owner}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className="d-none d-lg-block table-responsive">
                   <table className="table table-hover align-middle table-nowrap mb-0">
                     <thead className="table-light">
                       <tr>
@@ -708,10 +868,30 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {cases.map((item) => (
-                        <tr key={item.id}>
+                      {cases.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="text-center py-5">
+                            <div className="d-flex flex-column align-items-center gap-2">
+                              <span className="avatar-sm rounded-circle bg-light text-muted d-inline-flex align-items-center justify-content-center">
+                                <i className="ri-inbox-archive-line fs-20"></i>
+                              </span>
+                              <div>
+                                <p className="fw-semibold text-body mb-1">No recent activity</p>
+                                <p className="text-body-secondary fs-13 mb-0">
+                                  Recent diagnosis cases will appear here after data is loaded.
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        cases.map((item) => (
+                        <tr key={item.id} className={item.status === "expert" ? "table-danger" : item.status === "follow-up" ? "table-warning" : ""}>
                           <td>
-                            <span className="fw-semibold text-primary">{item.id}</span>
+                            <div className="d-flex flex-column gap-1">
+                              <span className="fw-semibold text-primary">{item.id}</span>
+                              <span className="text-body-secondary fs-12">{item.date}</span>
+                            </div>
                           </td>
                           <td>
                             <div className="d-flex align-items-center gap-2">
@@ -719,21 +899,33 @@ export default function Dashboard() {
                                 <img
                                   src={item.imageUrl}
                                   alt={item.crop}
-                                  className="rounded"
+                                  className="avatar-xxs rounded object-fit-cover"
                                   style={{ width: 28, height: 28, objectFit: "cover" }}
                                 />
-                              ) : null}
-                              <span>{item.crop}</span>
+                              ) : (
+                                <span className="avatar-xxs rounded-circle bg-light text-muted d-inline-flex align-items-center justify-content-center">
+                                  <i className="ri-leaf-line fs-12"></i>
+                                </span>
+                              )}
+                              <div className="d-flex flex-column gap-1">
+                                <span className="fw-medium text-body">{item.crop}</span>
+                                <span className="text-body-secondary fs-12">{item.farm}</span>
+                              </div>
                             </div>
                           </td>
-                          <td className="text-muted">{item.farm}</td>
-                          <td>{item.disease}</td>
+                          <td className="text-body-secondary">{item.farm}</td>
                           <td>
-                            <div className="d-flex align-items-center gap-2" style={{ minWidth: 130 }}>
+                            <div className="d-flex flex-column gap-1">
+                              <span className="fw-medium text-body">{item.disease}</span>
+                              <span className="text-body-secondary fs-12">Reporter: {item.owner}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2">
                               <Progress
                                 value={item.confidence}
                                 color={confidenceColor(item.confidence)}
-                                style={{ height: 6, flex: 1 }}
+                                className="flex-grow-1"
                               />
                               <span className={`fw-semibold fs-12 text-${confidenceColor(item.confidence)}`}>
                                 {item.confidence}%
@@ -741,14 +933,16 @@ export default function Dashboard() {
                             </div>
                           </td>
                           <td>
-                            <Badge color={statusColor[item.status]}>
+                            <Badge color={statusColor[item.status]} className="d-inline-flex align-items-center gap-1">
+                              <i className={statusIcon[item.status] || "ri-record-circle-line"}></i>
                               {item.statusLabel}
                             </Badge>
                           </td>
                           <td className="text-muted">{item.owner}</td>
                           <td className="text-muted">{item.date}</td>
                         </tr>
-                      ))}
+                      )))
+                      }
                     </tbody>
                   </table>
                 </div>

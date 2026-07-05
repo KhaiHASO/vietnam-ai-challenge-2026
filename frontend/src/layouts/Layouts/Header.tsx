@@ -10,10 +10,6 @@ const logoLight = "/images/logo-light.png";
 
 //import Components
 import SearchOption from "@common/SearchOption";
-import LanguageDropdown from "@common/LanguageDropdown";
-import WebAppsDropdown from "@common/WebAppsDropdown";
-import MyCartDropdown from "@common/MyCartDropdown";
-import FullScreenDropdown from "@common/FullScreenDropdown";
 import NotificationDropdown from "@common/NotificationDropdown";
 import ProfileDropdown from "@common/ProfileDropdown";
 import LightDark from "@common/LightDark";
@@ -160,18 +156,6 @@ const Header = ({ onChangeLayoutMode, layoutModeType, headerClass }: any) => {
                   </Form>
                 </DropdownMenu>
               </Dropdown>
-
-              {/* LanguageDropdown */}
-              <LanguageDropdown />
-
-              {/* WebAppsDropdown */}
-              <WebAppsDropdown />
-
-              {/* MyCartDropdwon */}
-              <MyCartDropdown />
-
-              {/* FullScreenDropdown */}
-              <FullScreenDropdown />
 
               {/* Dark/Light Mode set */}
               <LightDark

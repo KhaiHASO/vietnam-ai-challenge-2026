@@ -195,14 +195,39 @@ const VerticalLayout = (props: any) => {
           <React.Fragment key={key}>
             {/* Main Header */}
             {item["isHeader"] ? (
-              <li className="menu-title">
-                <span data-key="t-menu">{props.t(item.label)} </span>
+              <li
+                className="menu-title"
+                style={{
+                  marginTop: "8px",
+                  marginBottom: "2px",
+                  paddingLeft: "6px",
+                  paddingRight: "6px",
+                }}
+              >
+                <span
+                  data-key="t-menu"
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    letterSpacing: "0.08em",
+                    opacity: 0.72,
+                  }}
+                >
+                  {props.t(item.label)}{" "}
+                </span>
               </li>
             ) : item.subItems ? (
               <li className="nav-item">
                 <Link
                   onClick={item.click}
                   className="nav-link menu-link"
+                  style={{
+                    borderRadius: "12px",
+                    paddingTop: "11px",
+                    paddingBottom: "11px",
+                    paddingLeft: "14px",
+                    paddingRight: "14px",
+                  }}
                   href={item.link ? item.link : "/#"}
                   data-bs-toggle="collapse"
                   aria-expanded={item.stateVariables}
@@ -233,6 +258,13 @@ const VerticalLayout = (props: any) => {
                               <Link
                                 href={subItem.link ? subItem.link : "/#"}
                                 className="nav-link"
+                                style={{
+                                  borderRadius: "10px",
+                                  paddingTop: "9px",
+                                  paddingBottom: "9px",
+                                  paddingLeft: "18px",
+                                  paddingRight: "12px",
+                                }}
                               >
                                 {props.t(subItem.label)}
                                 {subItem.badgeName ? (
@@ -253,6 +285,13 @@ const VerticalLayout = (props: any) => {
                               <Link
                                 onClick={subItem.click}
                                 className="nav-link"
+                                style={{
+                                  borderRadius: "10px",
+                                  paddingTop: "9px",
+                                  paddingBottom: "9px",
+                                  paddingLeft: "18px",
+                                  paddingRight: "12px",
+                                }}
                                 href="/#"
                                 data-bs-toggle="collapse"
                                 aria-expanded={subItem.stateVariables}
@@ -290,6 +329,13 @@ const VerticalLayout = (props: any) => {
                                                     : "/#"
                                                 }
                                                 className="nav-link"
+                                                style={{
+                                                  borderRadius: "10px",
+                                                  paddingTop: "8px",
+                                                  paddingBottom: "8px",
+                                                  paddingLeft: "22px",
+                                                  paddingRight: "12px",
+                                                }}
                                               >
                                                 {props.t(childItem.label)}
                                               </Link>
@@ -299,6 +345,13 @@ const VerticalLayout = (props: any) => {
                                               <Link
                                                 href="/#"
                                                 className="nav-link"
+                                                style={{
+                                                  borderRadius: "10px",
+                                                  paddingTop: "8px",
+                                                  paddingBottom: "8px",
+                                                  paddingLeft: "22px",
+                                                  paddingRight: "12px",
+                                                }}
                                                 onClick={childItem.click}
                                                 data-bs-toggle="collapse"
                                                 aria-expanded={childItem.stateVariables}
@@ -327,6 +380,13 @@ const VerticalLayout = (props: any) => {
                                                             subChildItem.link
                                                           }
                                                           className="nav-link"
+                                                          style={{
+                                                            borderRadius: "10px",
+                                                            paddingTop: "8px",
+                                                            paddingBottom: "8px",
+                                                            paddingLeft: "26px",
+                                                            paddingRight: "12px",
+                                                          }}
                                                           data-key="t-basic-action"
                                                         >
                                                           {props.t(
@@ -356,6 +416,13 @@ const VerticalLayout = (props: any) => {
               <li className="nav-item">
                 <Link
                   className="nav-link menu-link"
+                  style={{
+                    borderRadius: "12px",
+                    paddingTop: "11px",
+                    paddingBottom: "11px",
+                    paddingLeft: "14px",
+                    paddingRight: "14px",
+                  }}
                   href={item.link ? item.link : "/#"}
                 >
                   <i className={item.icon}></i>{" "}
