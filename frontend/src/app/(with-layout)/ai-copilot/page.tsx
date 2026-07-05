@@ -82,6 +82,7 @@ interface DbState {
   intervention_logs?: InterventionLog[];
   farms?: Farm[];
   treatment_logs?: TreatmentLog[];
+  pending_approvals?: Approval[];
 }
 const demoPrompts: Record<string, Array<{ label: string; text: string }>> = {
   sme: [
@@ -726,10 +727,10 @@ export default function AICopilotDashboard() {
                 <h5 className="mb-0 text-warning-emphasis">⏳ Human-in-the-Loop Approval Queue (Yêu cầu chờ duyệt)</h5>
               </CardHeader>
               <CardBody>
-                {dbState?.pending_approvals && dbState.pending_approvals.filter(a => a.status === "Pending").length === 0 ? (
+                {dbState?.pending_approvals && dbState.pending_approvals.filter((a: any) => a.status === "Pending").length === 0 ? (
                   <div className="text-center text-muted py-4">Không có giao dịch/hành động nào cần phê duyệt vào lúc này.</div>
                 ) : (
-                  dbState?.pending_approvals?.filter(a => a.status === "Pending").map((a) => (
+                  dbState?.pending_approvals?.filter((a: any) => a.status === "Pending").map((a: any) => (
                     <div key={a.approval_id} className="border border-warning p-3 rounded-3 mb-3 bg-warning-subtle-light">
                       <div className="d-flex align-items-center justify-content-between mb-2">
                         <span className="fw-bold text-danger fs-14">⚠️ YÊU CẦU DUYỆT HÀNH ĐỘNG RỦI RO</span>

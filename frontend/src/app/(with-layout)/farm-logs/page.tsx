@@ -30,7 +30,7 @@ export default function FarmLogs() {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const response = await axios.get("/api/season-logs");
+        const response: any = await axios.get("/api/season-logs");
         if (response && response.season_logs && response.season_logs.length > 0) {
           const backendLogs = response.season_logs.map((l: any) => ({
             id: l.log_id,
@@ -63,7 +63,7 @@ export default function FarmLogs() {
     return matchType && matchFarm;
   });
 
-  const grouped: Record<string, typeof logEntries> = {};
+  const grouped: Record<string, any[]> = {};
   filtered.forEach((l) => {
     if (!grouped[l.date]) grouped[l.date] = [];
     grouped[l.date].push(l);

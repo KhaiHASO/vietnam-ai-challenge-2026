@@ -308,23 +308,23 @@ const confidenceColor = (value: number) => {
 
 export default function Dashboard() {
   const [kpis, setKpis] = useState<any[]>(kpiData);
-  const [cases, setCases] = useState<any[]>(recentCases);
-  const [reminders, setReminders] = useState<any[]>(remindersToday);
-  const [healthList, setHealthList] = useState<any[]>(farmHealth);
+  const [cases, setCases] = useState<any[]>([]);
+  const [reminders, setReminders] = useState<any[]>([]);
+  const [healthList, setHealthList] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get("/api/dashboard/overview");
+        const response: any = await axios.get("/api/dashboard/overview");
         if (response && response.summary) {
           const s = response.summary;
           const updatedKPIs = [...kpiData];
-          updatedKPIs[0].value = s.diagnosis_cases || 7;
-          updatedKPIs[1].value = s.farms || 6;
-          updatedKPIs[2].value = s.active_reminders || 4;
+          updatedKPIs[0].value = s.diagnosis_cases || 0;
+          updatedKPIs[1].value = s.farms || 0;
+          updatedKPIs[2].value = s.active_reminders || 0;
           setKpis(updatedKPIs);
 
-          if (response.recent_cases && response.recent_cases.length > 0) {
+          if (response.recent_cases) {
             const mappedCases = response.recent_cases.map((c: any) => ({
               id: c.case_id,
               crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
@@ -337,7 +337,7 @@ export default function Dashboard() {
               owner: "Nông dân local",
               imageUrl: c.image_url,
             }));
-            setCases([...mappedCases, ...recentCases]);
+            setCases(mappedCases);
           }
         }
       } catch (err) {
@@ -345,7 +345,25 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await axios.get("/api/farms");
+        const responseReminders: any = await axios.get("/api/reminders");
+        if (responseReminders && responseReminders.reminders) {
+          const mappedReminders = responseReminders.reminders.slice(0, 4).map((r: any) => ({
+            id: r.reminder_id,
+            time: new Date(r.due_at).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+            title: r.title,
+            note: r.notes || r.title,
+            icon: r.type === "camera" ? "ri-camera-line" : r.type === "watering" ? "ri-drop-line" : "ri-eye-line",
+            color: r.priority === "high" ? "danger" : "info",
+            done: r.status === "completed",
+          }));
+          setReminders(mappedReminders);
+        }
+      } catch (err) {
+        console.error("Dashboard reminders fetch error", err);
+      }
+
+      try {
+        const response: any = await axios.get("/api/farms");
         if (response && response.farms) {
           const mappedHealth = response.farms.map((f: any) => ({
             farm: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,

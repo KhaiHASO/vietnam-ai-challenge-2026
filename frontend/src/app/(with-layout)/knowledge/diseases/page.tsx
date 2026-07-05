@@ -28,7 +28,7 @@ export default function DiseasesLibrary() {
   useEffect(() => {
     const fetchDiseases = async () => {
       try {
-        const response = await axios.get("/api/knowledge/diseases");
+        const response: any = await axios.get("/api/knowledge/diseases");
         if (response && response.diseases && response.diseases.length > 0) {
           const mappedDiseases = response.diseases.map((d: any) => {
             const treat = d.treatment || {};
@@ -77,7 +77,7 @@ export default function DiseasesLibrary() {
     const matchGroup = groupFilter === "all" || d.group === groupFilter;
     const matchSearch =
       d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.crops.some((c) => c.toLowerCase().includes(search.toLowerCase()));
+      d.crops.some((c: string) => c.toLowerCase().includes(search.toLowerCase()));
     return matchGroup && matchSearch;
   });
 
@@ -163,7 +163,7 @@ export default function DiseasesLibrary() {
                   <div className="mb-2">
                     <p className="fs-12 text-muted mb-1">Cây thường gặp:</p>
                     <div className="d-flex flex-wrap gap-1">
-                      {d.crops.slice(0, 3).map((c) => (
+                      {d.crops.slice(0, 3).map((c: string) => (
                         <Badge key={c} color="light" className="text-muted fs-11">
                           {c}
                         </Badge>
@@ -224,7 +224,7 @@ export default function DiseasesLibrary() {
                     <p className="fs-13 text-muted">{selected.treatment}</p>
                     <h6 className="fw-semibold">🌱 Cây thường gặp</h6>
                     <div className="d-flex flex-wrap gap-1">
-                      {selected.crops.map((c) => (
+                      {selected.crops.map((c: string) => (
                         <Badge key={c} color="light" className="text-muted">
                           {c}
                         </Badge>

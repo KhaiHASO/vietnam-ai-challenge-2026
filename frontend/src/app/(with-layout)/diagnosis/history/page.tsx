@@ -47,7 +47,7 @@ export default function DiagnosisHistory() {
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await axios.get("/api/diagnosis/history");
+        const response: any = await axios.get("/api/diagnosis/history");
         if (response && response.cases) {
           const backendCases = response.cases.map((c: any) => ({
             id: c.case_id,

@@ -18,7 +18,7 @@ export default function ExpertReview() {
 
   const fetchReviews = async () => {
     try {
-      const response = await axios.get("/api/expert/reviews");
+      const response: any = await axios.get("/api/expert/reviews");
       if (response && response.reviews) {
         const backendReviews = response.reviews.map((r: any) => ({
           id: r.review_id,
@@ -190,7 +190,7 @@ export default function ExpertReview() {
 
                     {/* Agent trace */}
                     <div className="d-flex flex-wrap gap-1 mb-3">
-                      {c.agents.map((ag) => (
+                      {c.agents.map((ag: string) => (
                         <Badge key={ag} color="light" className="text-muted fs-11">
                           <i className="ri-cpu-line me-1"></i>{ag}
                         </Badge>

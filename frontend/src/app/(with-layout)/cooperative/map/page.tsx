@@ -70,7 +70,7 @@ export default function CooperativeMap() {
   useEffect(() => {
     const fetchCooperativeMap = async () => {
       try {
-        const response = await axios.get("/api/cooperative/disease-map");
+        const response: any = await axios.get("/api/cooperative/disease-map");
         if (response && response.map_points) {
           const points = response.map_points;
           const updatedDistricts = mapDistricts.map((d) => {

@@ -33,7 +33,7 @@ export default function DiagnosisFollowUp() {
   useEffect(() => {
     const fetchFollowUp = async () => {
       try {
-        const response = await axios.get("/api/diagnosis/follow-up");
+        const response: any = await axios.get("/api/diagnosis/follow-up");
         if (response) {
           const list: any[] = [];
           

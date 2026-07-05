@@ -121,7 +121,7 @@ export default function DiagnosisNew() {
         });
       }, 200);
 
-      const response = await axios.post("/api/cropdoctor/diagnose", formData, {
+      const response: any = await axios.post("/api/cropdoctor/diagnose", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -242,7 +242,7 @@ export default function DiagnosisNew() {
       const recs = diagnosisResult?.reasoning?.content?.safe_recommendations?.join("; ") || "Tỉa và tiêu hủy lá quả bệnh";
       const imageUrlVal = diagnosisResult?.image_path ? "/" + diagnosisResult.image_path.replace("\\", "/") : null;
 
-      const response = await axios.post("/api/diagnosis/cases", {
+      const response: any = await axios.post("/api/diagnosis/cases", {
         farm_id: selectedFarm,
         crop: cropVal,
         summary: summaryVal,

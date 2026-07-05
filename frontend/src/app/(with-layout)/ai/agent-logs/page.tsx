@@ -20,7 +20,7 @@ export default function AgentLogs() {
   useEffect(() => {
     const fetchTraces = async () => {
       try {
-        const response = await axios.get("/api/diagnosis/history");
+        const response: any = await axios.get("/api/diagnosis/history");
         if (response && response.cases) {
           const mappedTraces = response.cases.map((c: any) => ({
             id: c.case_id,
@@ -280,7 +280,7 @@ export default function AgentLogs() {
                       }}
                     />
                     <div className="d-flex flex-column gap-3">
-                      {agentSteps.map((step, index) => (
+                      {agentSteps.map((step: any, index: number) => (
                         <div key={step.agent} className="d-flex gap-3 position-relative">
                           <div
                             className={`bg-${step.color}-subtle text-${step.color} rounded-circle d-flex align-items-center justify-content-center flex-shrink-0`}
@@ -307,7 +307,7 @@ export default function AgentLogs() {
                             </div>
                             <p className="fs-13 mb-3">{step.output}</p>
                             <div className="d-flex flex-wrap gap-2">
-                              {step.evidence.map((item) => (
+                              {step.evidence.map((item: string) => (
                                 <code key={item} className="fs-12 px-2 py-1 rounded bg-light">
                                   {item}
                                 </code>
