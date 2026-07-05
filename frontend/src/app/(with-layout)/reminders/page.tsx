@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
+import axios from "axios";
 
 const reminders = [
   {
@@ -121,9 +122,42 @@ const typeColorMap: Record<string, string> = {
 };
 
 export default function Reminders() {
+  const [reminderList, setReminderList] = useState<any[]>(reminders);
   const [done, setDone] = useState<string[]>(
     reminders.filter((r) => r.done).map((r) => r.id)
   );
+
+  useEffect(() => {
+    const fetchReminders = async () => {
+      try {
+        const response = await axios.get("/api/listing/reminders");
+        if (response.data && response.data.reminders && response.data.reminders.length > 0) {
+          const backendReminders = response.data.reminders.map((r: any) => ({
+            id: r.reminder_id,
+            date: new Date(r.due_at).toLocaleDateString("vi-VN"),
+            time: new Date(r.due_at).toLocaleTimeString("vi-VN", { hour: '2-digit', minute: '2-digit' }),
+            isToday: new Date(r.due_at).toDateString() === new Date().toDateString(),
+            type: r.type || "check",
+            typeLabel: r.title,
+            typeColor: typeColorMap[r.type] || "warning",
+            typeIcon: r.type === "camera" ? "ri-camera-line" : r.type === "watering" ? "ri-drop-line" : "ri-eye-line",
+            farm: "Vườn canh tác",
+            crop: "🌱 Cây trồng",
+            desc: r.notes || r.title,
+            done: r.status === "completed",
+            urgent: r.priority === "high",
+          }));
+          setReminderList([...backendReminders, ...reminders]);
+        } else {
+          setReminderList(reminders);
+        }
+      } catch (err) {
+        console.error(err);
+        setReminderList(reminders);
+      }
+    };
+    fetchReminders();
+  }, []);
 
   const toggle = (id: string) => {
     setDone((prev) =>
@@ -131,8 +165,8 @@ export default function Reminders() {
     );
   };
 
-  const todayItems = reminders.filter((r) => r.isToday);
-  const upcomingItems = reminders.filter((r) => !r.isToday);
+  const todayItems = reminderList.filter((r) => r.isToday);
+  const upcomingItems = reminderList.filter((r) => !r.isToday);
   const todayDone = todayItems.filter((r) => done.includes(r.id)).length;
 
   return (

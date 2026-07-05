@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Input, Modal, ModalHeader, ModalBody } from "reactstrap";
+import axios from "axios";
 
 const diseases = [
   {
@@ -148,11 +149,49 @@ const severityLabel: Record<string, { label: string; color: string }> = {
 };
 
 export default function DiseasesLibrary() {
+  const [diseaseList, setDiseaseList] = useState<any[]>(diseases);
   const [groupFilter, setGroupFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<typeof diseases[0] | null>(null);
+  const [selected, setSelected] = useState<any | null>(null);
 
-  const filtered = diseases.filter((d) => {
+  useEffect(() => {
+    const fetchDiseases = async () => {
+      try {
+        const response = await axios.get("/api/listing/knowledge/diseases");
+        if (response.data && response.data.diseases && response.data.diseases.length > 0) {
+          const mappedDiseases = response.data.diseases.map((d: any) => {
+            const treat = d.treatment || {};
+            const treatStr = [treat.biological, treat.prevention, treat.chemical].filter(Boolean).join(". ");
+            return {
+              id: d.disease_id,
+              name: d.name,
+              pathogen: d.disease_id === "dis-001" ? "Colletotrichum spp." : d.disease_id === "dis-002" ? "Xanthomonas campestris" : "Nấm/Vi khuẩn hại",
+              group: d.disease_id.includes("pest") ? "pest" : d.disease_id.includes("bacterial") ? "bacterial" : "fungal",
+              groupLabel: d.disease_id.includes("pest") ? "Sâu hại" : d.disease_id.includes("bacterial") ? "Vi khuẩn" : "Bệnh nấm",
+              groupColor: d.disease_id.includes("pest") ? "info" : d.disease_id.includes("bacterial") ? "warning" : "danger",
+              crops: d.disease_id === "dis-001" ? ["Ớt", "Cà chua", "Dưa leo"] : ["Cây trồng"],
+              emoji: d.disease_id.includes("pest") ? "🐛" : d.disease_id.includes("bacterial") ? "🦠" : "🍄",
+              symptoms: d.symptoms || "Không có mô tả triệu chứng.",
+              conditions: d.description || "Nhiệt độ ấm, độ ẩm cao.",
+              treatment: treatStr || "Tỉa lá bệnh, bón phân cân đối.",
+              severity: d.severity || "medium",
+              ai_accuracy: 85,
+              commonInRegion: true,
+            };
+          });
+          setDiseaseList(mappedDiseases);
+        } else {
+          setDiseaseList(diseases);
+        }
+      } catch (err) {
+        console.error(err);
+        setDiseaseList(diseases);
+      }
+    };
+    fetchDiseases();
+  }, []);
+
+  const filtered = diseaseList.filter((d) => {
     const matchGroup = groupFilter === "all" || d.group === groupFilter;
     const matchSearch =
       d.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -172,7 +211,7 @@ export default function DiseasesLibrary() {
                   Thư viện bệnh cây
                 </h4>
                 <p className="text-muted mb-0 fs-13">
-                  {diseases.length} bệnh phổ biến · Đồng Nai & vùng lân cận
+                  {diseaseList.length} bệnh phổ biến · Đồng Nai & vùng lân cận
                 </p>
               </div>
             </div>

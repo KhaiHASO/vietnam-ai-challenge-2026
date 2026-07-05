@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Progress, Input, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
+import axios from "axios";
 
 const pendingCases = [
   {
@@ -53,31 +54,81 @@ type TabType = "pending" | "confirmed" | "corrected";
 
 export default function ExpertReview() {
   const [tab, setTab] = useState<TabType>("pending");
-  const [selected, setSelected] = useState<typeof pendingCases[0] | null>(null);
+  const [cases, setCases] = useState<any[]>(pendingCases);
+  const [selected, setSelected] = useState<any | null>(null);
   const [confirmed, setConfirmed] = useState<string[]>(["rev-003"]);
   const [corrected, setCorrected] = useState<string[]>([]);
   const [noteText, setNoteText] = useState("");
 
-  const allCases = pendingCases;
-  const filteredCases = allCases.filter((c) => {
-    if (tab === "pending") return !confirmed.includes(c.id) && !corrected.includes(c.id);
-    if (tab === "confirmed") return confirmed.includes(c.id);
-    if (tab === "corrected") return corrected.includes(c.id);
-    return true;
-  });
+  const fetchReviews = async () => {
+    try {
+      const response = await axios.get("/api/expert/reviews");
+      if (response.data && response.data.reviews && response.data.reviews.length > 0) {
+        const backendReviews = response.data.reviews.map((r: any) => ({
+          id: r.review_id,
+          emoji: "🌱",
+          crop: "Cây trồng",
+          farm: `Mã ca: ${r.case_id}`,
+          farmer: "Nông dân local",
+          phone: "0901 000 000",
+          aiDisease: "Cần thẩm định",
+          aiConfidence: r.risk_level === "high" ? 85 : 60,
+          symptomAnswer: `Mức độ rủi ro: ${r.risk_level}. Lý do gửi duyệt chuyên gia: ${r.reasons?.join("; ") || "Không rõ"}`,
+          date: new Date(r.created_at).toLocaleDateString("vi-VN"),
+          status: r.status,
+          agents: ["Vision", "Symptom", "Reasoning", "ExpertAgent"],
+        }));
+        setCases([...backendReviews, ...pendingCases]);
+      } else {
+        setCases(pendingCases);
+      }
+    } catch (err) {
+      console.error(err);
+      setCases(pendingCases);
+    }
+  };
 
-  const pendingCount = allCases.filter((c) => !confirmed.includes(c.id) && !corrected.includes(c.id)).length;
-  const confirmedCount = confirmed.length;
-  const correctedCount = corrected.length;
+  useEffect(() => {
+    fetchReviews();
+  }, []);
 
-  const handleConfirm = (id: string) => {
+  const handleConfirm = async (id: string) => {
+    try {
+      await axios.post(`/api/expert/reviews/${id}/approve`, {
+        notes: "Xác nhận chẩn đoán chính xác và duyệt phát đồ IPM.",
+      });
+      alert("Xác nhận đúng ca bệnh thành công!");
+    } catch (err) {
+      console.error(err);
+    }
     setConfirmed([...confirmed, id]);
     setSelected(null);
   };
-  const handleCorrect = (id: string) => {
+
+  const handleCorrect = async (id: string) => {
+    try {
+      await axios.post(`/api/expert/reviews/${id}/reject`, {
+        notes: noteText || "Điều chỉnh phương án điều trị.",
+      });
+      alert("Đã điều chỉnh chẩn đoán thành công!");
+    } catch (err) {
+      console.error(err);
+    }
     setCorrected([...corrected, id]);
     setSelected(null);
   };
+
+  const allCases = cases;
+  const filteredCases = allCases.filter((c) => {
+    if (tab === "pending") return !confirmed.includes(c.id) && !corrected.includes(c.id) && c.status !== "approved" && c.status !== "rejected";
+    if (tab === "confirmed") return confirmed.includes(c.id) || c.status === "approved";
+    if (tab === "corrected") return corrected.includes(c.id) || c.status === "rejected";
+    return true;
+  });
+
+  const pendingCount = allCases.filter((c) => !confirmed.includes(c.id) && !corrected.includes(c.id) && c.status !== "approved" && c.status !== "rejected").length;
+  const confirmedCount = allCases.filter((c) => confirmed.includes(c.id) || c.status === "approved").length;
+  const correctedCount = allCases.filter((c) => corrected.includes(c.id) || c.status === "rejected").length;
 
   return (
     <div className="page-content">

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
 import ReactApexChart from "react-apexcharts";
+import axios from "axios";
 
 // Mock disease outbreak locations (simulated as district data)
 const mapDistricts = [
@@ -101,10 +102,42 @@ const severityConfig: Record<string, { color: string; label: string; dot: string
 };
 
 export default function CooperativeMap() {
-  const [selectedDistrict, setSelectedDistrict] = useState<typeof mapDistricts[0] | null>(null);
+  const [districts, setDistricts] = useState<any[]>(mapDistricts);
+  const [selectedDistrict, setSelectedDistrict] = useState<any | null>(null);
 
-  const totalCases = mapDistricts.reduce((s, d) => s + d.cases, 0);
-  const highRisk = mapDistricts.filter((d) => d.severity === "high").length;
+  useEffect(() => {
+    const fetchCooperativeMap = async () => {
+      try {
+        const response = await axios.get("/api/listing/cooperative-disease-map");
+        if (response.data && response.data.map_points && response.data.map_points.length > 0) {
+          const points = response.data.map_points;
+          const updatedDistricts = mapDistricts.map((d) => {
+            const matchCount = points.filter((p: any) => 
+              (p.location && p.location.toLowerCase().includes(d.name.toLowerCase())) || 
+              (p.farm_name && p.farm_name.toLowerCase().includes(d.name.toLowerCase()))
+            ).length;
+            
+            const totalCasesCount = d.cases + matchCount;
+            return {
+              ...d,
+              cases: totalCasesCount,
+              severity: totalCasesCount > 10 ? "high" : totalCasesCount > 5 ? "medium" : "low",
+            };
+          });
+          setDistricts(updatedDistricts);
+        } else {
+          setDistricts(mapDistricts);
+        }
+      } catch (err) {
+        console.error(err);
+        setDistricts(mapDistricts);
+      }
+    };
+    fetchCooperativeMap();
+  }, []);
+
+  const totalCases = districts.reduce((s, d) => s + d.cases, 0);
+  const highRisk = districts.filter((d) => d.severity === "high").length;
 
   return (
     <div className="page-content">
@@ -134,7 +167,7 @@ export default function CooperativeMap() {
         <Row className="mb-3">
           {[
             { label: "Tổng ca toàn tỉnh", value: totalCases, icon: "ri-virus-line", color: "danger" },
-            { label: "Vùng có dịch", value: mapDistricts.length, icon: "ri-map-pin-2-line", color: "warning" },
+            { label: "Vùng có dịch", value: districts.length, icon: "ri-map-pin-2-line", color: "warning" },
             { label: "Ca tăng trong tuần", value: "+8", icon: "ri-arrow-up-line", color: "danger" },
             { label: "Vùng đang giảm", value: 1, icon: "ri-arrow-down-line", color: "success" },
           ].map((s, idx) => (
@@ -188,13 +221,13 @@ export default function CooperativeMap() {
                     </text>
                     {/* District dots */}
                     {[
-                      { x: 230, y: 100, ...mapDistricts[0] },
-                      { x: 300, y: 200, ...mapDistricts[1] },
-                      { x: 370, y: 230, ...mapDistricts[2] },
-                      { x: 180, y: 130, ...mapDistricts[3] },
-                      { x: 380, y: 100, ...mapDistricts[4] },
+                      { x: 230, y: 100, ...districts[0] },
+                      { x: 300, y: 200, ...districts[1] },
+                      { x: 370, y: 230, ...districts[2] },
+                      { x: 180, y: 130, ...districts[3] },
+                      { x: 380, y: 100, ...districts[4] },
                     ].map((d) => (
-                      <g key={d.id} style={{ cursor: "pointer" }} onClick={() => setSelectedDistrict(mapDistricts.find(m => m.id === d.id) || null)}>
+                      <g key={d.id} style={{ cursor: "pointer" }} onClick={() => setSelectedDistrict(districts.find(m => m.id === d.id) || null)}>
                         <circle
                           cx={d.x}
                           cy={d.y}

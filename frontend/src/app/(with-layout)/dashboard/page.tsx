@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import CountUp from "react-countup";
 import ReactApexChart from "react-apexcharts";
+import axios from "axios";
 import {
   Badge,
   Button,
@@ -306,6 +307,61 @@ const confidenceColor = (value: number) => {
 };
 
 export default function Dashboard() {
+  const [kpis, setKpis] = useState<any[]>(kpiData);
+  const [cases, setCases] = useState<any[]>(recentCases);
+  const [reminders, setReminders] = useState<any[]>(remindersToday);
+  const [healthList, setHealthList] = useState<any[]>(farmHealth);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await axios.get("/api/dashboard/overview");
+        if (response.data && response.data.summary) {
+          const s = response.data.summary;
+          const updatedKPIs = [...kpiData];
+          updatedKPIs[0].value = s.diagnosis_cases || 7;
+          updatedKPIs[1].value = s.farms || 6;
+          updatedKPIs[2].value = s.active_reminders || 4;
+          setKpis(updatedKPIs);
+
+          if (response.data.recent_cases && response.data.recent_cases.length > 0) {
+            const mappedCases = response.data.recent_cases.map((c: any) => ({
+              id: c.case_id,
+              crop: c.crop === "ot" ? "Ớt" : c.crop === "tomato" ? "Cà chua" : c.crop.charAt(0).toUpperCase() + c.crop.slice(1),
+              farm: c.location || "Vườn local",
+              disease: c.summary || "Đang chẩn đoán",
+              confidence: c.risk_level === "high" ? 85 : 70,
+              status: c.status === "created" ? "follow-up" : c.status || "follow-up",
+              statusLabel: c.status === "created" ? "Theo dõi 48h" : c.status === "resolved" ? "Đã xử lý" : "Đang kiểm tra",
+              date: new Date(c.created_at).toLocaleDateString("vi-VN"),
+              owner: "Nông dân local",
+            }));
+            setCases([...mappedCases, ...recentCases]);
+          }
+        }
+      } catch (err) {
+        console.error("Dashboard overview fetch error", err);
+      }
+
+      try {
+        const response = await axios.get("/api/dashboard/farms");
+        if (response.data && response.data.farms) {
+          const mappedHealth = response.data.farms.map((f: any) => ({
+            farm: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,
+            crop: f.crop_type,
+            health: Math.round(100 - f.leaf_damage_percent),
+            cases: f.leaf_damage_percent > 30 ? 2 : 1,
+            color: (100 - f.leaf_damage_percent) > 80 ? "success" : "warning",
+          }));
+          setHealthList(mappedHealth);
+        }
+      } catch (err) {
+        console.error("Dashboard farms fetch error", err);
+      }
+    };
+    fetchDashboardData();
+  }, []);
+
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -388,7 +444,7 @@ export default function Dashboard() {
         </Row>
 
         <Row>
-          {kpiData.map((kpi) => (
+          {kpis.map((kpi) => (
             <Col xl={3} md={6} key={kpi.id} className="mb-3">
               <Link href={kpi.link} className="text-decoration-none">
                 <Card className="card-animate h-100 mb-0" id={kpi.id}>
@@ -481,7 +537,7 @@ export default function Dashboard() {
                   </Link>
                 </div>
                 <div className="d-flex flex-column gap-2">
-                  {remindersToday.map((item) => (
+                  {reminders.map((item) => (
                     <div
                       key={item.id}
                       className={`d-flex gap-3 p-2 rounded ${item.done ? "opacity-50" : ""}`}
@@ -513,9 +569,8 @@ export default function Dashboard() {
           <Col xl={4} className="mb-3">
             <Card className="h-100">
               <CardBody>
-                <h5 className="fw-semibold mb-3">Sức khỏe vườn</h5>
                 <div className="d-flex flex-column gap-3">
-                  {farmHealth.map((farm) => (
+                  {healthList.map((farm) => (
                     <div key={farm.farm}>
                       <div className="d-flex align-items-center justify-content-between mb-1">
                         <div>
@@ -634,7 +689,7 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentCases.map((item) => (
+                      {cases.map((item) => (
                         <tr key={item.id}>
                           <td>
                             <span className="fw-semibold text-primary">{item.id}</span>

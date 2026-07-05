@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button } from "reactstrap";
+import axios from "axios";
 
 const logEntries = [
   {
@@ -127,16 +128,46 @@ const farmOptions = [
 ];
 
 export default function FarmLogs() {
+  const [logsList, setLogsList] = useState<any[]>(logEntries);
   const [typeFilter, setTypeFilter] = useState("all");
   const [farmFilter, setFarmFilter] = useState("all");
 
-  const filtered = logEntries.filter((l) => {
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const response = await axios.get("/api/listing/season-logs");
+        if (response.data && response.data.season_logs && response.data.season_logs.length > 0) {
+          const backendLogs = response.data.season_logs.map((l: any) => ({
+            id: l.log_id,
+            date: new Date(l.created_at || new Date()).toLocaleDateString("vi-VN"),
+            time: new Date(l.created_at || new Date()).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }),
+            type: l.treatment_type === "irrigation" ? "watering" : "treatment",
+            typeLabel: l.treatment_type === "irrigation" ? "Tưới nước" : "Can thiệp dịch bệnh",
+            typeColor: l.treatment_type === "irrigation" ? "primary" : "warning",
+            typeIcon: l.treatment_type === "irrigation" ? "ri-drop-line" : "ri-medicine-bottle-line",
+            farm: "Vườn canh tác",
+            crop: "🌱 Cây trồng",
+            content: l.notes || "Ghi nhận xử lý mùa vụ.",
+            by: "Hệ thống / Nông dân",
+          }));
+          setLogsList([...backendLogs, ...logEntries]);
+        } else {
+          setLogsList(logEntries);
+        }
+      } catch (err) {
+        console.error(err);
+        setLogsList(logEntries);
+      }
+    };
+    fetchLogs();
+  }, []);
+
+  const filtered = logsList.filter((l) => {
     const matchType = typeFilter === "all" || l.type === typeFilter;
     const matchFarm = farmFilter === "all" || l.farm === farmFilter;
     return matchType && matchFarm;
   });
 
-  // Group by date
   const grouped: Record<string, typeof logEntries> = {};
   filtered.forEach((l) => {
     if (!grouped[l.date]) grouped[l.date] = [];

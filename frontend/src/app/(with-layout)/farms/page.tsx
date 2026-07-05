@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Progress } from "reactstrap";
 import Link from "next/link";
+import axios from "axios";
 
 const farms = [
   {
@@ -62,6 +63,45 @@ const stageIcons: Record<string, string> = {
 };
 
 export default function Farms() {
+  const [farmList, setFarmList] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFarms = async () => {
+      try {
+        const response = await axios.get("/api/dashboard/farms");
+        if (response.data && response.data.farms) {
+          const backendFarms = response.data.farms.map((f: any) => ({
+            id: f.farm_id,
+            name: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,
+            location: "Đồng Nai",
+            area: f.farm_id === "FRM-501" ? "2.000 m²" : "3.500 m²",
+            crop: f.crop_type,
+            emoji: f.crop_type.toLowerCase().includes("durian") ? "🥑" : f.crop_type.toLowerCase().includes("rice") ? "🌾" : "🌱",
+            stage: f.days_since_last_treatment < 5 ? "Ra hoa" : "Vươn ngọn",
+            stageColor: f.days_since_last_treatment < 5 ? "success" : "primary",
+            health: Math.round(100 - f.leaf_damage_percent),
+            healthLabel: (100 - f.leaf_damage_percent) > 80 ? "Rất tốt" : (100 - f.leaf_damage_percent) > 60 ? "Tốt" : "Cần chú ý",
+            healthColor: (100 - f.leaf_damage_percent) > 80 ? "success" : (100 - f.leaf_damage_percent) > 60 ? "success" : "warning",
+            activeCases: f.leaf_damage_percent > 30 ? 2 : 1,
+            lastCheck: `Hôm qua, 16:00`,
+            notes: f.leaf_damage_percent > 30 ? "Phát hiện stress hoặc đốm bệnh rải rác" : "Cây khỏe mạnh bình thường",
+          }));
+          setFarmList(backendFarms);
+        } else {
+          setFarmList(farms);
+        }
+      } catch (err) {
+        console.error(err);
+        setFarmList(farms);
+      }
+    };
+    fetchFarms();
+  }, []);
+
+  const totalAreaVal = farmList.reduce((acc, curr) => acc + parseInt(curr.area.replace(/\./g, "").replace(" m²", "")), 0);
+  const totalCasesVal = farmList.reduce((acc, curr) => acc + curr.activeCases, 0);
+  const uniqueCrops = new Set(farmList.map((f) => f.crop)).size;
+
   return (
     <div className="page-content">
       <div className="container-fluid">
@@ -75,7 +115,7 @@ export default function Farms() {
                   Vườn của tôi
                 </h4>
                 <p className="text-muted mb-0 fs-13">
-                  3 vườn · Tổng diện tích 7.300 m² · Đồng Nai
+                  {farmList.length} vườn · Tổng diện tích {totalAreaVal.toLocaleString("vi-VN")} m² · Đồng Nai
                 </p>
               </div>
               <Button color="success" id="btn-add-farm" className="d-flex align-items-center gap-2">
@@ -88,9 +128,9 @@ export default function Farms() {
         {/* Summary Stats */}
         <Row className="mb-3">
           {[
-            { label: "Tổng diện tích", value: "7.300 m²", icon: "ri-map-2-line", color: "primary" },
-            { label: "Ca đang theo dõi", value: "4 ca", icon: "ri-heart-pulse-line", color: "danger" },
-            { label: "Cây trồng", value: "3 loại", icon: "ri-leaf-line", color: "success" },
+            { label: "Tổng diện tích", value: `${totalAreaVal.toLocaleString("vi-VN")} m²`, icon: "ri-map-2-line", color: "primary" },
+            { label: "Ca đang theo dõi", value: `${totalCasesVal} ca`, icon: "ri-heart-pulse-line", color: "danger" },
+            { label: "Cây trồng", value: `${uniqueCrops} loại`, icon: "ri-leaf-line", color: "success" },
             { label: "Lần kiểm tra cuối", value: "Hôm nay", icon: "ri-calendar-check-line", color: "info" },
           ].map((s) => (
             <Col md={3} key={s.label} className="mb-2">
@@ -111,7 +151,7 @@ export default function Farms() {
 
         {/* Farm Cards */}
         <Row>
-          {farms.map((farm) => (
+          {farmList.map((farm) => (
             <Col xl={4} md={6} key={farm.id} className="mb-3">
               <Card className="h-100" id={farm.id} style={{ transition: "box-shadow 0.2s" }}>
                 <CardBody className="p-4">
