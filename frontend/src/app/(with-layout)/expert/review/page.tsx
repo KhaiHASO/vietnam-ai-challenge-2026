@@ -4,66 +4,22 @@ import React, { useState, useEffect } from "react";
 import { Row, Col, Card, CardBody, Badge, Button, Progress, Input, Modal, ModalHeader, ModalBody, ModalFooter } from "reactstrap";
 import axios from "axios";
 
-const pendingCases = [
-  {
-    id: "rev-001",
-    emoji: "🌶️",
-    crop: "Ớt",
-    farm: "Vườn ớt Trảng Bom",
-    farmer: "Nguyễn Văn A",
-    phone: "0901 234 567",
-    aiDisease: "Phấn trắng (Powdery Mildew)",
-    aiConfidence: 61,
-    symptomAnswer: "Xuất hiện sau mưa, lớp trắng trên lá, chưa lan sang quả",
-    date: "01/07/2026",
-    status: "pending",
-    agents: ["Vision", "Symptom", "Context", "Reasoning"],
-  },
-  {
-    id: "rev-002",
-    emoji: "🍅",
-    crop: "Cà chua",
-    farm: "Ruộng cà Long Thành",
-    farmer: "Trần Thị B",
-    phone: "0912 345 678",
-    aiDisease: "Héo rũ Fusarium",
-    aiConfidence: 55,
-    symptomAnswer: "Cây héo từ từ, lá vàng dưới trước. Thân cắt ra thấy nâu bên trong",
-    date: "25/06/2026",
-    status: "pending",
-    agents: ["Vision", "Symptom", "Context", "Reasoning", "Safety"],
-  },
-  {
-    id: "rev-003",
-    emoji: "🌾",
-    crop: "Lúa",
-    farm: "Ruộng lúa Nhơn Trạch",
-    farmer: "Lê Văn C",
-    phone: "0923 456 789",
-    aiDisease: "Đạo ôn cổ bông (Neck Blast)",
-    aiConfidence: 71,
-    symptomAnswer: "Cổ bông thối đen, hạt lép. Xảy ra sau sương mù liên tục",
-    date: "20/06/2026",
-    status: "confirmed",
-    expertNote: "Xác nhận đúng Đạo ôn cổ bông. Khuyến nghị phun Tricyclazole ngay.",
-    agents: ["Vision", "Symptom", "Context"],
-  },
-];
+// Pure backend expert reviews loaded dynamically.
 
 type TabType = "pending" | "confirmed" | "corrected";
 
 export default function ExpertReview() {
   const [tab, setTab] = useState<TabType>("pending");
-  const [cases, setCases] = useState<any[]>(pendingCases);
+  const [cases, setCases] = useState<any[]>([]);
   const [selected, setSelected] = useState<any | null>(null);
-  const [confirmed, setConfirmed] = useState<string[]>(["rev-003"]);
+  const [confirmed, setConfirmed] = useState<string[]>([]);
   const [corrected, setCorrected] = useState<string[]>([]);
   const [noteText, setNoteText] = useState("");
 
   const fetchReviews = async () => {
     try {
       const response = await axios.get("/api/expert/reviews");
-      if (response && response.reviews && response.reviews.length > 0) {
+      if (response && response.reviews) {
         const backendReviews = response.reviews.map((r: any) => ({
           id: r.review_id,
           emoji: "🌱",
@@ -78,13 +34,13 @@ export default function ExpertReview() {
           status: r.status,
           agents: ["Vision", "Symptom", "Reasoning", "ExpertAgent"],
         }));
-        setCases([...backendReviews, ...pendingCases]);
+        setCases(backendReviews);
       } else {
-        setCases(pendingCases);
+        setCases([]);
       }
     } catch (err) {
       console.error(err);
-      setCases(pendingCases);
+      setCases([]);
     }
   };
 
