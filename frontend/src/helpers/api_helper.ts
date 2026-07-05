@@ -1,6 +1,5 @@
 import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 import config from "../config";
-import "./fakebackend";
 
 const { api } = config;
 
