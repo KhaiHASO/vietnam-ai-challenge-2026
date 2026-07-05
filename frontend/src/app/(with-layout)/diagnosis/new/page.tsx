@@ -12,21 +12,13 @@ import {
 } from "reactstrap";
 import Link from "next/link";
 
-type Step = 1 | 2 | 3 | 4;
-
-const crops = [
-  { value: "ot", label: "🌶️ Ớt" },
-  { value: "ca-chua", label: "🍅 Cà chua" },
-  { value: "dua-leo", label: "🥒 Dưa leo" },
-  { value: "cai-xanh", label: "🥬 Cải xanh" },
-  { value: "lua", label: "🌾 Lúa" },
-  { value: "ngo", label: "🌽 Ngô" },
-];
+type Step = 1 | 2 | 3;
 
 const farms = [
   { value: "vuon-ot", label: "Vườn ớt Trảng Bom" },
   { value: "ruong-ca", label: "Ruộng cà Long Thành" },
   { value: "vuon-dua", label: "Vườn dưa Nhơn Trạch" },
+  { value: "vuon-sau-rieng", label: "Vườn sầu riêng CRP-304" },
 ];
 
 const agentSteps = [
@@ -84,7 +76,6 @@ const agentSteps = [
 
 export default function DiagnosisNew() {
   const [step, setStep] = useState<Step>(1);
-  const [selectedCrop, setSelectedCrop] = useState("");
   const [selectedFarm, setSelectedFarm] = useState("");
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -108,7 +99,7 @@ export default function DiagnosisNew() {
         clearInterval(interval);
         setTimeout(() => {
           setIsAnalyzing(false);
-          setStep(3);
+          setStep(2);
         }, 600);
       }
       setAnalysisProgress(Math.round(prog));
@@ -116,10 +107,9 @@ export default function DiagnosisNew() {
   };
 
   const steps = [
-    { num: 1, label: "Thông tin cây" },
-    { num: 2, label: "Upload ảnh" },
-    { num: 3, label: "AI phân tích" },
-    { num: 4, label: "Kết quả" },
+    { num: 1, label: "Upload ảnh & Chọn vườn" },
+    { num: 2, label: "AI phân tích" },
+    { num: 3, label: "Kết quả" },
   ];
 
   return (
@@ -205,45 +195,16 @@ export default function DiagnosisNew() {
           </Col>
         </Row>
 
-        {/* Step 1: Crop & Farm Selection */}
+        {/* Step 1: Farm Selection & Image Upload */}
         {step === 1 && (
           <Row className="justify-content-center">
             <Col xl={7}>
               <Card>
                 <CardBody className="p-4">
-                  <h5 className="fw-semibold mb-4">
-                    Bước 1: Chọn cây trồng & vườn
+                  <h5 className="fw-semibold mb-3">
+                    Bước 1: Chọn vườn canh tác & Tải lên hình ảnh
                   </h5>
-                  <div className="mb-4">
-                    <label className="form-label fw-medium">
-                      🌱 Loại cây trồng
-                    </label>
-                    <div className="d-flex flex-wrap gap-2">
-                      {crops.map((c) => (
-                        <button
-                          key={c.value}
-                          id={`crop-${c.value}`}
-                          onClick={() => setSelectedCrop(c.value)}
-                          className="btn"
-                          style={{
-                            border: `2px solid ${selectedCrop === c.value ? "#2dce89" : "var(--vz-border-color)"}`,
-                            background:
-                              selectedCrop === c.value
-                                ? "rgba(45,206,137,0.1)"
-                                : "transparent",
-                            color:
-                              selectedCrop === c.value
-                                ? "#2dce89"
-                                : "var(--vz-body-color)",
-                            fontWeight: selectedCrop === c.value ? 600 : 400,
-                            transition: "all 0.2s",
-                          }}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  
                   <div className="mb-4">
                     <label className="form-label fw-medium">
                       📍 Vườn canh tác
@@ -262,97 +223,62 @@ export default function DiagnosisNew() {
                       ))}
                     </select>
                   </div>
-                  <div className="d-flex justify-content-end">
-                    <Button
-                      color="success"
-                      id="btn-step1-next"
-                      disabled={!selectedCrop || !selectedFarm}
-                      onClick={() => setStep(2)}
-                    >
-                      Tiếp theo
-                      <i className="ri-arrow-right-line ms-2"></i>
-                    </Button>
-                  </div>
-                </CardBody>
-              </Card>
-            </Col>
-          </Row>
-        )}
 
-        {/* Step 2: Image Upload */}
-        {step === 2 && (
-          <Row className="justify-content-center">
-            <Col xl={7}>
-              <Card>
-                <CardBody className="p-4">
-                  <h5 className="fw-semibold mb-1">Bước 2: Chụp / Upload ảnh</h5>
-                  <p className="text-muted fs-13 mb-4">
-                    Chụp ảnh rõ nét phần lá/quả bị bệnh trong điều kiện ánh sáng tốt
-                  </p>
-                  <label
-                    htmlFor="file-upload"
-                    id="drop-zone"
-                    className="d-flex flex-column align-items-center justify-content-center p-5 rounded"
-                    style={{
-                      border: "2px dashed #2dce89",
-                      background: "rgba(45,206,137,0.04)",
-                      cursor: "pointer",
-                      transition: "background 0.2s",
-                      minHeight: 220,
-                    }}
-                  >
-                    {uploadedFile ? (
-                      <div className="text-center">
-                        <div
-                          style={{
-                            width: 80,
-                            height: 80,
-                            background: "rgba(45,206,137,0.1)",
-                            borderRadius: 12,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            margin: "0 auto 16px",
-                          }}
-                        >
-                          <i className="ri-image-2-line text-success fs-36"></i>
+                  <div className="mb-4">
+                    <label className="form-label fw-medium">
+                      📸 Hình ảnh lá bị bệnh
+                    </label>
+                    <label
+                      htmlFor="file-upload"
+                      id="drop-zone"
+                      className="d-flex flex-column align-items-center justify-content-center p-4 rounded"
+                      style={{
+                        border: "2px dashed #2dce89",
+                        background: "rgba(45,206,137,0.04)",
+                        cursor: "pointer",
+                        transition: "background 0.2s",
+                        minHeight: 180,
+                      }}
+                    >
+                      {uploadedFile ? (
+                        <div className="text-center">
+                          <i className="ri-image-2-line text-success fs-36 mb-2 d-block"></i>
+                          <p className="fw-semibold text-success mb-1">
+                            {uploadedFile}
+                          </p>
+                          <p className="text-muted fs-12 mb-0">
+                            Nhấn để thay đổi ảnh
+                          </p>
                         </div>
-                        <p className="fw-semibold text-success mb-1">
-                          {uploadedFile}
-                        </p>
-                        <p className="text-muted fs-12 mb-0">
-                          Nhấn để thay đổi ảnh
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="text-center">
-                        <i className="ri-upload-cloud-2-line fs-48 text-success mb-3 d-block"></i>
-                        <p className="fw-semibold mb-1">
-                          Kéo thả ảnh vào đây
-                        </p>
-                        <p className="text-muted fs-13 mb-0">
-                          hoặc nhấn để chọn ảnh · JPG, PNG, HEIC
-                        </p>
-                      </div>
-                    )}
-                    <input
-                      id="file-upload"
-                      type="file"
-                      accept="image/*"
-                      className="d-none"
-                      onChange={handleUpload}
-                    />
-                  </label>
-                  <div className="mt-3 p-3 rounded" style={{ background: "rgba(255,193,7,0.08)", border: "1px solid rgba(255,193,7,0.3)" }}>
+                      ) : (
+                        <div className="text-center">
+                          <i className="ri-upload-cloud-2-line fs-36 text-success mb-2 d-block"></i>
+                          <p className="fw-semibold mb-1">
+                            Kéo thả ảnh hoặc nhấn để chọn
+                          </p>
+                          <p className="text-muted fs-12 mb-0">
+                            Hỗ trợ JPG, PNG, WEBP
+                          </p>
+                        </div>
+                      )}
+                      <input
+                        id="file-upload"
+                        type="file"
+                        accept="image/*"
+                        className="d-none"
+                        onChange={handleUpload}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-3 p-3 rounded mb-4" style={{ background: "rgba(255,193,7,0.08)", border: "1px solid rgba(255,193,7,0.3)" }}>
                     <p className="mb-0 fs-13 text-warning">
                       <i className="ri-lightbulb-flash-line me-2"></i>
-                      <strong>Mẹo:</strong> Chụp từ khoảng cách 20–30cm, đủ ánh sáng, tập trung vào vùng bị bệnh
+                      <strong>Mẹo:</strong> Chụp cận cảnh vết bệnh trên lá từ 20-30cm dưới ánh sáng tự nhiên.
                     </p>
                   </div>
-                  <div className="d-flex justify-content-between mt-4">
-                    <Button color="light" id="btn-step2-back" onClick={() => setStep(1)}>
-                      <i className="ri-arrow-left-line me-2"></i>Quay lại
-                    </Button>
+
+                  <div className="d-flex justify-content-end">
                     {isAnalyzing ? (
                       <div className="d-flex flex-column align-items-end gap-2" style={{ minWidth: 200 }}>
                         <span className="text-muted fs-13">
@@ -364,13 +290,14 @@ export default function DiagnosisNew() {
                       <Button
                         color="success"
                         id="btn-analyze"
+                        disabled={!selectedFarm || !uploadedFile}
                         onClick={() => {
                           setUploadedFile("anh_ot_benh_mau.jpg");
                           runAnalysis();
                         }}
                       >
                         <i className="ri-cpu-line me-2"></i>
-                        Phân tích AI
+                        Bắt đầu phân tích AI
                       </Button>
                     )}
                   </div>
@@ -380,13 +307,13 @@ export default function DiagnosisNew() {
           </Row>
         )}
 
-        {/* Step 3: Agent Analysis */}
-        {step === 3 && (
+        {/* Step 2: Agent Analysis */}
+        {step === 2 && (
           <Row className="justify-content-center">
             <Col xl={8}>
               <Card>
                 <CardBody className="p-4">
-                  <h5 className="fw-semibold mb-1">Bước 3: AI Agent đang phân tích</h5>
+                  <h5 className="fw-semibold mb-1">Bước 2: AI Agent đang phân tích</h5>
                   <p className="text-muted fs-13 mb-4">
                     Multi-agent system xử lý hình ảnh → hỏi triệu chứng → kết luận
                   </p>
@@ -433,8 +360,11 @@ export default function DiagnosisNew() {
                       </div>
                     ))}
                   </div>
-                  <div className="d-flex justify-content-end mt-4">
-                    <Button color="success" id="btn-view-result" onClick={() => setStep(4)}>
+                  <div className="d-flex justify-content-between mt-4">
+                    <Button color="light" id="btn-step2-back" onClick={() => setStep(1)}>
+                      <i className="ri-arrow-left-line me-2"></i>Quay lại
+                    </Button>
+                    <Button color="success" id="btn-view-result" onClick={() => setStep(3)}>
                       Xem kết quả chẩn đoán
                       <i className="ri-arrow-right-line ms-2"></i>
                     </Button>
@@ -445,8 +375,8 @@ export default function DiagnosisNew() {
           </Row>
         )}
 
-        {/* Step 4: Result */}
-        {step === 4 && (
+        {/* Step 3: Result */}
+        {step === 3 && (
           <Row className="justify-content-center">
             <Col xl={9}>
               <Row>
