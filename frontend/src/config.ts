@@ -28,7 +28,7 @@ const config: Config = {
     APP_ID: "",
   },
   api: {
-    API_URL: "https://api-node.themesbrand.website",
+    API_URL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000",
   },
 };
 
