@@ -9,6 +9,7 @@ class DiagnosisCaseCreate(BaseModel):
     summary: str | None = None
     location: str | None = None
     notes: str | None = None
+    image_url: str | None = None
 
 
 class DiagnosisCaseResponse(BaseModel):

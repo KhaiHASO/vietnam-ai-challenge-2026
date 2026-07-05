@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if PROJECT_ROOT not in sys.path:
@@ -63,6 +64,12 @@ def create_app() -> FastAPI:
     )
 
     register_exception_handlers(app)
+
+    # Mount static files for images serving
+    os.makedirs(settings.upload_root_path, exist_ok=True)
+    app.mount("/uploads", StaticFiles(directory=str(settings.upload_root_path)), name="uploads")
+    os.makedirs("tmp_uploads", exist_ok=True)
+    app.mount("/tmp_uploads", StaticFiles(directory="tmp_uploads"), name="tmp_uploads")
 
     app.include_router(health.router)
     app.include_router(status.router)

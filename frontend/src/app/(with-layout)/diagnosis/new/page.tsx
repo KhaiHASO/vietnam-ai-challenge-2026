@@ -80,6 +80,7 @@ export default function DiagnosisNew() {
   const [selectedFarm, setSelectedFarm] = useState("");
   const [uploadedFile, setUploadedFile] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [diagnosisResult, setDiagnosisResult] = useState<any>(null);
@@ -89,8 +90,10 @@ export default function DiagnosisNew() {
 
   const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setUploadedFile(e.target.files[0].name);
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      setUploadedFile(selectedFile.name);
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
     }
   };
 
@@ -162,6 +165,7 @@ export default function DiagnosisNew() {
       const cropVal = diagnosisResult?.vision?.final_disease_label?.split("___")[0]?.toLowerCase() || "tomato";
       const summaryVal = diagnosisResult?.vision?.final_disease_vi || "Thán thư (Anthracnose)";
       const recs = diagnosisResult?.reasoning?.content?.safe_recommendations?.join("; ") || "Tỉa và tiêu hủy lá quả bệnh";
+      const imageUrlVal = diagnosisResult?.image_path ? "/" + diagnosisResult.image_path.replace("\\", "/") : null;
 
       const response = await axios.post("/api/diagnosis/cases", {
         farm_id: selectedFarm,
@@ -169,6 +173,7 @@ export default function DiagnosisNew() {
         summary: summaryVal,
         location: farmLabel,
         notes: `IPM: ${recs}`,
+        image_url: imageUrlVal,
       });
 
       if (response && response.case_id) {
@@ -327,12 +332,19 @@ export default function DiagnosisNew() {
                       }}
                     >
                       {uploadedFile ? (
-                        <div className="text-center">
-                          <i className="ri-image-2-line text-success fs-36 mb-2 d-block"></i>
-                          <p className="fw-semibold text-success mb-1">
+                        <div className="text-center p-2">
+                          {previewUrl && (
+                            <img
+                              src={previewUrl}
+                              alt="Selected leaf"
+                              className="img-thumbnail mb-2"
+                              style={{ maxHeight: 120, objectFit: "cover" }}
+                            />
+                          )}
+                          <p className="fw-semibold text-success mb-1 fs-12">
                             {uploadedFile}
                           </p>
-                          <p className="text-muted fs-12 mb-0">
+                          <p className="text-muted fs-11 mb-0">
                             Nhấn để thay đổi ảnh
                           </p>
                         </div>
@@ -469,6 +481,16 @@ export default function DiagnosisNew() {
                 <Col md={6} className="mb-3">
                   <Card className="h-100">
                     <CardBody className="p-4">
+                      {previewUrl && (
+                        <div className="mb-3 rounded overflow-hidden" style={{ border: "1px solid var(--vz-border-color)" }}>
+                          <img
+                            src={previewUrl}
+                            alt="Diagnosed leaf"
+                            className="img-fluid w-100"
+                            style={{ maxHeight: 180, objectFit: "cover" }}
+                          />
+                        </div>
+                      )}
                       <div className="d-flex align-items-center gap-2 mb-3">
                         <div style={{ width: 12, height: 12, borderRadius: "50%", background: "#ef4444" }}></div>
                         <h6 className="fw-bold mb-0 text-danger">⚠️ Kết quả chẩn đoán</h6>

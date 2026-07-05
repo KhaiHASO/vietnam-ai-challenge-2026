@@ -68,7 +68,7 @@ export default function Farms() {
   useEffect(() => {
     const fetchFarms = async () => {
       try {
-        const response = await axios.get("/api/dashboard/farms");
+        const response = await axios.get("/api/farms");
         if (response && response.farms) {
           const backendFarms = response.farms.map((f: any) => ({
             id: f.farm_id,

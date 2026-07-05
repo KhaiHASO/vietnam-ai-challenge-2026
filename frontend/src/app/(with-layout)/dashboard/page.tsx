@@ -335,6 +335,7 @@ export default function Dashboard() {
               statusLabel: c.status === "created" ? "Theo dõi 48h" : c.status === "resolved" ? "Đã xử lý" : "Đang kiểm tra",
               date: new Date(c.created_at).toLocaleDateString("vi-VN"),
               owner: "Nông dân local",
+              imageUrl: c.image_url,
             }));
             setCases([...mappedCases, ...recentCases]);
           }
@@ -344,7 +345,7 @@ export default function Dashboard() {
       }
 
       try {
-        const response = await axios.get("/api/dashboard/farms");
+        const response = await axios.get("/api/farms");
         if (response && response.farms) {
           const mappedHealth = response.farms.map((f: any) => ({
             farm: f.name === "Plot A - Durian" ? "Vườn sầu riêng CRP-304" : f.name === "Plot B - Rice" ? "Ruộng lúa Nhơn Trạch" : f.name,
@@ -694,7 +695,19 @@ export default function Dashboard() {
                           <td>
                             <span className="fw-semibold text-primary">{item.id}</span>
                           </td>
-                          <td>{item.crop}</td>
+                          <td>
+                            <div className="d-flex align-items-center gap-2">
+                              {item.imageUrl ? (
+                                <img
+                                  src={item.imageUrl}
+                                  alt={item.crop}
+                                  className="rounded"
+                                  style={{ width: 28, height: 28, objectFit: "cover" }}
+                                />
+                              ) : null}
+                              <span>{item.crop}</span>
+                            </div>
+                          </td>
                           <td className="text-muted">{item.farm}</td>
                           <td>{item.disease}</td>
                           <td>

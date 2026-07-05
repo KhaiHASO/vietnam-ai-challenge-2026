@@ -17,6 +17,7 @@ const logEntries = [
     crop: "🌶️ Ớt",
     content: "AI chẩn đoán Thán thư (89% confidence). Đốm nâu xuất hiện trên lá và 2-3 quả non.",
     by: "AI Agent",
+    imageUrl: "https://images.unsplash.com/photo-1592417817098-8f3d6eb19675?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-002",
@@ -30,6 +31,7 @@ const logEntries = [
     crop: "🌶️ Ớt",
     content: "Tỉa và tiêu hủy 15 lá bệnh. Giảm tưới 30%. Cải thiện thông gió bằng cách tỉa bớt cành.",
     by: "Nguyễn Văn A",
+    imageUrl: "https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-003",
@@ -43,6 +45,7 @@ const logEntries = [
     crop: "🌶️ Ớt",
     content: "Chụp lại ảnh theo dõi. Bệnh có vẻ chưa lan rộng thêm. Tiếp tục theo dõi 48h.",
     by: "Nguyễn Văn A",
+    imageUrl: "https://images.unsplash.com/photo-1563514220747-a33533927e99?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-004",
@@ -56,6 +59,7 @@ const logEntries = [
     crop: "🍅 Cà chua",
     content: "Tưới nhỏ giọt 45 phút. Độ ẩm đất đạt 65%. Cây phát triển bình thường.",
     by: "Nguyễn Văn A",
+    imageUrl: "https://images.unsplash.com/photo-1463123081488-729f1a1ee02e?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-005",
@@ -69,6 +73,7 @@ const logEntries = [
     crop: "🌶️ Ớt",
     content: "AI chẩn đoán Héo xanh vi khuẩn (78% confidence). Phát hiện 4 cây có triệu chứng héo đột ngột.",
     by: "AI Agent",
+    imageUrl: "https://images.unsplash.com/photo-1500937386664-56d1dfef3854?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-006",
@@ -82,6 +87,7 @@ const logEntries = [
     crop: "🥒 Dưa leo",
     content: "Bón NPK 20-20-15 lần 2. Liều 30g/gốc. Tổng 54kg cho 1.800m².",
     by: "Nguyễn Văn A",
+    imageUrl: "https://images.unsplash.com/photo-1593113598332-cd288d649433?auto=format&fit=crop&w=600&q=80",
   },
   {
     id: "log-007",
@@ -108,6 +114,7 @@ const logEntries = [
     crop: "🍅 Cà chua",
     content: "AI phát hiện nghi héo rũ Fusarium (55% confidence). Đã gửi chuyên gia xác nhận.",
     by: "AI Agent",
+    imageUrl: "https://images.unsplash.com/photo-1589656966895-2f33e7653819?auto=format&fit=crop&w=600&q=80",
   },
 ];
 
@@ -298,6 +305,16 @@ export default function FarmLogs() {
                               <span className="text-muted fs-11">{log.time}</span>
                             </div>
                             <p className="mb-1 fs-13">{log.content}</p>
+                            {log.imageUrl && (
+                              <div className="my-2 rounded overflow-hidden" style={{ maxHeight: 150, border: "1px solid var(--vz-border-color)" }}>
+                                <img
+                                  src={log.imageUrl}
+                                  alt="Log preview"
+                                  className="img-fluid"
+                                  style={{ objectFit: "cover", width: "100%", maxHeight: 150 }}
+                                />
+                              </div>
+                            )}
                             <span className="text-muted fs-11">
                               <i className="ri-user-line me-1"></i>
                               {log.by}

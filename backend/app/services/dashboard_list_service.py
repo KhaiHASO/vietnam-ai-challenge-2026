@@ -61,6 +61,11 @@ class DashboardListService:
 
     async def diagnosis_history(self) -> dict[str, Any]:
         cases = await self.repository.find_many("diagnosis_cases", {}, sort=[("created_at", -1)])
+        for case in cases:
+            if not case.get("image_url"):
+                image = await self.repository.find_one("case_images", {"case_id": case["case_id"]})
+                if image:
+                    case["image_url"] = image.get("uri")
         return {"cases": cases}
 
     async def diagnosis_follow_up(self) -> dict[str, Any]:

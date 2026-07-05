@@ -75,14 +75,36 @@ class DiagnosisService:
 
     async def create_case(self, request: DiagnosisCaseCreate) -> dict[str, Any]:
         now = _now()
+        case_id = _new_id("case")
+        status = "created"
+
+        if request.image_url:
+            image_id = _new_id("img")
+            img_filename = request.image_url.replace("\\", "/").split("/")[-1]
+            img_doc = {
+                "image_id": image_id,
+                "case_id": case_id,
+                "uri": request.image_url,
+                "filename": img_filename,
+                "original_filename": img_filename,
+                "content_type": "image/jpeg",
+                "size_bytes": 0,
+                "status": "uploaded",
+                "created_at": now,
+                "updated_at": now,
+            }
+            await self.repository.insert_one("case_images", img_doc)
+            status = "image_uploaded"
+
         document = {
-            "case_id": _new_id("case"),
+            "case_id": case_id,
             "farm_id": request.farm_id,
             "crop": request.crop.strip().lower(),
-            "status": "created",
+            "status": status,
             "summary": request.summary,
             "location": request.location,
             "notes": request.notes,
+            "image_url": request.image_url,
             "risk_level": None,
             "needs_expert_review": False,
             "created_at": now,

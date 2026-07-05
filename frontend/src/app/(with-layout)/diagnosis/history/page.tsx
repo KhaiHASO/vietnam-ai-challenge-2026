@@ -142,6 +142,7 @@ export default function DiagnosisHistory() {
             statusLabel: c.status === "created" ? "Mới tạo" : c.status === "resolved" ? "Đã xử lý" : "Đang theo dõi",
             date: new Date(c.created_at).toLocaleDateString("vi-VN"),
             agentSteps: 5,
+            imageUrl: c.image_url,
           }));
           setCases([...backendCases, ...allCases]);
         } else {
@@ -264,8 +265,19 @@ export default function DiagnosisHistory() {
                         filtered.map((c) => (
                           <tr key={c.id} id={c.id}>
                             <td className="ps-4">
-                              <span className="fs-20 me-2">{c.emoji}</span>
-                              <strong>{c.crop}</strong>
+                              <div className="d-flex align-items-center gap-2">
+                                {c.imageUrl ? (
+                                  <img
+                                    src={c.imageUrl}
+                                    alt={c.crop}
+                                    className="rounded"
+                                    style={{ width: 36, height: 36, objectFit: "cover" }}
+                                  />
+                                ) : (
+                                  <span className="fs-20">{c.emoji}</span>
+                                )}
+                                <strong>{c.crop}</strong>
+                              </div>
                             </td>
                             <td className="text-muted fs-13">{c.farm}</td>
                             <td>
