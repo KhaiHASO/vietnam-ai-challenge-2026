@@ -1,29 +1,22 @@
 import logging
 
-from ai_layer.orchestrator import AIOrchestrator
+from ai_layer.rag.models import CopilotRequest, CopilotAnswer
+from ai_layer.rag.service import RAGService
 
 logger = logging.getLogger("backend.chat")
 
-RAG_FALLBACK_MESSAGE = "không đủ căn cứ"
 
-
-def process_chat(query: str) -> dict[str, object]:
-    try:
-        orchestrator = AIOrchestrator()
-        return orchestrator.process_request(query)
-    except Exception as exc:
-        logger.warning("Chat orchestration failed; returning RAG fallback: %s", exc.__class__.__name__)
-        return {
-            "success": True,
-            "response": RAG_FALLBACK_MESSAGE,
-            "message": RAG_FALLBACK_MESSAGE,
-            "fallback_used": True,
-            "fallback_reason": exc.__class__.__name__,
-            "telemetry": {
-                "step_4_rag": {
-                    "name": "RAG / Knowledge Fallback",
-                    "status": "fallback",
-                    "message": RAG_FALLBACK_MESSAGE,
-                }
-            },
-        }
+async def process_legacy_chat(query: str, tenant_id: str, user_id: str, rag_service: RAGService) -> dict[str, object]:
+    request = CopilotRequest(
+        tenant_id=tenant_id,
+        user_id=user_id,
+        query=query
+    )
+    answer = await rag_service.process(request)
+    return {
+        "success": True,
+        "response": answer.content,
+        "message": answer.content,
+        "status": answer.status.value,
+        "trace": answer.trace
+    }

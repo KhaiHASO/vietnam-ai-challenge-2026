@@ -36,6 +36,7 @@ from app.routes import (
     listing,
     status,
 )
+from app.auth.routes import admin_router, router as auth_router
 from app.services.startup_service import initialize_demo_state
 
 logger = logging.getLogger("backend")
@@ -43,15 +44,18 @@ logger = logging.getLogger("backend")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    try:
-        initialize_demo_state()
-    except Exception:
-        logger.exception("Demo data initialization failed")
+    if settings.demo_mode:
+        try:
+            initialize_demo_state()
+        except Exception:
+            logger.exception("Demo data initialization failed")
 
     await connect_to_mongo()
     yield
     await close_mongo_connection()
 
+
+from app.middleware.request_context import RequestContextMiddleware
 
 def create_app() -> FastAPI:
     app = FastAPI(
@@ -67,6 +71,7 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_middleware(RequestContextMiddleware)
 
     register_exception_handlers(app)
 
@@ -86,12 +91,19 @@ def create_app() -> FastAPI:
     app.include_router(listing.router)
     app.include_router(knowledge.router)
     app.include_router(cooperative.router)
+
     app.include_router(chat.router)
     app.include_router(database.router)
     app.include_router(approvals.router)
     app.include_router(cropdoctor_router)
+    app.include_router(auth_router, prefix="/api/v1")
+    app.include_router(admin_router, prefix="/api/v1")
+
+    from app.copilot.routes import router as copilot_router
+    from app.copilot.memory_routes import router as memory_router
+    app.include_router(copilot_router)
+    app.include_router(memory_router)
 
     return app
-
 
 app = create_app()

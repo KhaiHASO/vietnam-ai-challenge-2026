@@ -7,7 +7,7 @@ logger = logging.getLogger("backend.mongo_schema")
 ASCENDING = 1
 DESCENDING = -1
 VALIDATION_LEVEL = "moderate"
-VALIDATION_ACTION = "warn"
+VALIDATION_ACTION = "error"
 
 
 @dataclass(frozen=True)
@@ -240,6 +240,205 @@ COLLECTION_SPECS: tuple[CollectionSpec, ...] = (
                 "metrics": {"bsonType": "object"},
                 "notes": {"bsonType": "string"},
             },
+        ),
+    ),
+    CollectionSpec(
+        name="users",
+        validator=_json_schema(
+            required=["user_id", "tenant_id", "username", "normalized_username", "hashed_password", "roles", "created_at"],
+            properties={
+                **_base_props(),
+                "user_id": {"bsonType": "string"},
+                "tenant_id": {"bsonType": "string"},
+                "username": {"bsonType": "string"},
+                "normalized_username": {"bsonType": "string"},
+                "email": {"bsonType": ["string", "null"]},
+                "hashed_password": {"bsonType": "string"},
+                "roles": {"bsonType": "array"},
+                "is_active": {"bsonType": "bool"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_users_username_unique",
+                keys=(("tenant_id", ASCENDING), ("normalized_username", ASCENDING)),
+                options={"unique": True},
+            ),
+            IndexSpec(
+                name="idx_users_email_unique",
+                keys=(("tenant_id", ASCENDING), ("email", ASCENDING)),
+                options={"unique": True, "sparse": True},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="refresh_sessions",
+        validator=_json_schema(
+            required=["token_id", "family_id", "user_id", "tenant_id", "hashed_token", "expires_at", "created_at"],
+            properties={
+                **_base_props(),
+                "token_id": {"bsonType": "string"},
+                "family_id": {"bsonType": "string"},
+                "user_id": {"bsonType": "string"},
+                "tenant_id": {"bsonType": "string"},
+                "hashed_token": {"bsonType": "string"},
+                "expires_at": {"bsonType": "date"},
+                "revoked": {"bsonType": "bool"},
+                "consumed_at": {"bsonType": ["date", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_refresh_sessions_token_hash_unique",
+                keys=(("hashed_token", ASCENDING),),
+                options={"unique": True},
+            ),
+            IndexSpec(
+                name="idx_refresh_sessions_family_id",
+                keys=(("family_id", ASCENDING),),
+            ),
+            IndexSpec(
+                name="idx_refresh_sessions_user_id",
+                keys=(("user_id", ASCENDING),),
+            ),
+            IndexSpec(
+                name="idx_refresh_sessions_expiry_ttl",
+                keys=(("expires_at", ASCENDING),),
+                options={"expireAfterSeconds": 0},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="refresh_families",
+        validator=_json_schema(
+            required=["family_id", "revoked", "updated_at"],
+            properties={
+                **_base_props(),
+                "family_id": {"bsonType": "string"},
+                "revoked": {"bsonType": "bool"},
+                "revoked_at": {"bsonType": ["date", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_refresh_families_id_unique",
+                keys=(("family_id", ASCENDING),),
+                options={"unique": True},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="audit_events",
+        validator=_json_schema(
+            required=["event_id", "event_type", "occurred_at"],
+            properties={
+                "event_id": {"bsonType": "string"},
+                "event_type": {"bsonType": "string"},
+                "occurred_at": {"bsonType": "date"},
+                "tenant_id": {"bsonType": "string"},
+                "user_id": {"bsonType": "string"},
+                "actor_id": {"bsonType": "string"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_audit_events_occurred_at",
+                keys=(("occurred_at", DESCENDING),),
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="idempotency_records",
+        validator=_json_schema(
+            required=["idempotency_key", "request_hash", "status", "created_at"],
+            properties={
+                **_base_props(),
+                "idempotency_key": {"bsonType": "string"},
+                "request_hash": {"bsonType": "string"},
+                "status": {"bsonType": "string"},
+                "response": {"bsonType": ["object", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_idempotency_key",
+                keys=(("idempotency_key", ASCENDING),),
+                options={"unique": True},
+            ),
+            IndexSpec(
+                name="idx_idempotency_ttl",
+                keys=(("created_at", ASCENDING),),
+                options={"expireAfterSeconds": 86400},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="copilot_sessions",
+        validator=_json_schema(
+            required=["session_id", "tenant_id", "user_id", "revision", "created_at"],
+            properties={
+                **_base_props(),
+                "session_id": {"bsonType": "string"},
+                "tenant_id": {"bsonType": "string"},
+                "user_id": {"bsonType": "string"},
+                "revision": {"bsonType": ["int", "long", "double", "decimal"]},
+                "title": {"bsonType": "string"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_copilot_sessions_session_id",
+                keys=(("session_id", ASCENDING),),
+                options={"unique": True},
+            ),
+            IndexSpec(
+                name="idx_copilot_sessions_user_id",
+                keys=(("tenant_id", ASCENDING), ("user_id", ASCENDING)),
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="copilot_messages",
+        validator=_json_schema(
+            required=["message_id", "session_id", "sequence", "role", "content", "created_at"],
+            properties={
+                **_base_props(),
+                "message_id": {"bsonType": "string"},
+                "session_id": {"bsonType": "string"},
+                "sequence": {"bsonType": ["int", "long", "double", "decimal"]},
+                "role": {"bsonType": "string"},
+                "content": {"bsonType": "string"},
+                "status": {"bsonType": "string"},
+                "trace": {"bsonType": ["object", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_copilot_messages_session_seq",
+                keys=(("session_id", ASCENDING), ("sequence", ASCENDING)),
+                options={"unique": True},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="copilot_events",
+        validator=_json_schema(
+            required=["event_id", "session_id", "sequence", "type", "timestamp"],
+            properties={
+                **_base_props(),
+                "event_id": {"bsonType": "string"},
+                "session_id": {"bsonType": "string"},
+                "sequence": {"bsonType": ["int", "long", "double", "decimal"]},
+                "type": {"bsonType": "string"},
+                "payload": {"bsonType": ["object", "null"]},
+                "timestamp": {"bsonType": "date"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                name="idx_copilot_events_session_seq",
+                keys=(("session_id", ASCENDING), ("sequence", ASCENDING)),
+            ),
         ),
     ),
 )
