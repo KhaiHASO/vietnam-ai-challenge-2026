@@ -13,7 +13,7 @@
 - Target one single-tenant Docker/VPS deployment first; retain `tenant_id` and `domain_id` in all state and evidence contracts.
 - Roles are exactly `admin`, `expert`, and `operator`; there is no public signup.
 - Access JWT lifetime is 15 minutes; opaque refresh token maximum lifetime is 7 days with rotation and reuse detection.
-- DeepSeek is the primary production provider; Ollama is a policy-controlled local fallback; OpenAI and Gemini remain optional adapters.
+- FPT AI Factory is the preferred competition gateway when `FPT_AI_FACTORY_API_KEY` is configured, serving the selected DeepSeek/Qwen-class model plus embedding/rerank capabilities; direct DeepSeek is the next production provider, Ollama is a policy-controlled local fallback, and OpenAI/Gemini remain optional adapters.
 - Business state is MongoDB; working memory/cache/job transport is Redis; vector search is persistent ChromaDB; source files use `ObjectStorage` with local-volume and S3-compatible adapters.
 - `Memory != Evidence`; memory facts never satisfy evidence or citation requirements.
 - No backend module may import ChromaDB, LangGraph, embedding providers, or provider SDKs directly; use `RAGService` only.
@@ -464,7 +464,7 @@ git commit -m "feat: add rotating authentication and RBAC"
 - Test: `tests/ai_layer/rag/contracts/test_contracts.py`
 
 **Interfaces:**
-- Produces: `CopilotRequest`, `Evidence`, `Citation`, `VersionSet`, `CopilotAnswer`, `Abstention`, `CopilotEvent`.
+- Produces: `CopilotRequest`, `Evidence`, `Citation`, `ModelSignal`, `VersionSet`, `CopilotAnswer`, `Abstention`, `CopilotEvent`.
 
 - [ ] **Step 1: Write failing invariant tests**
 
@@ -503,6 +503,8 @@ Keep `validators_passed: bool` as an internal `Field(exclude=True)` on the assur
 - [ ] **Step 4: Implement version and provenance fields**
 
 `VersionSet` includes `domain_pack`, `knowledge_index`, `prompt`, `policy`, `provider_model`, and `validator_bundle`. `Evidence` includes chunk/document/source/checksum, tenant/domain/index scope, score, content, page/section, and source title. `Citation` may only reference an evidence `chunk_id` later verified by the assurance pipeline.
+
+`ModelSignal` carries typed non-evidence signals such as PyTorch `risk_level`, `priority`, `requires_review`, confidence, model version, latency, and engine status. It is displayed/audited separately and never inserted into citations.
 
 - [ ] **Step 5: Run tests and verify GREEN**
 
@@ -755,6 +757,10 @@ git commit -m "feat: add RAG assurance and abstention gates"
 
 **Files:**
 - Create: `ai_layer/rag/providers/gateway.py`
+- Create: `ai_layer/rag/providers/fpt_ai_factory.py`
+- Create: `ai_layer/rag/embeddings/fpt_ai_factory.py`
+- Create: `ai_layer/rag/rerankers/fpt_ai_factory.py`
+- Create: `ai_layer/rag/tools/pytorch_triage.py`
 - Rewrite: `ai_layer/rag/agentic/state.py`
 - Rewrite: `ai_layer/rag/agentic/nodes.py`
 - Rewrite: `ai_layer/rag/agentic/graph.py`
@@ -764,6 +770,8 @@ git commit -m "feat: add RAG assurance and abstention gates"
 - Test: `tests/ai_layer/rag/test_service.py`
 - Test: `tests/ai_layer/rag/agentic/test_graph.py`
 - Test: `tests/ai_layer/rag/providers/test_gateway.py`
+- Test: `tests/ai_layer/rag/providers/test_fpt_ai_factory.py`
+- Test: `tests/ai_layer/rag/tools/test_pytorch_triage.py`
 
 **Interfaces:**
 - Produces: `ProviderGateway.generate()`, `AgenticRAGRunner.run()`, `RAGService.ask()`, `RAGService.stream()`, `RAGService.ingest()`.
@@ -801,13 +809,17 @@ Expected: FAIL because the facade and bounded runner do not exist.
 
 Use an OpenAI-compatible async adapter for DeepSeek/OpenAI/Ollama-compatible endpoints. Provider exceptions remain exceptions, never returned as answer text. Gateway enforces capability/risk policy, timeout, bounded transient retry, circuit state, and explicit `degraded` metadata. High-risk calls may not fall back to a weaker provider unless the domain policy permits it.
 
+Add a server-only FPT AI Factory adapter using Bearer authentication and configured model IDs. Register independent chat, embedding, and rerank capabilities so RAG can prove more than a single chat API call. Never serialize the key, include it in cache keys, or expose it through `NEXT_PUBLIC_*`. Trace only provider name, model/version, token counts, latency, cache savings, status code class, and request ID.
+
+Wrap `ai_layer.pytorch_engine.inference.predict_triage` as a typed `pytorch_triage` capability. Its `ModelSignal` affects route class, action risk, queue priority, and HITL requirement; heuristic fallback must set `engine_status="fallback"` and cannot be presented as a PyTorch prediction.
+
 - [ ] **Step 4: Implement typed agent state and bounded graph**
 
 State includes request, memory context, route class, evidence, rewrite/reflect counts, generated draft, validation verdicts, versions, degraded state, and trace ID. Fast path skips planner/reflect but retains all safety/evidence/citation/output gates. Standard path permits one repair; complex path permits maximum two reflect/retrieve loops.
 
 - [ ] **Step 5: Implement RAGService orchestration**
 
-Order: validate input → resolve registries → load scoped memory/cache candidate → route → retrieve/agent loop → evidence gate → structured generate → citation/claim gate → action policy → cache eligibility → append memory/conversation event → answer. `stream()` emits typed lifecycle events and token deltas only after safe draft validation; it never emits chain-of-thought.
+Order: validate input → resolve registries → load scoped memory/cache candidate → obtain PyTorch triage signal → route → retrieve/agent loop → evidence gate → structured generate → citation/claim gate → action policy using the triage signal → cache eligibility → append memory/conversation event → answer. `stream()` emits typed lifecycle/model-signal events and token deltas only after safe draft validation; it never emits chain-of-thought.
 
 - [ ] **Step 6: Keep compatibility shims**
 
@@ -1218,6 +1230,8 @@ Desktop uses an asymmetric grid with a slim conversation rail, dominant message 
 
 Add layout-matched skeletons, actionable empty state, inline network error, visible degraded provider badge, approval panel, and neutral abstention panel with at most three recovery actions. Preserve the composer value after error/abstain. Citation click focuses the exact source item.
 
+Show a compact “Decision signals” disclosure for FPT provider/model latency and PyTorch risk/priority/model version. Label heuristic fallback explicitly; do not mix model signals into the evidence/citation panel.
+
 - [ ] **Step 5: Implement restrained motion and icons**
 
 Use only `@phosphor-icons/react`, consistent weight/stroke, no emoji. Isolate the Framer Motion magnetic send button as a client leaf using `useMotionValue`/`useTransform`; use transform/opacity only, spring `{stiffness: 100, damping: 20}`, and respect reduced motion. No outer glow, pure black, purple, or infinite parent re-renders.
@@ -1494,6 +1508,8 @@ git commit -m "ops: add production adapters worker and compose stack"
 - Create: `scripts/backup.ps1`
 - Create: `scripts/restore_verify.ps1`
 - Create: `docs/runbooks/ai-native-production.md`
+- Create: `docs/competition/fpt-ai-factory-integration.md`
+- Create: `docs/competition/pytorch-award-evidence.md`
 - Test: `tests/ai_layer/rag/evaluation/test_runner.py`
 - Test: `backend/tests/observability/test_redaction.py`
 
@@ -1524,6 +1540,8 @@ Expected: FAIL because the evaluator and redaction layer do not exist.
 - [ ] **Step 3: Implement golden-set evaluation**
 
 Dataset includes answerable, unanswerable, conflicting, injection, cross-scope, stale, and high-risk approval cases. Score retrieval recall@k, citation precision/support, unsupported claim rate, abstain precision/recall, policy violations, latency, and token/cost. Judge model/version is metadata only and cannot override deterministic failures.
+
+Add an FPT AI Factory scorecard covering live-key health, chat/embedding/rerank usage, latency, token/cost, cache savings, and controlled provider fallback. Add a PyTorch ablation comparing triage against heuristic and LLM-only baselines with macro-F1, high-risk recall, calibration, p95 CPU latency, throughput, model size, `torch.compile` result where supported, ONNX parity, and the number of workflow decisions changed by the model.
 
 - [ ] **Step 4: Implement redacted observability**
 
