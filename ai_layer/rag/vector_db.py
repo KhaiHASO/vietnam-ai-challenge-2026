@@ -1,122 +1,70 @@
-import json
-import os
-import numpy as np
-from typing import List, Dict, Any, Tuple
-from ai_layer.config import settings
+"""Compatibility wrapper — preserves the old LocalVectorDB API while delegating
+to the new RAG system that uses ChunkMetadataModel / Chunk."""
+import uuid
+from typing import List, Tuple, Dict
+
+try:
+    from .app_context import app_context
+    from .models import Chunk, ChunkMetadataModel
+    _READY = True
+except Exception:
+    _READY = False
+
+
+if _READY:
+    def _doc_to_chunk(doc: Dict) -> Chunk:
+        ki = doc.get("knowledge_item_id", "") or ""
+        meta_raw = doc.get("metadata", {}) or {}
+        meta = ChunkMetadataModel(
+            source_id=doc.get("id", ""),
+            source_type=meta_raw.get("source_type", "mock"),
+            chunk_index=0,
+            extra={k: v for k, v in meta_raw.items() if k != "source_type"},
+        )
+        return Chunk(id=doc.get("id", str(uuid.uuid4())), text=doc.get("content", ""), metadata=meta)
+else:
+    def _doc_to_chunk(doc):
+        return doc
+
 
 class LocalVectorDB:
+    """Backward-compatible shim wrapping the new retriever / vector store."""
+
     def __init__(self):
-        self.db_path = settings.vector_db_path
-        self.documents: List[Dict[str, Any]] = []
-        self.embeddings: List[np.ndarray] = []
-        self.model = None
-        self._init_embedding_model()
-        self.load_db()
-
-    def _init_embedding_model(self):
-        """Initializes the embedding model (local SentenceTransformers or a mockup fallback)"""
-        if settings.EMBEDDING_PROVIDER == "local":
+        self.documents: Dict[str, Dict] = {}
+        if _READY:
             try:
-                from sentence_transformers import SentenceTransformer
-                # Use CUDA if available
-                device = "cuda" if os.environ.get("USE_CUDA", "false").lower() == "true" else "cpu"
-                self.model = SentenceTransformer(settings.EMBEDDING_MODEL, device=device)
-                print(f"[RAG] Initialized local SentenceTransformer on device: {device}")
-            except ImportError:
-                print("[RAG] Warning: sentence-transformers not installed. Using TF-IDF/BM25 mockup embedding provider.")
-                self.model = None
+                self._vs = app_context.vector_store
+            except Exception:
+                self._vs = None
         else:
-            # Fallback for API-based embeddings (e.g. OpenAI, Gemini)
-            self.model = None
+            self._vs = None
 
-    def get_embedding(self, text: str) -> np.ndarray:
-        """Generates embedding vector for a given text."""
-        if self.model:
-            return self.model.encode(text)
-        else:
-            # Fallback mockup: Character/Word frequency vector normalized
-            # Hash words to a 384-dimensional vector (matches all-MiniLM-L6-v2 dimensions)
-            words = text.lower().split()
-            vector = np.zeros(384)
-            for w in words:
-                idx = idx = abs(hash(w)) % 384
-                vector[idx] += 1
-            norm = np.linalg.norm(vector)
-            if norm > 0:
-                vector = vector / norm
-            return vector
+    def get_embedding(self, text: str):
+        if _READY:
+            return app_context.embedding_provider.embed_query(text)
+        return None
 
-    def add_documents(self, docs: List[Dict[str, Any]]):
-        """
-        Adds list of documents.
-        Each doc: {"id": str, "content": str, "metadata": dict}
-        """
-        for doc in docs:
-            emb = self.get_embedding(doc["content"])
-            self.documents.append(doc)
-            self.embeddings.append(emb)
-        self.save_db()
+    def add_documents(self, docs):
+        if self._vs is None:
+            return
+        chunks = [_doc_to_chunk(d) for d in docs]
+        for c in chunks:
+            self.documents[c.id] = {"content": c.text}
+        self._vs.add_chunks(chunks)
 
-    def search(self, query: str, top_k: int = None) -> List[Tuple[Dict[str, Any], float]]:
-        """
-        Searches similar documents using Cosine Similarity.
-        Returns: List of tuples (document_dict, similarity_score)
-        """
-        if not self.documents:
+    def search(self, query: str, top_k: int = 2) -> List[Tuple[Dict, float]]:
+        if self._vs is None:
             return []
-            
-        k = top_k or settings.RAG_TOP_K
-        query_emb = self.get_embedding(query)
-        
-        scores = []
-        for idx, doc_emb in enumerate(self.embeddings):
-            # Cosine similarity
-            dot_product = np.dot(query_emb, doc_emb)
-            norm_q = np.linalg.norm(query_emb)
-            norm_d = np.linalg.norm(doc_emb)
-            
-            similarity = 0.0
-            if norm_q > 0 and norm_d > 0:
-                similarity = float(dot_product / (norm_q * norm_d))
-                
-            scores.append((self.documents[idx], similarity))
-            
-        # Sort by similarity desc
-        scores.sort(key=lambda x: x[1], reverse=True)
-        
-        # Filter by threshold
-        filtered_scores = [s for s in scores if s[1] >= settings.RAG_SIMILARITY_THRESHOLD]
-        
-        return filtered_scores[:k]
+        results = app_context.retriever.retrieve(query, top_k=top_k)
+        out = []
+        for c in results:
+            score = c.metadata.rerank_score if _READY and hasattr(c.metadata, "rerank_score") else 0.0
+            out.append(({"id": c.id, "content": c.text}, score))
+        return out
 
     def save_db(self):
-        """Saves documents and serialized embeddings to a local JSON file."""
-        data = []
-        for doc, emb in zip(self.documents, self.embeddings):
-            data.append({
-                "doc": doc,
-                "embedding": emb.tolist()
-            })
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
-        with open(self.db_path, "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=2)
+        pass
 
     def load_db(self):
-        """Loads database from file if exists."""
-        if os.path.exists(self.db_path):
-            try:
-                with open(self.db_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                self.documents = []
-                self.embeddings = []
-                for item in data:
-                    self.documents.append(item["doc"])
-                    self.embeddings.append(np.array(item["embedding"]))
-                print(f"[RAG] Loaded {len(self.documents)} documents from vector database.")
-            except Exception as e:
-                print(f"[RAG] Error loading DB: {e}. Starting with empty database.")
-                self.documents = []
-                self.embeddings = []
-        else:
-            self.documents = []
-            self.embeddings = []
+        pass

@@ -1,0 +1,54 @@
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field
+from datetime import datetime
+from enum import Enum
+
+
+class SourceType(str, Enum):
+    PDF = "pdf"
+    DOCX = "docx"
+    EXCEL = "excel"
+    GEOJSON = "geojson"
+    CSV = "csv"
+    IMAGE = "image"
+    WEBSITE = "website"
+    API = "api"
+    EMAIL = "email"
+
+
+class KnowledgeItem(BaseModel):
+    """
+    The highest level of knowledge representation.
+    Represents a logical unit of knowledge (e.g. A Farm, A Policy, A Patient).
+    """
+    id: str
+    domain: str
+    title: str
+    source_type: SourceType
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class Document(BaseModel):
+    """
+    Represents a parsed document containing text and metadata.
+    """
+    id: str
+    knowledge_item_id: str
+    text_content: str
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    page_content: Optional[str] = None
+
+
+class Chunk(BaseModel):
+    """
+    Represents a chunk of a document, ready for embedding.
+    """
+    id: str
+    document_id: str
+    knowledge_item_id: str
+    text: str
+    embedding: Optional[List[float]] = None
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+    chunk_index: int = 0

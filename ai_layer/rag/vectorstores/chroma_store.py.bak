@@ -1,0 +1,144 @@
+import os
+import logging
+from typing import List, Dict, Any, Optional
+from ai_layer.rag.interfaces.vectorstore import BaseVectorStore
+from ai_layer.rag.interfaces.embedding import BaseEmbeddingProvider
+from ai_layer.rag.models import Chunk
+
+logger = logging.getLogger(__name__)
+
+try:
+    import chromadb
+    from chromadb.config import Settings
+    CHROMADB_AVAILABLE = True
+except ImportError:
+    CHROMADB_AVAILABLE = False
+
+
+class ChromaVectorStore(BaseVectorStore):
+    """
+    Vector Store implementation using ChromaDB.
+    Persists data locally into a .chroma_db folder.
+    """
+    
+    def __init__(self, embedding_provider: BaseEmbeddingProvider, persist_directory: str = "./.chroma_db", collection_name: str = "rag_core"):
+        if not CHROMADB_AVAILABLE:
+            raise ImportError("chromadb is not installed. Run `pip install chromadb`")
+            
+        self.embedding_provider = embedding_provider
+        
+        # Initialize ChromaDB persistent client
+        # Ensures that the directory is absolutely resolved
+        abs_persist_dir = os.path.abspath(persist_directory)
+        self.client = chromadb.PersistentClient(path=abs_persist_dir)
+        
+        # Get or create the main collection
+        self.collection = self.client.get_or_create_collection(
+            name=collection_name,
+            metadata={"hnsw:space": "cosine"} # Cosine similarity is usually best for semantic search
+        )
+
+    def add_chunks(self, chunks: List[Chunk]) -> bool:
+        if not chunks:
+            return True
+            
+        ids = []
+        documents = []
+        metadatas = []
+        
+        # Filter chunks that already have embeddings, otherwise embed them
+        texts_to_embed = []
+        chunks_to_embed = []
+        
+        for chunk in chunks:
+            if chunk.embedding is None:
+                texts_to_embed.append(chunk.text)
+                chunks_to_embed.append(chunk)
+            
+        # Batch embedding
+        if texts_to_embed:
+            embeddings = self.embedding_provider.embed_documents(texts_to_embed)
+            for i, chunk in enumerate(chunks_to_embed):
+                chunk.embedding = embeddings[i]
+                
+        # Prepare for Chroma ingestion
+        embeddings_for_chroma = []
+        for chunk in chunks:
+            ids.append(chunk.id)
+            documents.append(chunk.text)
+            
+            # Chroma metadata requires values to be string, int, float or bool
+            # We must serialize complex types if any exist. For simplicity, we just use the raw dict
+            # assuming it only contains simple primitives.
+            safe_metadata = {}
+            for k, v in chunk.metadata.items():
+                if isinstance(v, (str, int, float, bool)):
+                    safe_metadata[k] = v
+                else:
+                    safe_metadata[k] = str(v)
+            
+            # Inject knowledge_item_id and document_id for advanced filtering
+            safe_metadata["knowledge_item_id"] = chunk.knowledge_item_id
+            safe_metadata["document_id"] = chunk.document_id
+            safe_metadata["chunk_index"] = chunk.chunk_index
+            
+            metadatas.append(safe_metadata)
+            embeddings_for_chroma.append(chunk.embedding)
+            
+        try:
+            self.collection.add(
+                ids=ids,
+                embeddings=embeddings_for_chroma,
+                metadatas=metadatas,
+                documents=documents
+            )
+            return True
+        except Exception as e:
+            logger.error(f"Error adding chunks to ChromaDB: {e}")
+            return False
+
+    def similarity_search(
+        self, 
+        query_embedding: List[float], 
+        top_k: int = 5, 
+        filters: Optional[Dict[str, Any]] = None
+    ) -> List[Chunk]:
+        
+        try:
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=top_k,
+                where=filters if filters else None,
+                include=["metadatas", "documents", "distances"]
+            )
+            
+            chunks = []
+            if not results["ids"] or not results["ids"][0]:
+                return chunks
+                
+            # Parse results back into Chunk objects
+            for i in range(len(results["ids"][0])):
+                chunk_id = results["ids"][0][i]
+                text = results["documents"][0][i]
+                metadata = results["metadatas"][0][i]
+                
+                # We do not retrieve embedding from Chroma back to save memory, 
+                # but we could if we include="embeddings"
+                chunk = Chunk(
+                    id=chunk_id,
+                    document_id=metadata.get("document_id", ""),
+                    knowledge_item_id=metadata.get("knowledge_item_id", ""),
+                    text=text,
+                    metadata=metadata,
+                    chunk_index=metadata.get("chunk_index", 0)
+                )
+                
+                # Add distance score into metadata for re-ranking later
+                chunk.metadata["similarity_distance"] = results["distances"][0][i]
+                chunks.append(chunk)
+                
+            return chunks
+            
+        except Exception as e:
+            logger.error(f"Error querying ChromaDB: {e}")
+            return []

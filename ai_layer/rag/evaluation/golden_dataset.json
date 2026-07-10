@@ -1,0 +1,26 @@
+[
+    {
+        "query": "Làm thế nào để phòng trừ sâu bệnh cho cây lúa?",
+        "context": "Để phòng trừ sâu bệnh cho cây lúa, cần thường xuyên thăm đồng, phát hiện sớm các loại sâu bệnh như rầy nâu, sâu đục thân, bệnh đạo ôn. Khi phát hiện bệnh, có thể sử dụng các loại thuốc bảo vệ thực vật sinh học kết hợp với các biện pháp canh tác như bón phân cân đối, giữ nước phù hợp.",
+        "expected_answer": "Cần thường xuyên thăm đồng để phát hiện sớm sâu bệnh. Sử dụng thuốc bảo vệ thực vật sinh học và kết hợp biện pháp canh tác như bón phân cân đối, giữ nước phù hợp.",
+        "domain": "agriculture"
+    },
+    {
+        "query": "Mật độ trồng cây ngô tốt nhất là bao nhiêu?",
+        "context": "Mật độ trồng ngô tùy thuộc vào giống, đất đai và mùa vụ. Nhìn chung, với các giống ngô lai hiện nay, mật độ thích hợp từ 5,5 đến 6,5 vạn cây/ha. Khoảng cách hàng cách hàng 70cm, cây cách cây 25-30cm.",
+        "expected_answer": "Mật độ trồng ngô lai thích hợp là 5,5 đến 6,5 vạn cây/ha, khoảng cách hàng 70cm, cây cách cây 25-30cm.",
+        "domain": "agriculture"
+    },
+    {
+        "query": "Làm thủ tục đăng ký kinh doanh cần những gì?",
+        "context": "Để đăng ký kinh doanh, bạn cần chuẩn bị hồ sơ gồm giấy đề nghị đăng ký doanh nghiệp, điều lệ công ty, danh sách thành viên hoặc cổ đông, và bản sao hợp lệ chứng minh nhân dân/căn cước công dân của các thành viên. Nộp hồ sơ tại Phòng Đăng ký kinh doanh thuộc Sở Kế hoạch và Đầu tư.",
+        "expected_answer": "Cần chuẩn bị hồ sơ gồm giấy đề nghị, điều lệ công ty, danh sách thành viên/cổ đông và bản sao CMND/CCCD. Nộp tại Phòng Đăng ký kinh doanh.",
+        "domain": "sme"
+    },
+    {
+        "query": "Các triệu chứng của bệnh sốt xuất huyết là gì?",
+        "context": "Triệu chứng của bệnh sốt xuất huyết thường bao gồm sốt cao đột ngột, đau đầu dữ dội, đau hốc mắt, đau nhức cơ khớp. Các dấu hiệu khác có thể là phát ban, buồn nôn, và xuất huyết nhẹ như chảy máu chân răng hoặc chảy máu mũi.",
+        "expected_answer": "Triệu chứng bao gồm sốt cao, đau đầu, đau hốc mắt, đau cơ khớp, phát ban, buồn nôn và có thể xuất huyết nhẹ.",
+        "domain": "healthcare"
+    }
+]

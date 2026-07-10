@@ -1,36 +1,27 @@
-from ai_layer.config import settings
-from ai_layer.rag.vector_db import LocalVectorDB
+"""Compatibility stub — seed_mock() delegates to the new vector store."""
+from .vector_db import LocalVectorDB
+
+_db = LocalVectorDB()
+
 
 def seed_knowledge_base():
-    """Seeds the Vector DB with dynamic domain policy guidelines."""
-    db = LocalVectorDB()
-    
-    # If DB is already seeded, don't seed again
-    if len(db.documents) > 0:
-        print(f"[RAG] Vector DB for domain '{settings.ACTIVE_DOMAIN}' already has documents. Skipping seed.")
-        return
-        
-    mock_docs = [
+    _db.add_documents([
         {
-            "id": "policy_rice_disease",
-            "content": "Triệu chứng và điều trị nấm đạo ôn lúa: Bệnh do nấm Pyricularia oryzae gây ra đốm hình quả trám màu xám nâu trên lá. Nếu diện tích lá bị hại vượt quá 10%, cần phun thuốc trừ nấm gốc Tricyclazole. Việc phun hóa chất này yêu cầu chuyên gia xác nhận.",
-            "metadata": {"category": "disease", "tags": ["rice", "fungus", "pesticide"]}
+            "id": "policy-001",
+            "knowledge_item_id": "KI-RICE",
+            "content": "Nấm đạo ôn (Magnaporthe oryzae) trên lúa: phòng ngừa bằng giống kháng bệnh, bón cân đối NPK, không thụ động nhiều.",
+            "metadata": {"source_type": "policy", "crop": "lúa", "topic": "nấm đạo ôn"},
         },
         {
-            "id": "policy_durian_watering",
-            "content": "Lịch tưới nước cho sầu riêng Monthong: Cần giữ độ ẩm đất ổn định từ 60-70% ở giai đoạn nuôi trái. Nếu độ ẩm giảm xuống dưới 40%, lá sẽ héo và rụng quả non. Khuyến nghị tưới 80-100 lít/gốc mỗi 2 ngày.",
-            "metadata": {"category": "irrigation", "tags": ["durian", "water", "moisture"]}
+            "id": "policy-002",
+            "knowledge_item_id": "KI-DURIAN",
+            "content": "Tưới sầu riêng: lượng nước 30-40mm/ngày, tránh ngập úng gây thối rễ, tưới sáng sớm.",
+            "metadata": {"source_type": "policy", "crop": "sầu riêng", "topic": "tưới tiêu"},
         },
         {
-            "id": "policy_fertilizer_rule",
-            "content": "Chính sách bón phân hữu cơ: Bón lót phân chuồng hoai mục kết hợp NPK tỉ lệ 15-15-15 vào đầu mùa mưa. Tuyệt đối không bón phân hóa học đậm đặc trực tiếp vào sát gốc cây để tránh hiện tượng xót rễ.",
-            "metadata": {"category": "fertilizer", "tags": ["NPK", "soil"]}
-        }
-    ]
-        
-    print(f"[RAG] Seeding default knowledge base documents for '{settings.ACTIVE_DOMAIN}'...")
-    db.add_documents(mock_docs)
-    print(f"[RAG] Successfully seeded {len(mock_docs)} documents.")
-
-if __name__ == "__main__":
-    seed_knowledge_base()
+            "id": "policy-003",
+            "knowledge_item_id": "KI-RICE",
+            "content": "Bón phân lúa: 45kgN/ha đợt sinh trưởng, 15kgP2O5/ha đợt đẻ nhánh, sau đó bổ kali.",
+            "metadata": {"source_type": "policy", "crop": "lúa", "topic": "bón phân"},
+        },
+    ])

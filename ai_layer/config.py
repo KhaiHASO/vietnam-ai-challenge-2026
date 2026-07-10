@@ -14,13 +14,13 @@ class AISettings(BaseSettings):
     
     # RAG Settings
     EMBEDDING_PROVIDER: str = os.getenv("EMBEDDING_PROVIDER", "local")  # local, openai, gemini
-    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "all-MiniLM-L6-v2")
+    EMBEDDING_MODEL: str = os.getenv("EMBEDDING_MODEL", "keepitreal/vietnamese-sbert")
     RAG_TOP_K: int = 3
-    RAG_SIMILARITY_THRESHOLD: float = 0.4
+    RAG_SIMILARITY_THRESHOLD: float = 0.6
     
     # Guardrail Thresholds
     PROMPT_INJECTION_THRESHOLD: float = 0.6
-    HALLUCINATION_THRESHOLD: float = 0.5
+    HALLUCINATION_THRESHOLD: float = 0.8
     
     @property
     def domain_dir(self) -> str:
