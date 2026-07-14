@@ -1,38 +1,44 @@
-import os
-from typing import Dict, Any
-from ai_layer.config import settings
+import warnings
+from functools import lru_cache
+from typing import Any
+
+from .catalog import RegistryCatalog
 
 
-CAPABILITIES: Dict[str, Dict[str, Any]] = {}
+@lru_cache(maxsize=1)
+def _catalog() -> RegistryCatalog:
+    catalog = RegistryCatalog()
+    catalog.freeze(readiness=False)
+    return catalog
 
 
-def load_capabilities():
-    global CAPABILITIES
-    domain_dir = settings.domain_dir
-    if not os.path.isdir(domain_dir):
-        return
-    for name in os.listdir(domain_dir):
-        pack_path = os.path.join(domain_dir, name)
-        if os.path.isdir(pack_path):
-            CAPABILITIES[name] = {"name": name, "path": pack_path}
+def load_capabilities() -> RegistryCatalog:
+    warnings.warn(
+        "load_capabilities is deprecated. Use RegistryCatalog instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return _catalog()
 
 
-load_capabilities()
+def get_capability(domain: str, tenant_id: str = "single") -> dict[str, Any]:
+    warnings.warn(
+        "get_capability is deprecated. Use RegistryCatalog instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    context = _catalog().resolve_request_context(domain, tenant_id)
+    return {
+        "domain_id": context.domain_id,
+        "tenant_id": context.tenant_id,
+        **context.manifest.model_dump(),
+    }
 
 
-def get_capability(domain: str) -> Dict[str, Any]:
-    if not domain or domain == "default":
-        return {}
-    if domain in CAPABILITIES:
-        return CAPABILITIES[domain]
-    root = settings.domain_dir
-    if root and os.path.isdir(root):
-        candidate = os.path.join(root, domain)
-        if os.path.isdir(candidate):
-            CAPABILITIES[domain] = {"name": domain, "path": candidate}
-            return CAPABILITIES[domain]
-    return {}
-
-
-def get_capability_registry():
-    return {"get_capability": get_capability, "capabilities": CAPABILITIES}
+def get_capability_registry() -> dict[str, Any]:
+    warnings.warn(
+        "get_capability_registry is deprecated. Use RegistryCatalog instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return {"get_capability": get_capability, "catalog": _catalog()}

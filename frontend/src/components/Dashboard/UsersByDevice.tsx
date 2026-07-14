@@ -11,7 +11,8 @@ import {
   DropdownItem,
   CardBody,
 } from "reactstrap";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/hooks/useRedux";
 //Import Icons
 import FeatherIcon from "feather-icons-react";
 
@@ -24,7 +25,7 @@ const UsersByDevice = () => {
   const [isUserDropdown, setUserDropdown] = useState<boolean>(false);
   const toggleDropdown = () => setUserDropdown(!isUserDropdown);
 
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [chartData, setChartData] = useState<number[]>([]);
 
   const userdeviceData = createSelector(

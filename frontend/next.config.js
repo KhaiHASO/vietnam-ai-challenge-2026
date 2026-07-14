@@ -11,9 +11,6 @@ const silenceDeprecations = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  typescript: {
-    ignoreBuildErrors: true,
-  },
   images: {
     unoptimized: true,
   },
@@ -23,7 +20,10 @@ const nextConfig = {
     // Replace react-apexcharts with our safe version to handle frozen objects
     // This prevents "Cannot add property group, object is not extensible" errors
     // by deep cloning frozen objects before passing to ApexCharts
-    const safeApexChartsPath = path.resolve(__dirname, "src/lib/react-apexcharts-safe.tsx");
+    const safeApexChartsPath = path.resolve(
+      __dirname,
+      "src/lib/react-apexcharts-safe.tsx"
+    );
     config.resolve.alias = {
       ...config.resolve.alias,
       "react-apexcharts": safeApexChartsPath,
@@ -32,7 +32,10 @@ const nextConfig = {
     // Exclude our safe wrapper from the alias to prevent circular dependency
     config.resolve.alias = {
       ...config.resolve.alias,
-      "react-apexcharts-original": path.resolve(__dirname, "node_modules/react-apexcharts/dist/react-apexcharts.esm.js"),
+      "react-apexcharts-original": path.resolve(
+        __dirname,
+        "node_modules/react-apexcharts/dist/react-apexcharts.esm.js"
+      ),
     };
 
     // Handle asset files like fonts and images

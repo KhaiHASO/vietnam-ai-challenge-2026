@@ -65,6 +65,8 @@ def error_payload(
     status_code: int,
     code: str,
     message: str,
+    trace_id: str,
+    retryable: bool,
     details: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     payload = {
@@ -73,6 +75,8 @@ def error_payload(
             "code": code,
             "message": message,
             "status_code": status_code,
+            "trace_id": trace_id,
+            "retryable": retryable,
         },
     }
     if details:
@@ -85,11 +89,13 @@ def register_exception_handlers(app: FastAPI) -> None:
     async def http_exception_handler(
         request: Request, exc: StarletteHTTPException
     ) -> JSONResponse:
+        trace_id = getattr(request.state, "trace_id", "unknown")
+        retryable = exc.status_code == 429 or exc.status_code >= 500
         message, detail_code, details = _safe_error_fields(exc.detail, exc.status_code)
         code = detail_code or f"HTTP_{exc.status_code}"
         return JSONResponse(
             status_code=exc.status_code,
-            content=error_payload(exc.status_code, code, message, details),
+            content=error_payload(exc.status_code, code, message, trace_id, retryable, details),
         )
 
     @app.exception_handler(RequestValidationError)
@@ -105,14 +111,15 @@ def register_exception_handlers(app: FastAPI) -> None:
                 }
             )
 
-        payload = error_payload(422, "VALIDATION_ERROR", "Invalid request")
+        payload = error_payload(422, "VALIDATION_ERROR", "Invalid request", getattr(request.state, "trace_id", "unknown"), False)
         payload["error"]["fields"] = fields
         return JSONResponse(status_code=422, content=payload)
 
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        trace_id = getattr(request.state, "trace_id", "unknown")
         logger.exception("Unhandled backend error on %s %s", request.method, request.url.path)
         return JSONResponse(
             status_code=500,
-            content=error_payload(500, "INTERNAL_SERVER_ERROR", "Internal server error"),
+            content=error_payload(500, "INTERNAL_SERVER_ERROR", "Internal server error", trace_id, True),
         )

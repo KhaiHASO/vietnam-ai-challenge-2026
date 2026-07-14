@@ -6,6 +6,38 @@ from ai_layer.rag.vectorstores.chroma_store import ChromaVectorStore
 from ai_layer.rag.retrievers.core_retriever import CoreRetriever
 
 
+def build_rag_service(*, memory=None, cache=None):
+    from ai_layer.rag.service import RAGService
+    from ai_layer.rag.validation.pipeline import AssurancePipeline
+    from ai_layer.rag.providers.gateway import ProviderGateway
+    from ai_layer.rag.providers.fpt_ai_factory import FPTAIChatAdapter
+    from ai_layer.rag.agentic.graph import BoundedAgenticRunner
+    from ai_layer.rag.validation.input import InputValidator
+    from ai_layer.rag.validation.evidence import EvidenceValidator
+    from ai_layer.rag.validation.citations import CitationValidator
+
+    pipeline = AssurancePipeline(InputValidator(), EvidenceValidator(), CitationValidator())
+    gateway = ProviderGateway(FPTAIChatAdapter())
+    runner = BoundedAgenticRunner(
+        retriever_factory=get_retriever,
+        provider_gateway=gateway,
+    )
+
+    return RAGService(
+        catalog=None,
+        memory=memory,
+        cache=cache,
+        gateway=gateway,
+        runner=runner,
+        validator=pipeline,
+    )
+
+
+@lru_cache(maxsize=1)
+def get_rag_service():
+    return build_rag_service()
+
+
 @lru_cache(maxsize=1)
 def get_embedding_provider():
     if settings.EMBEDDING_PROVIDER == "local":
@@ -24,21 +56,22 @@ def get_embedding_provider():
     return DeterministicEmbeddingProvider()
 
 
-@lru_cache(maxsize=1)
-def get_vector_store():
-    chroma_path = os.path.join(settings.domain_dir, ".chroma_db")
+@lru_cache(maxsize=None)
+def get_vector_store(domain_id: str = "agriculture"):
+    chroma_path = settings.vector_db_path_for(domain_id)
     embedding_provider = get_embedding_provider()
     return ChromaVectorStore(
         embedding_provider=embedding_provider,
         persist_directory=chroma_path,
+        chroma_url=settings.CHROMA_URL,
     )
 
 
-@lru_cache(maxsize=1)
-def get_retriever():
+@lru_cache(maxsize=None)
+def get_retriever(domain_id: str = "agriculture"):
     return CoreRetriever(
         embedding_provider=get_embedding_provider(),
-        vector_store=get_vector_store(),
+        vector_store=get_vector_store(domain_id),
         llm_provider=get_llm_provider(),
     )
 

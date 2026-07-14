@@ -12,8 +12,7 @@ def evaluate_model(domain: str):
     print(f"  EVALUATING PYTORCH MODEL - DOMAIN: {domain.upper()}")
     print(f"==========================================\n")
     
-    settings.ACTIVE_DOMAIN = domain
-    checkpoint_path = os.path.join(settings.domain_dir, "data", "model_checkpoint.pth")
+    checkpoint_path = settings.data_path(domain) / "model_checkpoint.pth"
     
     if not os.path.exists(checkpoint_path):
         print(f"[PyTorch Eval] Checkpoint not found at {checkpoint_path}. Train the model first.")
@@ -110,7 +109,7 @@ def evaluate_model(domain: str):
     print("------------------------------------------")
     
     # Save metrics.json
-    metrics_path = os.path.join(settings.domain_dir, "data", "metrics.json")
+    metrics_path = settings.data_path(domain) / "metrics.json"
     with open(metrics_path, "w") as f:
         json.dump(metrics, f, indent=2)
     print(f"[PyTorch Eval] Saved evaluation metrics to: {metrics_path}")

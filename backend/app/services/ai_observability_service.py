@@ -8,8 +8,9 @@ from app.repositories.diagnosis_repository import DiagnosisRepository
 
 
 class AiObservabilityService:
-    def __init__(self, repository: DiagnosisRepository | None = None) -> None:
+    def __init__(self, repository: DiagnosisRepository | None = None, domain_id: str = "agriculture") -> None:
         self.repository = repository or DiagnosisRepository()
+        self.domain_id = domain_id
         self.project_root = Path(__file__).resolve().parents[3]
 
     async def model_report(self) -> dict[str, Any]:
@@ -21,14 +22,14 @@ class AiObservabilityService:
         train_history = self._load_train_history()
         latest_metrics = self._latest_metrics(train_history)
         model_card = self._load_model_card()
-        checkpoint_path = Path(ai_settings.domain_dir) / "data" / "model_checkpoint.pth"
+        checkpoint_path = ai_settings.data_path(self.domain_id) / "model_checkpoint.pth"
         checkpoint_exists = checkpoint_path.exists()
         metrics = self._model_metrics(latest_metrics)
 
         current_report = {
             "model_name": "ImpactTriageNet",
             "model_version": "impact-triage-v1.0",
-            "domain": ai_settings.ACTIVE_DOMAIN,
+            "domain": self.domain_id,
             "framework": "PyTorch",
             "architecture": "Multi-task feed-forward network with tabular and text embedding fusion",
             "task": "AI-native crop diagnosis risk triage and HITL prioritization",
@@ -82,7 +83,7 @@ class AiObservabilityService:
         }
 
     def _load_train_history(self) -> dict[str, Any]:
-        path = Path(ai_settings.domain_dir) / "data" / "train_history.json"
+        path = ai_settings.data_path(self.domain_id) / "train_history.json"
         if not path.exists():
             return {}
         try:

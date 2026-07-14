@@ -1,7 +1,7 @@
 import useChartColors from "@components/Common/useChartColors";
 import React from "react";
 import ReactApexChart from "react-apexcharts";
-import { ApexOptions } from "apexcharts";
+import type { ApexLegendFormatterOpts } from "apexcharts";
 
 const DashboardBlogCharts = ({ chartId }: any) => {
   const chartColors = useChartColors(chartId);
@@ -112,7 +112,7 @@ const DeviceCharts = ({ chartId }: any) => {
   const chartColors = useChartColors(chartId);
 
   const series = [44, 55, 24];
-  var options: ApexOptions = {
+  const options: React.ComponentProps<typeof ReactApexChart>["options"] = {
     chart: {
       height: 210,
       type: "donut" as const,
@@ -131,14 +131,9 @@ const DeviceCharts = ({ chartId }: any) => {
       type: "gradient",
     },
     legend: {
-      formatter: function (
-        val: string,
-        opts: {
-          w: { globals: { series: { [x: string]: string } } };
-          seriesIndex: string | number;
-        }
-      ) {
-        return val + " - " + opts.w.globals.series[opts.seriesIndex];
+      formatter: function (val: string, opts?: ApexLegendFormatterOpts) {
+        const value = opts?.w.globals.series[opts.seriesIndex];
+        return `${val} - ${value ?? ""}`;
       },
       position: "bottom",
     },

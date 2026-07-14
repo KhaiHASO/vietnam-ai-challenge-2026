@@ -20,7 +20,7 @@ def get_triage_model(domain: str):
     if not HAS_TORCH:
         return None
     
-    checkpoint_path = os.path.join(settings.domain_dir, "data", "model_checkpoint.pth")
+    checkpoint_path = settings.data_path(domain) / "model_checkpoint.pth"
     
     if not os.path.exists(checkpoint_path):
         print(f"[PyTorch Inference] Checkpoint not found at {checkpoint_path}. Running fast auto-train...")
@@ -52,11 +52,10 @@ def get_triage_model(domain: str):
         print(f"[PyTorch Inference] Error loading model: {e}")
         return None
 
-def predict_triage(description: str, metadata: dict) -> dict:
+def predict_triage(description: str, metadata: dict, domain: str = "agriculture") -> dict:
     """
     Predicts triage risk, priority, review requirement, and confidence using the PyTorch engine.
     """
-    domain = settings.ACTIVE_DOMAIN
     if not HAS_TORCH:
         return run_rule_based_fallback(domain, description, metadata)
         

@@ -348,6 +348,75 @@ COLLECTION_SPECS: tuple[CollectionSpec, ...] = (
         ),
     ),
     CollectionSpec(
+        name="jobs",
+        validator=_json_schema(
+            required=["job_id", "job_type", "idempotency_key", "payload", "attempts", "status", "next_run_at"],
+            properties={
+                **_base_props(),
+                "job_id": {"bsonType": "string"},
+                "job_type": {"bsonType": "string"},
+                "idempotency_key": {"bsonType": "string"},
+                "payload": {"bsonType": "object"},
+                "attempts": {"bsonType": ["int", "long"]},
+                "status": {"bsonType": "string"},
+                "next_run_at": {"bsonType": "date"},
+                "last_error": {"bsonType": ["string", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(name="idx_jobs_id_unique", keys=(("job_id", ASCENDING),), options={"unique": True}),
+            IndexSpec(name="idx_jobs_idempotency_unique", keys=(("idempotency_key", ASCENDING),), options={"unique": True}),
+            IndexSpec(name="idx_jobs_ready", keys=(("status", ASCENDING), ("next_run_at", ASCENDING))),
+        ),
+    ),
+    CollectionSpec(
+        name="approvals",
+        validator=_json_schema(
+            required=["approval_id", "policy", "requester", "status"],
+            properties={
+                **_base_props(),
+                "approval_id": {"bsonType": "string"},
+                "policy": {"bsonType": "string"},
+                "proposed_action": {"bsonType": "object"},
+                "evidence": {"bsonType": "array"},
+                "requester": {"bsonType": "string"},
+                "required_roles": {"bsonType": "array"},
+                "status": {"bsonType": "string"},
+                "decision_actor": {"bsonType": ["string", "null"]},
+                "decision_time": {"bsonType": ["date", "null"]},
+                "trace_id": {"bsonType": ["string", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(name="idx_approvals_id_unique", keys=(("approval_id", ASCENDING),), options={"unique": True}),
+            IndexSpec(name="idx_approvals_requester_status", keys=(("requester", ASCENDING), ("status", ASCENDING))),
+        ),
+    ),
+    CollectionSpec(
+        name="memory_facts",
+        validator=_json_schema(
+            required=["fact_id", "tenant_id", "domain_id", "user_id", "key", "status", "created_at"],
+            properties={
+                **_base_props(),
+                "fact_id": {"bsonType": "string"},
+                "tenant_id": {"bsonType": "string"},
+                "domain_id": {"bsonType": "string"},
+                "user_id": {"bsonType": "string"},
+                "key": {"bsonType": "string"},
+                "value": {},
+                "source_type": {"bsonType": "string"},
+                "source_message_id": {"bsonType": "string"},
+                "status": {"bsonType": "string"},
+                "consent": {"bsonType": "bool"},
+                "expires_at": {"bsonType": ["date", "null"]},
+            },
+        ),
+        indexes=(
+            IndexSpec(name="idx_memory_facts_id_unique", keys=(("fact_id", ASCENDING),), options={"unique": True}),
+            IndexSpec(name="idx_memory_facts_scope", keys=(("tenant_id", ASCENDING), ("domain_id", ASCENDING), ("user_id", ASCENDING))),
+        ),
+    ),
+    CollectionSpec(
         name="idempotency_records",
         validator=_json_schema(
             required=["idempotency_key", "request_hash", "status", "created_at"],

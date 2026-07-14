@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toErrorMessage } from "@/lib/error-message";
 
 interface User {
   id: string;
@@ -46,7 +47,7 @@ export const fetchUsers = createAsyncThunk(
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );
@@ -70,7 +71,7 @@ export const createUser = createAsyncThunk(
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );
@@ -97,7 +98,7 @@ export const updateUser = createAsyncThunk(
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );
@@ -116,7 +117,7 @@ export const deleteUser = createAsyncThunk(
 
       return id;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );

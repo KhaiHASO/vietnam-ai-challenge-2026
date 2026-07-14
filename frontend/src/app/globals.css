@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'SFMono-Regular', Consolas, monospace;
+  --color-canvas: #f4f7f4;
+  --color-ink: #18201b;
+  --color-accent: #28765a;
+}
+
+html {
+  background: #f4f7f4;
+}
+
+body {
+  margin: 0;
+  color: #18201b;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}

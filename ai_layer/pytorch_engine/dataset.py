@@ -18,13 +18,13 @@ class OperationsTriageDataset(Dataset):
     PyTorch Dataset for AI-Native Operations Triage.
     Loads tabular metrics and embeds description text for training.
     """
-    def __init__(self, domain: str = None, csv_path: str = None, num_samples: int = 200):
-        self.domain = domain or settings.ACTIVE_DOMAIN
+    def __init__(self, domain: str = "agriculture", csv_path: str = None, num_samples: int = 200):
+        self.domain = domain
         self.vector_db = LocalVectorDB() # Helper to get text embeddings
         
         # If no CSV path provided, try the default domain path, or generate synthetic data
         if not csv_path:
-            csv_path = os.path.join(settings.domain_dir, "data", "pytorch_dataset.csv")
+            csv_path = settings.data_path(self.domain) / "pytorch_dataset.csv"
             
         if not os.path.exists(csv_path):
             print(f"[PyTorch Dataset] CSV not found at {csv_path}. Generating synthetic data...")

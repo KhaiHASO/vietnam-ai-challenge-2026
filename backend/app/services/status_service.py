@@ -20,6 +20,6 @@ def get_status() -> dict[str, object]:
         "version": settings.app_version,
         "demo_mode": settings.demo_mode,
         "ai_service_url": settings.ai_service_url,
-        "active_domain": ai_settings.ACTIVE_DOMAIN,
+        "active_domain": "agriculture",
         "database": mongo_status(),
     }

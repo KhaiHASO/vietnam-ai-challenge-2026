@@ -92,9 +92,17 @@ class CopilotRepository:
         cursor = get_database().copilot_messages.find({"session_id": session_id}).sort("sequence", 1).limit(limit)
         return await cursor.to_list(length=limit)
         
-    async def append_event(self, session_id: str, sequence: int, event_type: str, payload: dict[str, Any] | None = None) -> str:
+    async def append_event(
+        self,
+        session_id: str,
+        sequence: int,
+        event_type: str,
+        payload: dict[str, Any] | None = None,
+        *,
+        event_id: str | None = None,
+    ) -> str:
         db = get_database()
-        event_id = str(uuid4())
+        event_id = event_id or str(uuid4())
         event = {
             "event_id": event_id,
             "session_id": session_id,
@@ -105,3 +113,16 @@ class CopilotRepository:
         }
         await db.copilot_events.insert_one(event)
         return event_id
+
+    async def list_events_after(
+        self, session_id: str, last_event_id: str | None
+    ) -> list[dict[str, Any]]:
+        events = await get_database().copilot_events.find(
+            {"session_id": session_id}
+        ).sort("sequence", 1).to_list(length=1_000)
+        if last_event_id is None:
+            return events
+        for index, event in enumerate(events):
+            if event["event_id"] == last_event_id:
+                return events[index + 1 :]
+        return events

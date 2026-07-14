@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardBody, Col, Row } from "reactstrap";
 import classNames from "classnames";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/hooks/useRedux";
 import { CountriesCharts } from "./DashboardAnalyticsCharts";
 import { VectorMap } from "@south-paw/react-vector-maps";
 import world from "@/components/Common/world.svg.json";
@@ -11,7 +12,7 @@ import { getAllData } from "@/slices/thunks";
 import { createSelector } from "reselect";
 
 const LiveUsers = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [countryData, setCountryData] = useState<any>([]);
   const [periodType, setPeriodType] = useState<string>("halfyearly");

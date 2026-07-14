@@ -30,6 +30,20 @@ out/
 build/
 .yarn/
 yarn-error.log
-package-lock.json
 yarn.lock
 tsconfig.tsbuildinfo
+
+# AI Agents & IDE
+.gemini/
+.claude/
+backend/.codex/
+
+# Caches & Temp & DB
+.tmp/
+.pytest_cache/
+tmp_uploads/
+ai_layer/rag/cache/
+.chroma_db/
+
+# Downloaded Templates
+Home One*

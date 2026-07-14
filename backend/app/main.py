@@ -21,6 +21,8 @@ from ai_layer.cropdoctor.api.router import router as cropdoctor_router
 from app.core.config import settings
 from app.core.errors import register_exception_handlers
 from app.db.mongo import close_mongo_connection, connect_to_mongo
+from app.db.mongo import mongo_state
+from app.db.redis import close_redis_connection, connect_to_redis
 from app.routes import (
     ai,
     approvals,
@@ -51,8 +53,34 @@ async def lifespan(app: FastAPI):
             logger.exception("Demo data initialization failed")
 
     await connect_to_mongo()
-    yield
-    await close_mongo_connection()
+    redis_client = await connect_to_redis()
+    app.state.redis = redis_client
+    if settings.environment == "production" and (
+        not mongo_state.connected or redis_client is None
+    ):
+        await close_redis_connection()
+        await close_mongo_connection()
+        raise RuntimeError("MongoDB and Redis are required in production")
+
+    if mongo_state.connected:
+        from app.auth.bootstrap import bootstrap_first_admin
+        from app.auth.repository import AuthRepository
+
+        await bootstrap_first_admin(
+            AuthRepository(),
+            username=settings.bootstrap_admin_username,
+            password=(
+                settings.bootstrap_admin_password.get_secret_value()
+                if settings.bootstrap_admin_password
+                else None
+            ),
+            tenant_id=settings.bootstrap_admin_tenant_id,
+        )
+    try:
+        yield
+    finally:
+        await close_redis_connection()
+        await close_mongo_connection()
 
 
 from app.middleware.request_context import RequestContextMiddleware
@@ -71,38 +99,56 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    from app.middleware.rate_limit import RateLimitMiddleware
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(RequestContextMiddleware)
 
     register_exception_handlers(app)
 
-    # Mount static files for images serving
-    os.makedirs(settings.upload_root_path, exist_ok=True)
-    app.mount("/uploads", StaticFiles(directory=str(settings.upload_root_path)), name="uploads")
-    os.makedirs("tmp_uploads", exist_ok=True)
-    app.mount("/tmp_uploads", StaticFiles(directory="tmp_uploads"), name="tmp_uploads")
+
+
+
+    # Only diagnosis images are public assets. Knowledge source documents remain private.
+    diagnosis_upload_path = settings.upload_root_path / "diagnosis_cases"
+    os.makedirs(diagnosis_upload_path, exist_ok=True)
+    app.mount(
+        "/uploads/diagnosis_cases",
+        StaticFiles(directory=str(diagnosis_upload_path)),
+        name="diagnosis_uploads",
+    )
+
+    from fastapi import Depends
+    from app.auth.dependencies import get_current_user
+    auth_dep = [Depends(get_current_user)]
 
     app.include_router(health.router)
-    app.include_router(status.router)
-    app.include_router(ai.router)
-    app.include_router(domain.router)
-    app.include_router(diagnosis.router)
-    app.include_router(expert.router)
-    app.include_router(dashboard.router)
-    app.include_router(listing.router)
-    app.include_router(knowledge.router)
-    app.include_router(cooperative.router)
+    app.include_router(status.router, dependencies=auth_dep)
+    
+    app.include_router(ai.router, dependencies=auth_dep)
+    app.include_router(domain.router, dependencies=auth_dep)
+    app.include_router(diagnosis.router, dependencies=auth_dep)
+    app.include_router(expert.router, dependencies=auth_dep)
+    app.include_router(dashboard.router, dependencies=auth_dep)
+    app.include_router(listing.router, dependencies=auth_dep)
+    app.include_router(knowledge.router, dependencies=auth_dep)
+    app.include_router(cooperative.router, dependencies=auth_dep)
 
-    app.include_router(chat.router)
-    app.include_router(database.router)
-    app.include_router(approvals.router)
-    app.include_router(cropdoctor_router)
+    app.include_router(chat.router, dependencies=auth_dep)
+    app.include_router(database.router, dependencies=auth_dep)
+    app.include_router(approvals.router, dependencies=auth_dep)
+    app.include_router(cropdoctor_router, dependencies=auth_dep)
+    
     app.include_router(auth_router, prefix="/api/v1")
-    app.include_router(admin_router, prefix="/api/v1")
+    app.include_router(admin_router, prefix="/api/v1", dependencies=auth_dep)
 
     from app.copilot.routes import router as copilot_router
     from app.copilot.memory_routes import router as memory_router
-    app.include_router(copilot_router)
-    app.include_router(memory_router)
+    from app.knowledge.routes import router as knowledge_ingestion_router
+    from app.observability.routes import router as observability_router
+    app.include_router(copilot_router, dependencies=auth_dep)
+    app.include_router(memory_router, dependencies=auth_dep)
+    app.include_router(knowledge_ingestion_router)
+    app.include_router(observability_router)
 
     return app
 

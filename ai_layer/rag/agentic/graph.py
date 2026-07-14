@@ -1,59 +1,57 @@
-from langgraph.graph import StateGraph, END
-from ai_layer.rag.agentic.state import AgentState
-from ai_layer.rag.agentic.nodes import AgenticNodes
+import logging
 
-def create_agentic_graph(nodes: AgenticNodes):
-    """
-    Creates and compiles the LangGraph state machine for Agentic RAG.
-    """
-    
-    workflow = StateGraph(AgentState)
-    
-    # Add nodes
-    workflow.add_node("planner", nodes.planner_node)
-    workflow.add_node("retrieve", nodes.retrieve_node)
-    workflow.add_node("reflect", nodes.reflect_node)
-    workflow.add_node("rewrite", nodes.rewrite_node)
-    workflow.add_node("generate", nodes.generate_node)
-    
-    # Define routing logic
-    def route_after_plan(state: AgentState) -> str:
-        if state.get("needs_retrieval", True):
-            return "retrieve"
-        return "generate"
-        
-    def route_after_reflect(state: AgentState) -> str:
-        # Nếu đủ tốt hoặc đã loop quá 2 lần thì chuyển sang generate
-        if state.get("is_relevant", True) or state.get("loop_count", 0) >= 2:
-            return "generate"
-        # Ngược lại thì viết lại câu hỏi
-        return "rewrite"
-        
-    # Build edges
-    workflow.set_entry_point("planner")
-    
-    workflow.add_conditional_edges(
-        "planner",
-        route_after_plan,
-        {
-            "retrieve": "retrieve",
-            "generate": "generate"
-        }
-    )
-    
-    workflow.add_edge("retrieve", "reflect")
-    
-    workflow.add_conditional_edges(
-        "reflect",
-        route_after_reflect,
-        {
-            "generate": "generate",
-            "rewrite": "rewrite"
-        }
-    )
-    
-    workflow.add_edge("rewrite", "retrieve")
-    workflow.add_edge("generate", END)
-    
-    # Compile
-    return workflow.compile()
+from ai_layer.rag.agentic.nodes import AgenticNodes
+from ai_layer.rag.agentic.state import AgenticState
+from ai_layer.rag.contracts.memory import Evidence
+from ai_layer.rag.contracts.request import CopilotRequest
+
+logger = logging.getLogger(__name__)
+
+
+class BoundedAgenticRunner:
+    def __init__(
+        self,
+        retriever=None,
+        provider_gateway=None,
+        *,
+        retriever_factory=None,
+        max_loops: int = 2,
+    ):
+        self.retriever = retriever
+        self.retriever_factory = retriever_factory
+        self.gateway = provider_gateway
+        self.max_loops = max_loops
+
+    async def run(
+        self, request: CopilotRequest, route_class: str = "standard"
+    ) -> list[Evidence]:
+        retriever = self.retriever
+        if retriever is None and self.retriever_factory is not None:
+            retriever = self.retriever_factory(request.domain_id)
+        if retriever is None:
+            logger.warning("No retriever configured; refusing to fabricate evidence")
+            return []
+        nodes = AgenticNodes(retriever, self.gateway)
+        state = AgenticState(
+            request=request,
+            current_query=request.query,
+            rewrite_count=0,
+            reflect_count=0,
+            evidence=[],
+            is_relevant=True,
+            route_class=route_class,
+        )
+        state = await nodes.retrieve_node(state)
+        if route_class == "fast" or self.gateway is None:
+            return state.get("evidence", [])
+
+        max_reflect = 1 if route_class == "standard" else self.max_loops
+        for _ in range(max_reflect):
+            state = await nodes.reflect_node(state)
+            if state.get("is_relevant", False):
+                break
+            if state.get("reflect_count", 0) >= max_reflect:
+                break
+            state = await nodes.rewrite_node(state)
+            state = await nodes.retrieve_node(state)
+        return state.get("evidence", [])

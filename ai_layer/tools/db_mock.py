@@ -123,9 +123,8 @@ DEFAULT_AGRICULTURE_STATE = {
     ]
 }
 
-def load_db() -> Dict[str, Any]:
-    db_file = settings.db_path
-    domain = settings.ACTIVE_DOMAIN
+def load_db(domain: str = "agriculture") -> Dict[str, Any]:
+    db_file = settings.db_path_for(domain)
     
     # Select appropriate default state
     if domain == "education":
@@ -136,7 +135,7 @@ def load_db() -> Dict[str, Any]:
         default_state = DEFAULT_SME_STATE
         
     if not os.path.exists(db_file):
-        save_db(default_state)
+        save_db(default_state, domain)
         return default_state
     try:
         with open(db_file, "r", encoding="utf-8") as f:
@@ -144,16 +143,16 @@ def load_db() -> Dict[str, Any]:
     except Exception:
         return default_state
 
-def save_db(state: Dict[str, Any]):
-    db_file = settings.db_path
+def save_db(state: Dict[str, Any], domain: str = "agriculture"):
+    db_file = settings.db_path_for(domain)
     os.makedirs(os.path.dirname(db_file), exist_ok=True)
     with open(db_file, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=2)
 
-def update_wallet(amount_change: int) -> int:
-    db = load_db()
+def update_wallet(amount_change: int, domain: str = "agriculture") -> int:
+    db = load_db(domain)
     if "wallet" not in db:
         db["wallet"] = {"balance": 1500000, "currency": "VND"}
     db["wallet"]["balance"] += amount_change
-    save_db(db)
+    save_db(db, domain)
     return db["wallet"]["balance"]

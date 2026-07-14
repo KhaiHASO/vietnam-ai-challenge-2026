@@ -1,0 +1,27 @@
+version: "1.0.0"
+locale: "vi-VN"
+prompt_bundle_version: "v1.2"
+policy_bundle_version: "v1.0"
+validator_bundle_version: "v1.1"
+
+memory_policy:
+  allowed_fact_fields: 
+    - "crop_type"
+    - "disease_history"
+    - "location"
+
+retrieval:
+  similarity_threshold: 0.75
+  top_k: 5
+
+provider_order: 
+  - "ollama"
+  - "openai"
+
+max_reflect_count: 2
+
+tool_risk_classes:
+  - name: "low"
+    requires_approval: false
+  - name: "high"
+    requires_approval: true

@@ -7,11 +7,12 @@ from app.auth.dependencies import get_current_user
 from app.auth.tokens import Principal
 from app.copilot.service import CopilotService
 from app.copilot.repository import CopilotRepository, ConversationRevisionConflict, IdempotencyConflict
-from ai_layer.rag.service import get_rag_service, RAGService
+from app.copilot.dependencies import get_runtime_rag_service
+from ai_layer.rag.service import RAGService
 
 router = APIRouter(prefix="/api/v1/copilot", tags=["Copilot"])
 
-def get_copilot_service(rag_service: RAGService = Depends(get_rag_service)) -> CopilotService:
+def get_copilot_service(rag_service: RAGService = Depends(get_runtime_rag_service)) -> CopilotService:
     repo = CopilotRepository()
     return CopilotService(repo, rag_service)
 

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { toErrorMessage } from "@/lib/error-message";
 
 interface Settings {
   theme: "light" | "dark";
@@ -44,7 +45,7 @@ export const fetchSettings = createAsyncThunk(
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );
@@ -71,7 +72,7 @@ export const updateSettings = createAsyncThunk(
       const data = await response.json();
       return data;
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(toErrorMessage(error));
     }
   }
 );

@@ -10,8 +10,6 @@ def export_to_onnx(domain: str):
     print(f"  EXPORTING PYTORCH MODEL TO ONNX - DOMAIN: {domain.upper()}")
     print(f"==========================================\n")
     
-    settings.ACTIVE_DOMAIN = domain
-    
     model = get_triage_model(domain)
     if not model:
         print("[ONNX Export] PyTorch model checkpoint not found. Please train the model first.")
@@ -23,7 +21,7 @@ def export_to_onnx(domain: str):
     dummy_tab = torch.randn(1, 10, dtype=torch.float32)
     dummy_text = torch.randn(1, 384, dtype=torch.float32)
     
-    export_path = os.path.join(settings.domain_dir, "data", "model.onnx")
+    export_path = settings.data_path(domain) / "model.onnx"
     
     try:
         import torch.onnx

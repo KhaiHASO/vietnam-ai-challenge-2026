@@ -1,145 +1,253 @@
-# 🚀 VAIC 2026: AI-Native SME Copilot & CropDoctor AI Platform
+# Canopy — Nền tảng AI-Native Copilot & CropDoctor
 
-## 🇻🇳 Vietnam AI Innovation Challenge 2026 - Dự Án Đi Thi Cấp Độ Chuyên Nghiệp (Professional Track)
+Canopy là nền tảng AI-Native hỗ trợ chẩn đoán cây trồng và tư vấn chuyên môn có kiểm soát. Hệ thống kết hợp Web UI, API, worker bất đồng bộ và `ai_layer/rag` (RAG, memory, cache, registry, validation, policy và typed abstention).
 
-Hệ thống phần mềm chuẩn mực được thiết kế theo kiến trúc **AI-Native Software (Maturity Level 5-6 LLMOps)** phục vụ cho cuộc thi **VAIC 2026**. Dự án tích hợp hai phân hệ chính giúp giải quyết triệt để các bài toán tối ưu vận hành doanh nghiệp đa lĩnh vực và chẩn đoán lâm sàng nông nghiệp công nghệ cao.
+> Khuyến nghị dùng Docker Compose khi demo hoặc vận hành đầy đủ. Cách này chạy đúng topology production: Nginx, Frontend, Backend, Worker, MongoDB, Redis và Chroma.
 
----
-
-## 📁 Sơ Đồ Cấu Trúc Tổng Thể Monorepo
+## Kiến trúc
 
 ```text
-vietnam-ai-challenge-2026/
-├── ai_layer/                              # Phân lớp xử lý trí tuệ nhân tạo chuyên sâu
-│   ├── cropdoctor/                        # Hệ thống Multi-Agent của CropDoctor AI
-│   │   ├── agents/                        # Định nghĩa 6 Agent tự trị chuyên biệt
-│   │   │   ├── vision_consensus_agent.py  # Phân tích ảnh và xuất trắc lượng thị giác
-│   │   │   ├── symptom_agent.py           # Thu thập triệu chứng lâm sàng tương tác
-│   │   │   ├── context_agent.py           # Tra cứu dữ liệu thời tiết & bối cảnh thực địa
-│   │   │   ├── reasoning_agent.py         # Lập luận hợp nhất đa tác nhân (DeepSeek Engine)
-│   │   │   ├── safety_agent.py            # Thẩm định an toàn sinh học IPM
-│   │   │   └── diary_agent.py             # Đăng ký nhật ký số & nhắc lịch tự động
-│   │   └── api/                           # Router phân phối kết quả Agent chẩn đoán
-│   └── pytorch_engine/                    # Bộ máy học sâu phân loại rủi ro
-│       ├── model.py                       # Mạng ImpactTriageNet (torch.nn.Module)
-│       ├── dataset.py                     # Bộ tiền xử lý & nhúng dữ liệu vector
-│       ├── train.py                       # Tập lệnh huấn luyện mô hình học sâu
-│       ├── evaluate.py                    # Đánh giá độ chính xác (Precision, Recall, F1)
-│       └── inference.py                   # Suy luận thời gian thực với cơ chế fallback
-├── backend/                               # Máy chủ Backend FastAPI (Python)
-│   ├── app/
-│   │   ├── db/                            # Quản lý kết nối MongoDB & Demo Memory Store
-│   │   ├── routes/                        # Các tuyến API nghiệp vụ chính (Farms, Cases, Map...)
-│   │   └── services/                      # Nghiệp vụ điều phối dữ liệu & startup dữ liệu hạt giống
-│   └── tmp_uploads/                       # Lưu trữ tệp ảnh lâm sàng tải lên
-├── frontend/                              # Giao diện điều khiển Cockpit Next.js (TypeScript)
-│   ├── src/
-│   │   ├── app/                           # Cấu trúc App Router của Next.js
-│   │   │   ├── (with-layout)/
-│   │   │   │   ├── ai-copilot/            # Phân hệ SME & Multidomain Copilot
-│   │   │   │   ├── diagnosis/             # Phân hệ CropDoctor AI Diagnosis Cockpit
-│   │   │   │   ├── farms/                 # Quản lý nông trang vận hành thật
-│   │   │   │   ├── cooperative/           # Bản đồ phân bố dịch bệnh khu vực
-│   │   │   │   ├── ai/agent-logs/         # Nhật ký kiểm toán trace bước chạy của Agent
-│   │   │   │   └── reminders/             # Lịch nhắc chăm sóc mùa vụ động
-│   │   └── components/                    # Thư viện component giao diện Velzon
-│   └── public/                            # Tài nguyên tĩnh
-└── README.md                              # Tài liệu hướng dẫn này
+Trình duyệt
+    │
+    ▼
+Nginx (cổng 80) ──► Frontend Next.js
+    │ /api
+    ▼
+Backend FastAPI ──► ai_layer/rag ──► FPT AI Factory / model provider
+    │                    │
+    │                    ├── Chroma (vector store)
+    │                    └── Redis (cache, queue, rate-limit)
+    ▼
+MongoDB (người dùng, hội thoại, audit, dữ liệu nghiệp vụ)
+    │
+    ▼
+Worker (ingestion, embedding, tác vụ nền)
 ```
 
----
+## Yêu cầu
 
-## 🧱 1. Phân Hệ 1: AI-Native Operations Copilot (SME & Multidomain)
+- Docker Desktop và Docker Compose v2 — cách chạy khuyến nghị.
+- Hoặc để phát triển cục bộ: Python 3.11+, Node.js 20+ và npm 10+.
+- API key của FPT AI Factory nếu muốn gọi mô hình thật.
 
-Giải pháp điều phối nghiệp vụ thông minh cho 3 lĩnh vực: **SME (Thanh toán & Đặt sân)**, **Giáo dục (Cảnh báo rớt môn)**, và **Nông nghiệp (Vận hành nông trại)**.
+## Chạy nhanh với Docker Compose
 
-### Luồng Vận Hành 9 Bước (Trace Flow)
-```mermaid
-graph TD
-    A[1. Input Capture & PII Scan] -->|Ẩn thông tin cá nhân| B[2. Input Safety Guardrail]
-    B -->|Chặn SQL/Prompt Injection| C[3. Semantic Model Router]
-    C -->|FAQ Cache / Agent routing| D[4. CUDA Vector Search - RAG]
-    D -->|Nạp tri thức chính sách| E[5. PyTorch Triage Engine]
-    E -->|Chấm điểm Rủi ro & Priority| F[6. Agent Planner - ReAct]
-    F -->|Đề xuất gọi API| G[7. Tool Executor]
-    G -->|Nếu rủi ro cao hoặc cần duyệt| H[8. Human-in-the-Loop Queue]
-    H -->|Quản trị viên phê duyệt| I[9. Output Guardrail Check]
-    E -->|Nếu câu hỏi thường gặp FAQ| I
-    I -->|Quét ảo tưởng Hallucination| J[Smart Response Dispatcher]
-    J -->|Phục hồi PII & Trả về UI| UI[Next.js Cockpit UI]
-```
+### 1. Tạo cấu hình môi trường
 
-### Các Tính Năng Cốt Lõi:
-1.  **Semantic Domain Switching**: Chuyển nhanh toàn bộ bối cảnh tri thức RAG, cấu trúc CSDL và tập lệnh API chỉ với 1 click ngay trên thanh tiêu đề.
-2.  **PyTorch ImpactTriageNet Engine**: Mô hình mạng thần kinh đa nhiệm tự động chấm điểm mức độ rủi ro của yêu cầu (< 2ms). Nếu độ rủi ro vượt ngưỡng an toàn, hệ thống tự động đưa vào hàng đợi phê duyệt của con người (**Human-in-the-Loop**).
-3.  **Hàng đợi phê duyệt (HitL Queue)**: Cho phép quản trị viên xem xét các hành động nhạy cảm như hoàn tiền Momo, điều chỉnh điểm số sinh viên hoặc đề xuất phun hóa chất, trước khi CSDL thật được cập nhật.
-
----
-
-## 🩺 2. Phân Hệ 2: CropDoctor AI (Nông Nghiệp Số & Lâm Sàng Thực Vật)
-
-Hệ thống chẩn đoán dịch bệnh đa tác nhân kết hợp dữ liệu bối cảnh thời tiết thời gian thực và đề xuất giải pháp bảo vệ thực vật theo chuẩn **IPM**.
-
-### Hệ thống 6 AI Agent Tự Trị (Multi-Agent System)
-1.  **Vision Consensus Agent**: Nhận dạng hình ảnh lá/quả bệnh, đo lường số lượng vết bệnh (`lesion_count`), tỷ lệ diện tích hư hại (`leaf_area_affected`) và trắc lượng chất lượng ảnh chụp (`image_quality`).
-2.  **Symptom Agent**: Khai thác câu hỏi lâm sàng bổ sung đối với người nông dân về tốc độ lây lan, thời điểm bùng phát dịch bệnh.
-3.  **Context Agent**: Lấy dữ liệu khí tượng địa lý (nhiệt độ, độ ẩm 85-92%, lượng mưa) của Trảng Bom/Long Thành Đồng Nai nhằm đối chiếu điều kiện sinh trưởng của nấm hại.
-4.  **Reasoning Agent (DeepSeek Engine)**: Hợp nhất dữ liệu của Vision, Symptom và Context Agent thông qua LLM DeepSeek để đưa ra kết luận chẩn đoán cuối cùng với độ tin cậy được tối ưu hóa.
-5.  **Safety Agent (IPM Auditor)**: Đóng vai trò chốt chặn an toàn sinh học, cảnh báo chống lạm dụng thuốc bảo vệ thực vật hóa học, ưu tiên đề xuất biện pháp cơ học/sinh học IPM trước.
-6.  **Diary Agent**: Tự động đăng ký sự kiện vào nhật ký mùa vụ của nông trại và lên lịch nhắc nhở theo dõi lâm sàng sau 48h.
-
-### Các Giao Diện Chức Năng Chính:
-*   **Bàn chẩn đoán lâm sàng (`/diagnosis/new`)**: Upload ảnh kéo thả, hỗ trợ zoom ảnh cực đại với bộ công cụ Lightbox xem chi tiết vết bệnh, tự động trích xuất tên ảnh gốc của tệp tải lên, vẽ sơ đồ tiến trình 6 Agent chạy trực tiếp.
-*   **Bệnh án lịch sử (`/diagnosis/history`)**: Bảng quản lý toàn bộ ca chẩn đoán thực tế lấy từ MongoDB. Nút xem chi tiết (`ri-eye-line`) hiển thị đầy đủ hình ảnh gốc kèm tên file ảnh, biểu đồ độ tin cậy và **Nhật ký audit log chi tiết của 6 Agent** của riêng ca bệnh đó.
-*   **Danh sách ca cần theo dõi (`/diagnosis/follow-up`)**: Quản lý các ca bệnh chờ phản hồi triệu chứng, các ca bệnh nguy cấp chờ chuyên gia phê duyệt đơn thuốc và nhắc nhở lịch chụp lại ảnh.
-*   **Bản đồ dịch bệnh hợp tác xã (`/cooperative/map`)**: Biểu diễn tọa độ phân bố ca dịch hại theo khu vực thực tế (Trảng Bom, Long Thành, Nhơn Trạch...). Đi kèm bảng tin cảnh báo bùng phát dịch bệnh theo thời gian thực.
-*   **Nhật ký kiểm toán hệ thống AI (`/ai/agent-logs`)**: Công cụ debug chuyên sâu cho các kỹ sư, hiển thị thời gian chạy (latency), dữ liệu đầu vào/đầu ra và các bằng chứng thực nghiệm (evidence) của từng Agent. Hỗ trợ tự động định vị trace của ca bệnh khi bấm chuyển từ danh sách lịch sử.
-
----
-
-## 🛠️ 3. Cài Đặt & Khởi Chạy Nhanh
-
-### Yêu cầu hệ thống:
-*   **Python**: 3.10 trở lên
-*   **NodeJS**: 18 trở lên
-*   **MongoDB** (Tùy chọn, hệ thống tự động fallback sang Demo Memory Store nếu không kết nối được MongoDB)
-
-### Cấu hình biến môi trường (`.env` ở thư mục gốc):
-Tạo file `.env` tại thư mục gốc của dự án và điền cấu hình API DeepSeek:
-```ini
-# DeepSeek API config
-DEEPSEEK_API_KEY=
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-DEEPSEEK_MODEL=deepseek-chat
-```
-
-### 1-Click Khởi chạy (Dành cho Windows - PowerShell):
-Mở terminal PowerShell tại thư mục gốc và thực thi:
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-.\run_project.ps1
-```
-*Script sẽ tự động khởi tạo môi trường ảo Python venv, cài đặt các thư viện backend, cài đặt dependencies frontend Next.js và khởi chạy cả hai cổng dịch vụ song song.*
-
-*   **Giao diện Dashboard**: [http://localhost:3000/ai-copilot](http://localhost:3000/ai-copilot) hoặc [http://localhost:3000/diagnosis/history](http://localhost:3000/diagnosis/history)
-*   **API Swagger**: [http://localhost:8000/docs](http://localhost:8000/docs)
-
----
-
-## 📅 4. Các Lệnh CLI Hữu Ích
-
-### Huấn luyện và nạp dữ liệu hạt giống (Seed & Train):
-```bash
-# Nạp dữ liệu hạt giống cho cả 3 domain và huấn luyện mạng PyTorch
-python scripts/seed_domain.py --domain all --train
+Copy-Item .env.example .env
 ```
 
-### Huấn luyện lại mạng thần kinh PyTorch nghiệp vụ:
-```bash
-python -m ai_layer.pytorch_engine.train --domain agriculture --epochs 20
+Mở `.env` và thay tối thiểu các giá trị sau:
+
+```dotenv
+ENVIRONMENT=production
+PUBLIC_ORIGIN=http://localhost
+JWT_SECRET=thay-bang-chuoi-ngau-nhien-toi-thieu-32-ky-tu
+BOOTSTRAP_ADMIN_USERNAME=admin
+BOOTSTRAP_ADMIN_PASSWORD=mat-khau-rieng-toi-thieu-12-ky-tu
+MONGO_ROOT_PASSWORD=mat-khau-mongodb-manh
+
+# Bắt buộc nếu dùng model FPT AI Factory thật
+FPT_AI_FACTORY_API_KEY=
+FPT_AI_FACTORY_ENDPOINT=https://api.fpt.ai/v1/chat/completions
+FPT_AI_FACTORY_MODEL_ID=qwen2.5-72b-instruct
 ```
 
-### Đo đạc hiệu năng mô hình (Benchmark):
-```bash
-python -m ai_layer.pytorch_engine.benchmark --domain sme
+Không commit file `.env` hoặc bất kỳ API key nào vào Git.
+
+### 2. Khởi động toàn bộ hệ thống
+
+```powershell
+docker compose up --build -d
+docker compose ps
 ```
+
+Mở ứng dụng tại [http://localhost](http://localhost). Health check: [http://localhost/health/live](http://localhost/health/live).
+
+Tài khoản quản trị đầu tiên được tạo từ `BOOTSTRAP_ADMIN_USERNAME`, `BOOTSTRAP_ADMIN_PASSWORD` và `BOOTSTRAP_ADMIN_TENANT_ID` khi Backend khởi động.
+
+### 3. Xem log hoặc dừng hệ thống
+
+```powershell
+docker compose logs -f backend
+docker compose logs -f worker
+docker compose down
+```
+
+`docker compose down -v` sẽ xóa cả dữ liệu MongoDB, Redis và Chroma. Chỉ dùng khi bạn chắc chắn không cần dữ liệu hiện tại.
+
+## Chạy cục bộ để phát triển
+
+### Backend
+
+```powershell
+py -3.11 -m venv .venv
+source .venv/Scripts/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements-dev.txt
+
+# Tạo file .env từ .env.example trước khi chạy
+$env:PYTHONPATH = "$PWD;$PWD\backend"
+python -m uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8000
+```
+
+API khả dụng tại [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) và health check tại `http://127.0.0.1:8000/health/live`.
+
+Để chạy ở chế độ phát triển độc lập, dùng các biến môi trường phù hợp trong `.env`:
+
+```dotenv
+ENVIRONMENT=development
+DEMO_MODE=true
+CORS_ORIGINS=http://localhost:3000
+MONGODB_URI=mongodb://localhost:27017
+DATABASE_NAME=cropdoctor_ai
+REDIS_URL=redis://localhost:6379/0
+CHROMA_URL=http://localhost:8000
+PRIMARY_AI_PROVIDER=fpt-ai-factory
+FPT_AI_FACTORY_API_KEY=
+```
+
+Bạn vẫn cần MongoDB, Redis và Chroma đang chạy nếu muốn kiểm tra đầy đủ RAG, cache, memory và tác vụ ingestion.
+
+### Worker
+
+Mở terminal thứ hai, kích hoạt lại virtual environment rồi chạy:
+
+```powershell
+$env:PYTHONPATH = "$PWD;$PWD\backend"
+python -m app.workers.main
+```
+
+Worker xử lý ingestion tài liệu, embedding và các tác vụ bất đồng bộ. Không bỏ qua worker khi kiểm thử Knowledge Base/RAG.
+
+### Frontend
+
+```powershell
+Set-Location frontend
+npm ci --legacy-peer-deps
+npm run dev
+```
+
+UI phát triển mở tại [http://localhost:3000](http://localhost:3000). Lưu ý: các luồng đăng nhập và AI Copilot gọi API cùng origin `/api`; vì vậy Docker Compose (qua Nginx) là cách phù hợp để kiểm thử end-to-end. Khi chạy Next.js độc lập, dùng API docs hoặc cấu hình proxy/rewrite cục bộ nếu cần gọi Backend từ UI.
+
+## Đăng nhập và phân quyền
+
+- `admin`: quản trị tenant, người dùng, Domain Pack và Knowledge Base.
+- `expert`: quản lý tri thức và hỗ trợ chuyên môn.
+- `operator`: sử dụng các tính năng được cấp quyền.
+
+API xác thực chính:
+
+```text
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+GET  /api/v1/auth/me
+```
+
+## Luồng AI/RAG an toàn
+
+`ai_layer/rag` là module đóng gói lõi AI, không phải một API RAG tách rời. Một yêu cầu Copilot được xử lý theo các lớp:
+
+```text
+Input validation → Policy/authorization → Memory & cache
+→ Retrieval từ Domain Pack/Knowledge Base → Agent/LLM
+→ Claim & citation validation → Output policy
+→ Trả lời có nguồn hoặc Typed Abstention
+```
+
+Nguyên tắc quan trọng:
+
+- Memory chỉ dùng cho ngữ cảnh hội thoại, không phải bằng chứng chuyên môn.
+- Cache key gắn với phiên bản Domain Pack, prompt và policy để tránh trả kết quả cũ sai ngữ cảnh.
+- Câu trả lời chuyên môn cần được kiểm tra claim/citation trước khi trả về.
+- Khi thiếu dữ liệu, nguồn không đủ tin cậy hoặc có lỗi kiểm định, Backend trả `typed abstention` thay vì suy đoán.
+
+Frontend cần hiển thị trạng thái abstain một cách rõ ràng: lý do, gợi ý người dùng bổ sung thông tin hoặc chuyển sang tư vấn viên/chuyên gia.
+
+## Nạp tri thức cho RAG
+
+1. Đăng nhập bằng tài khoản `admin` hoặc `expert`.
+2. Chọn hoặc tạo Domain Pack phù hợp.
+3. Gửi tài liệu qua Knowledge Base/Copilot UI hoặc API ingestion.
+4. Bảo đảm worker đang chạy để chunking và embedding hoàn tất.
+5. Kiểm tra nguồn trích dẫn và kết quả retrieval trước khi bật cho người dùng cuối.
+
+Endpoint ingestion yêu cầu quyền phù hợp:
+
+```text
+POST /api/v1/knowledge/ingestions
+```
+
+## Kiểm thử và kiểm tra chất lượng
+
+### Backend và AI layer
+
+```powershell
+$env:PYTHONPATH = "$PWD;$PWD\backend"
+python -m pytest backend/tests tests -q
+```
+
+### Frontend
+
+```powershell
+Set-Location frontend
+npm run test
+npm run type-check
+npm run lint
+npm run format:check
+```
+
+### Release/operational checks
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/verify_release.ps1
+```
+
+Build frontend có thể mất thời gian vì dự án vẫn chứa một số route/template kế thừa. Không nên coi một lần build timeout là đạt tiêu chuẩn release; hãy kiểm tra log, tài nguyên Docker và chạy lại trong môi trường CI trước khi phát hành.
+
+## Sao lưu và khôi phục
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/backup.ps1
+powershell -ExecutionPolicy Bypass -File scripts/restore_verify.ps1 -BackupDirectory <thu_muc_backup>
+```
+
+Thực hiện khôi phục thử định kỳ; backup không được xem là hợp lệ nếu chưa khôi phục và kiểm tra được.
+
+## Mở rộng sang domain mới
+
+Core hiện tại được thiết kế để tái sử dụng khi đổi chủ đề cuộc thi. Khi nhận domain mới, không cần viết lại AI layer; hãy:
+
+1. Tạo Domain Pack mới: taxonomy, prompt, policy, tool/registry và tiêu chí citation.
+2. Nạp tài liệu tri thức đáng tin cậy, version hóa nguồn và chạy ingestion.
+3. Cấu hình validator/policy theo mức rủi ro của domain.
+4. Viết bộ evaluation gồm câu đúng, câu thiếu thông tin, prompt injection và trường hợp phải abstain.
+5. Kiểm thử end-to-end trước khi bật domain mới cho người dùng.
+
+Với domain có rủi ro cao (y tế, pháp lý, tài chính), bắt buộc bổ sung policy, quy trình escalation người thật và review chuyên gia phù hợp; RAG không tự động bảo đảm tính đúng đắn.
+
+## Tài liệu liên quan
+
+- [Kế hoạch triển khai AI-Native](docs/superpowers/plans/2026-07-10-ai-native-production-implementation.md)
+- [Runbook vận hành](docs/operations/runbook.md)
+- [Hướng dẫn đổi Domain Pack](docs/architecture/domain-pack-migration-guide.md)
+- [Ma trận production readiness](docs/architecture/production-readiness-matrix.md)
+
+## Khắc phục lỗi thường gặp
+
+| Hiện tượng | Kiểm tra trước |
+| --- | --- |
+| Không đăng nhập được | Kiểm tra `BOOTSTRAP_ADMIN_*`, `JWT_SECRET`, log Backend và truy cập qua Nginx (`http://localhost`). |
+| Copilot trả abstain | Kiểm tra Domain Pack đang hoạt động, nguồn Knowledge Base, trạng thái worker và citation/retrieval trong audit/log. |
+| Nạp tài liệu xong chưa tìm thấy | Worker chưa chạy, Redis/Chroma không kết nối được hoặc ingestion đang lỗi. Xem log worker. |
+| FPT AI Factory lỗi | Kiểm tra `FPT_AI_FACTORY_API_KEY`, endpoint, model ID, quota và log provider; không đưa key vào log. |
+| Frontend ở cổng 3000 không gọi được API | Đây là giới hạn chạy dev độc lập; dùng Docker Compose/Nginx hoặc thiết lập proxy/rewrite cục bộ. |
+
+## Lưu ý bảo mật
+
+- Dùng secret ngẫu nhiên, mạnh và khác nhau cho JWT, MongoDB và tài khoản bootstrap.
+- Chỉ expose Nginx ra internet; MongoDB, Redis, Chroma, Backend và Worker nên ở mạng nội bộ.
+- Thiết lập HTTPS, origin thật trong `PUBLIC_ORIGIN`, rate-limit, backup và observability trước khi public.
+- Không xem AI output là nguồn chuyên môn tuyệt đối; luôn bảo toàn citation, policy và cơ chế abstain.

@@ -1,165 +1,111 @@
-import json
 import logging
+import json
+import hashlib
+import inspect
 from typing import List, Dict, Any
-from ai_layer.rag.agentic.state import AgentState
-from ai_layer.rag.interfaces.llm import BaseLLMProvider
-from ai_layer.rag.interfaces.retriever import BaseRetriever
+from ai_layer.rag.agentic.state import AgenticState
+from ai_layer.rag.contracts.memory import Evidence
 
 logger = logging.getLogger(__name__)
 
 class AgenticNodes:
-    def __init__(self, llm: BaseLLMProvider, retriever: BaseRetriever):
-        self.llm = llm
+    def __init__(self, retriever, provider_gateway, registry_catalog=None):
         self.retriever = retriever
-        
-    def planner_node(self, state: AgentState) -> AgentState:
-        """Determines if the question needs retrieval or can be answered directly."""
-        logger.info("[AgenticNodes] Running planner_node")
-        
-        facts = state.get("facts", [])
-        facts_str = f"Thông tin đã biết về người dùng:\n- " + "\n- ".join(facts) + "\n" if facts else ""
+        self.gateway = provider_gateway
+        self.catalog = registry_catalog
 
-        prompt = (
-            f"Bạn là một hệ thống phân loại câu hỏi.\n"
-            f"{facts_str}"
-            f"Câu hỏi: '{state['original_question']}'\n"
-            f"Nếu câu hỏi là lời chào hỏi thông thường (như xin chào, cảm ơn, bạn là ai) hoặc câu hỏi không cần kiến thức chuyên môn, hãy trả lời bằng JSON: {{\"needs_retrieval\": false}}.\n"
-            f"Nếu câu hỏi cần kiến thức chuyên môn nông nghiệp, thủ tục pháp lý, hoặc dữ liệu thực tế, hãy trả lời bằng JSON: {{\"needs_retrieval\": true}}.\n"
-            f"Chỉ trả về JSON hợp lệ, không kèm giải thích."
-        )
-        
-        try:
-            response = self.llm.generate(prompt=prompt)
-            # Dọn dẹp markdown json block nếu có
-            if response.startswith("```json"):
-                response = response.replace("```json", "").replace("```", "").strip()
-            
-            result = json.loads(response)
-            state['needs_retrieval'] = result.get('needs_retrieval', True)
-        except Exception as e:
-            logger.warning(f"Planner node failed: {e}. Defaulting to true.")
-            state['needs_retrieval'] = True
-            
-        return state
-
-    def retrieve_node(self, state: AgentState) -> AgentState:
+    async def retrieve_node(self, state: AgenticState) -> AgenticState:
         """Retrieves documents based on the current query."""
-        logger.info(f"[AgenticNodes] Running retrieve_node with query: {state['current_query']}")
+        request = state["request"]
+        query = state.get("current_query") or request.query
+        logger.info(f"[AgenticNodes] Running retrieve_node for query: {query}")
         
-        filters = {"tenant_id": state.get("tenant_id", "default")}
-        chunks = self.retriever.retrieve(state['current_query'], top_k=5, filters=filters)
-        state['documents'] = chunks
+        top_k = 5
+        filters = {"tenant_id": request.tenant_id, "domain_id": request.domain_id}
+        
+        # Self retriever has retrieve method
+        chunks = self.retriever.retrieve(query, top_k=top_k, filters=filters)
+        if inspect.isawaitable(chunks):
+            chunks = await chunks
+        
+        evidence_list = []
+        for c in chunks:
+            metadata = c.metadata
+            extra = getattr(metadata, "extra", {})
+            content = c.text
+            ev = Evidence(
+                chunk_id=c.id,
+                document_id=getattr(metadata, "source_id", "doc"),
+                source_uri=extra.get("source_uri", "kb://"),
+                tenant_id=request.tenant_id,
+                domain_id=request.domain_id,
+                index_revision=extra.get("index_revision", "default"),
+                score=float(getattr(metadata, "rerank_score", None) or extra.get("score", 0.9)),
+                content=content,
+                checksum=extra.get("checksum") or hashlib.sha256(content.encode()).hexdigest(),
+                source_title=extra.get("source_title", "Document"),
+                page_or_section=extra.get("page_or_section"),
+                document_status=extra.get("document_status", "active"),
+            )
+            evidence_list.append(ev)
+            
+        state["evidence"] = evidence_list
+        state["current_query"] = query
         return state
 
-    def reflect_node(self, state: AgentState) -> AgentState:
+    async def reflect_node(self, state: AgenticState) -> AgenticState:
         """Evaluates if the retrieved documents are relevant to the query."""
         logger.info("[AgenticNodes] Running reflect_node")
-        
-        if not state['documents']:
-            state['is_relevant'] = False
-            state['reflection_feedback'] = "Không tìm thấy tài liệu nào."
+        evidence = state.get("evidence", [])
+        if not evidence:
+            state["is_relevant"] = False
+            state["reflection_feedback"] = "Không tìm thấy tài liệu nào."
             return state
-            
-        docs_text = "\n\n".join([f"Tài liệu {i+1}: {chunk.text}" for i, chunk in enumerate(state['documents'])])
+
+        query = state["current_query"]
+        context_str = "\n".join([f"- {ev.content}" for ev in evidence])
         
         prompt = (
-            f"Bạn là một người đánh giá mức độ liên quan của tài liệu.\n"
-            f"Câu hỏi của người dùng: '{state['current_query']}'\n"
-            f"Tài liệu tìm được:\n{docs_text}\n"
-            f"Tài liệu trên có đủ thông tin để trả lời câu hỏi không?\n"
-            f"Trả về JSON với định dạng: {{\"is_relevant\": true/false, \"feedback\": \"Lý do tại sao\"}}.\n"
+            f"Hãy đánh giá xem tài liệu dưới đây có đủ thông tin để trả lời câu hỏi '{query}' hay không.\n"
+            f"Tài liệu:\n{context_str}\n\n"
+            f"Trả về JSON dạng: {{\"is_relevant\": true/false, \"feedback\": \"Lý do tại sao\"}}\n"
             f"Chỉ trả về JSON hợp lệ."
         )
         
         try:
-            response = self.llm.generate(prompt=prompt)
-            if response.startswith("```json"):
-                response = response.replace("```json", "").replace("```", "").strip()
-                
-            result = json.loads(response)
-            state['is_relevant'] = result.get('is_relevant', True)
-            state['reflection_feedback'] = result.get('feedback', "")
+            res_text = await self.gateway.generate(prompt, [])
+            if "```" in res_text:
+                res_text = res_text.split("```")[1]
+                if res_text.startswith("json"):
+                    res_text = res_text[4:]
+            res = json.loads(res_text.strip())
+            state["is_relevant"] = bool(res.get("is_relevant", True))
+            state["reflection_feedback"] = res.get("feedback", "")
         except Exception as e:
-            logger.warning(f"Reflect node failed: {e}. Defaulting to true.")
-            state['is_relevant'] = True
-            state['reflection_feedback'] = ""
+            logger.warning(f"Reflect node failed: {e}. Defaulting to True.")
+            state["is_relevant"] = True
+            state["reflection_feedback"] = ""
             
+        state["reflect_count"] = state.get("reflect_count", 0) + 1
         return state
 
-    def rewrite_node(self, state: AgentState) -> AgentState:
+    async def rewrite_node(self, state: AgenticState) -> AgenticState:
         """Rewrites the query if documents were not relevant."""
         logger.info("[AgenticNodes] Running rewrite_node")
+        query = state["current_query"]
+        feedback = state.get("reflection_feedback", "")
         
         prompt = (
-            f"Câu hỏi gốc: '{state['original_question']}'\n"
-            f"Lần tìm kiếm trước với câu hỏi: '{state['current_query']}' không thành công.\n"
-            f"Lý do: {state['reflection_feedback']}\n"
-            f"Hãy viết lại câu hỏi tìm kiếm này một cách rõ ràng, chi tiết hơn hoặc dùng các từ khóa khác để có thể tìm được tài liệu tốt hơn.\n"
-            f"Chỉ trả về câu hỏi mới, không giải thích gì thêm."
+            f"Câu hỏi gốc: '{query}'\n"
+            f"Phản hồi từ lần tìm kiếm trước: '{feedback}'\n"
+            f"Hãy viết lại câu hỏi tìm kiếm này rõ ràng và chi tiết hơn để thu được kết quả tốt hơn. Chỉ trả về câu hỏi mới."
         )
         
         try:
-            new_query = self.llm.generate(prompt=prompt).strip()
-            state['current_query'] = new_query
-            state['loop_count'] += 1
+            new_query = await self.gateway.generate(prompt, [])
+            state["current_query"] = new_query.strip()
         except Exception as e:
-            logger.warning(f"Rewrite node failed: {e}.")
-            state['loop_count'] += 1
+            logger.warning(f"Rewrite query failed: {e}")
             
-        return state
-
-    def generate_node(self, state: AgentState) -> AgentState:
-        """Generates the final answer with citations."""
-        logger.info("[AgenticNodes] Running generate_node")
-        
-        if not state.get('needs_retrieval', True):
-            # Chit chat
-            prompt = (
-                f"Hãy trả lời câu hỏi sau một cách thân thiện và ngắn gọn.\n"
-                f"Câu hỏi: {state['original_question']}"
-            )
-            try:
-                state['answer'] = self.llm.generate(prompt=prompt)
-            except Exception as e:
-                state['answer'] = "Xin lỗi, tôi đang gặp sự cố kết nối."
-            return state
-
-        # Retrieval based generation
-        if not state['documents']:
-            state['answer'] = "Xin lỗi, tôi không tìm thấy thông tin nào liên quan đến câu hỏi của bạn trong cơ sở dữ liệu."
-            return state
-            
-        context = ""
-        citations = []
-        for i, chunk in enumerate(state['documents']):
-            context += f"\n--- TÀI LIỆU {i+1} ---\n{chunk.text}\n"
-            citations.append(f"Tài liệu {i+1}: ID={chunk.id}, Nguồn={chunk.metadata.get('document_type', 'Unknown')}")
-            
-        state['citations'] = citations
-        
-        system_prompt = state.get('system_prompt', "Bạn là trợ lý AI chuyên về Nông nghiệp và EUDR.")
-        
-        facts = state.get("facts", [])
-        if facts:
-            system_prompt += "\n\nThông tin đã biết về người dùng:\n- " + "\n- ".join(facts) + "\nHãy sử dụng thông tin này để cá nhân hóa câu trả lời nếu phù hợp."
-
-        # Ensure it instructs to use context
-        system_prompt += (
-            "\n\nHãy trả lời câu hỏi dựa TRÊN CÁC TÀI LIỆU ĐƯỢC CUNG CẤP. "
-            "Khi sử dụng thông tin từ tài liệu nào, hãy trích dẫn bằng [Tài liệu X]. "
-            "Nếu tài liệu không có thông tin để trả lời, hãy nói rõ là không có thông tin."
-        )
-        
-        prompt = (
-            f"CÂU HỎI: {state['original_question']}\n\n"
-            f"TÀI LIỆU:\n{context}\n\n"
-            f"CÂU TRẢ LỜI:"
-        )
-        
-        try:
-            state['answer'] = self.llm.generate(prompt=prompt, system_prompt=system_prompt)
-        except Exception as e:
-            logger.error(f"Generate node failed: {e}")
-            state['answer'] = "Đã xảy ra lỗi khi tạo câu trả lời."
-            
+        state["rewrite_count"] = state.get("rewrite_count", 0) + 1
         return state

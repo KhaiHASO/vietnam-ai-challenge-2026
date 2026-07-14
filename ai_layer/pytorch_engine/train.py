@@ -14,10 +14,7 @@ def train_model(domain: str, epochs: int = 15, batch_size: int = 16, lr: float =
     print(f"  TRAINING PYTORCH MODEL - DOMAIN: {domain.upper()}")
     print(f"==========================================\n")
     
-    # 1. Update settings active domain temporarily if command line specifies it
-    settings.ACTIVE_DOMAIN = domain
-    
-    # 2. Initialize dataset
+    # 1. Initialize the request-scoped domain dataset.
     dataset = OperationsTriageDataset(domain=domain, num_samples=300)
     
     # 3. Train-Val Split
@@ -40,7 +37,7 @@ def train_model(domain: str, epochs: int = 15, batch_size: int = 16, lr: float =
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
     
     # Checkpoint Path
-    checkpoint_dir = os.path.join(settings.domain_dir, "data")
+    checkpoint_dir = settings.data_path(domain)
     os.makedirs(checkpoint_dir, exist_ok=True)
     checkpoint_path = os.path.join(checkpoint_dir, "model_checkpoint.pth")
     

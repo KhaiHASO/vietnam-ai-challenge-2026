@@ -11,7 +11,6 @@ def run_benchmark(domain: str, runs: int = 100):
     print(f"  BENCHMARKING PYTORCH ENGINE - DOMAIN: {domain.upper()}")
     print(f"==========================================\n")
     
-    settings.ACTIVE_DOMAIN = domain
     model = get_triage_model(domain)
     
     if not model:
@@ -81,7 +80,7 @@ def run_benchmark(domain: str, runs: int = 100):
     print("------------------------------------------")
     
     # Save results
-    save_path = os.path.join(settings.domain_dir, "data", "benchmark.json")
+    save_path = settings.data_path(domain) / "benchmark.json"
     with open(save_path, "w") as f:
         json.dump(benchmark_results, f, indent=2)
     print(f"[Benchmark] Saved results to: {save_path}")

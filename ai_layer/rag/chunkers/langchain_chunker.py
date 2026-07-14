@@ -1,8 +1,8 @@
 import uuid
 from typing import List
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from ai_layer.rag.interfaces.chunker import BaseChunker
-from ai_layer.rag.models import Document, Chunk
+from ai_layer.rag.models import Document, Chunk, ChunkMetadataModel
 
 class LangchainChunker(BaseChunker):
     """
@@ -30,13 +30,21 @@ class LangchainChunker(BaseChunker):
             
             # Create Chunk objects
             for idx, text in enumerate(text_chunks):
+                meta = doc.metadata.copy()
+                meta["knowledge_item_id"] = doc.knowledge_item_id
+                
+                chunk_meta = ChunkMetadataModel(
+                    source_id=doc.id,
+                    source_type=doc.source_type.value if hasattr(doc, 'source_type') else "",
+                    chunk_index=idx,
+                    total_chunks=len(text_chunks),
+                    extra=meta
+                )
+                
                 chunk = Chunk(
                     id=str(uuid.uuid4()),
-                    document_id=doc.id,
-                    knowledge_item_id=doc.knowledge_item_id,
                     text=text,
-                    chunk_index=idx,
-                    metadata=doc.metadata.copy()  # Inherit metadata from document
+                    metadata=chunk_meta
                 )
                 chunks.append(chunk)
                 

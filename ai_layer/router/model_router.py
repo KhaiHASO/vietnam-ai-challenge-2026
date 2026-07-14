@@ -4,7 +4,8 @@ from typing import Dict, Any, Tuple
 from ai_layer.config import settings
 
 class ModelRouter:
-    def __init__(self):
+    def __init__(self, domain_id: str = "agriculture"):
+        self.domain_id = domain_id
         # Default FAQ caches for each domain
         self.default_caches = {
             "sme": {
@@ -37,8 +38,8 @@ class ModelRouter:
 
     def _get_faq_cache(self) -> Dict[str, str]:
         # Try loading from local domain file if it exists
-        domain = settings.ACTIVE_DOMAIN
-        faq_file = os.path.join(settings.domain_dir, "data", "faq_cache.json")
+        domain = self.domain_id
+        faq_file = settings.data_path(domain) / "faq_cache.json"
         if os.path.exists(faq_file):
             try:
                 with open(faq_file, "r", encoding="utf-8") as f:
@@ -63,7 +64,7 @@ class ModelRouter:
             }
             
         # 2. Semantic routing by intent keywords
-        domain = settings.ACTIVE_DOMAIN
+        domain = self.domain_id
         keywords = self.action_keywords.get(domain, self.action_keywords["sme"])
         is_action = any(kw in clean_query for kw in keywords)
         
@@ -88,13 +89,13 @@ class ModelRouter:
         """Allows dynamically adding high-frequency responses to cache."""
         # This saves to the active cache in-memory, but we can also write to the file
         clean_query = query.strip().lower().rstrip("?").rstrip(".")
-        domain = settings.ACTIVE_DOMAIN
+        domain = self.domain_id
         if domain not in self.default_caches:
             self.default_caches[domain] = {}
         self.default_caches[domain][clean_query] = response
         
         # Try saving to file
-        faq_file = os.path.join(settings.domain_dir, "data", "faq_cache.json")
+        faq_file = settings.data_path(domain) / "faq_cache.json"
         os.makedirs(os.path.dirname(faq_file), exist_ok=True)
         try:
             faq_cache = self._get_faq_cache()

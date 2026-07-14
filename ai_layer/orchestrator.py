@@ -12,13 +12,14 @@ from ai_layer.approval.hitl import hitl_manager
 from ai_layer.pytorch_engine.inference import predict_triage
 
 class AIOrchestrator:
-    def __init__(self):
+    def __init__(self, domain_id: str = "agriculture"):
+        self.domain_id = domain_id
         self.pii_scanner = PIIScanner()
         self.input_guardrail = InputSafetyGuardrail()
         self.output_guardrail = OutputSafetyGuardrail()
-        self.router = ModelRouter()
+        self.router = ModelRouter(domain_id)
         self.vector_db = LocalVectorDB()
-        self.planner = AgentPlanner()
+        self.planner = AgentPlanner(domain_id)
 
     def _extract_metadata_from_query(self, query: str) -> dict:
         lower = query.lower()
@@ -38,7 +39,7 @@ class AIOrchestrator:
         """
         start_time = time.time()
         telemetry = {}
-        domain = settings.ACTIVE_DOMAIN
+        domain = self.domain_id
         
         # Step 1: PII Scan
         step_start = time.time()
@@ -96,7 +97,7 @@ class AIOrchestrator:
         # Step 4.5: PyTorch Impact Triage Engine
         step_start = time.time()
         metadata = self._extract_metadata_from_query(redacted_query)
-        pytorch_res = predict_triage(redacted_query, metadata)
+        pytorch_res = predict_triage(redacted_query, metadata, domain=domain)
         telemetry["pytorch_engine"] = {
             "name": "PyTorch Impact Triage Engine",
             "results": pytorch_res,

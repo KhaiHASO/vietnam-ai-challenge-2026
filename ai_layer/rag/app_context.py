@@ -51,6 +51,13 @@ class AppContext:
         self._resolved_dependencies.add("llm_provider")
         return get_llm_provider()
 
+    @property
+    def rag_service(self):
+        from ai_layer.rag.core.dependencies import get_rag_service
+
+        self._resolved_dependencies.add("rag_service")
+        return get_rag_service()
+
     def health_check(self) -> dict:
         return {
             "initialized": self.is_initialized,

@@ -6,7 +6,8 @@ from ai_layer.config import settings
 from ai_layer.tools.registry import tool_registry
 
 class AgentPlanner:
-    def __init__(self):
+    def __init__(self, domain_id: str = "agriculture"):
+        self.domain_id = domain_id
         self.provider = settings.PROVIDER
         self.model_name = settings.MODEL_NAME
         self.api_key = settings.API_KEY
@@ -87,8 +88,8 @@ class AgentPlanner:
         """
         trace_steps = []
         
-        # Build tool context instructions (filtered by ACTIVE_DOMAIN)
-        tool_schemas = tool_registry.get_tool_schemas(domain=settings.ACTIVE_DOMAIN)
+        # Build tool context instructions for the request-scoped domain.
+        tool_schemas = tool_registry.get_tool_schemas(domain=self.domain_id)
         tools_desc = "\n".join([f"- {t['function']['name']}: {t['function']['description']}. Args Schema: {t['function']['parameters']}" for t in tool_schemas])
         
         system_prompt = (

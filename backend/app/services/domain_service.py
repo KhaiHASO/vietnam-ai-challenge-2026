@@ -13,15 +13,13 @@ def switch_domain(domain: str) -> dict[str, object]:
             detail="Hệ thống đã được cấu hình chuyên biệt và chỉ hỗ trợ miền Nông nghiệp (agriculture).",
         )
 
-    ai_settings.ACTIVE_DOMAIN = "agriculture"
-    seed_knowledge_base()
-    load_db()
+    # Return domain configuration for this request without mutating global state.
 
     return {
         "success": True,
         "active_domain": "agriculture",
-        "db_path": ai_settings.db_path,
-        "vector_db_path": ai_settings.vector_db_path,
+        "db_path": ai_settings.db_path_for(normalized_domain).as_posix(),
+        "vector_db_path": ai_settings.vector_db_path_for(normalized_domain).as_posix(),
         "message": "Hệ thống đã khóa cố định ở miền Nông nghiệp (AGRICULTURE).",
     }
 
@@ -30,6 +28,6 @@ def get_domain_status() -> dict[str, object]:
     return {
         "active_domain": "agriculture",
         "model_name": ai_settings.MODEL_NAME,
-        "db_path": ai_settings.db_path,
-        "vector_db_path": ai_settings.vector_db_path,
+        "db_path": ai_settings.db_path_for("agriculture").as_posix(),
+        "vector_db_path": ai_settings.vector_db_path_for("agriculture").as_posix(),
     }

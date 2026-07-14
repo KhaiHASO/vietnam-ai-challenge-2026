@@ -1,9 +1,9 @@
-FROM node:20-alpine
+FROM node:20.11-alpine
 
 WORKDIR /app
 
-COPY package.json package-lock.json* yarn.lock* ./
-RUN npm install --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
 
 COPY . .
 

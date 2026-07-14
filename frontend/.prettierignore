@@ -110,3 +110,26 @@ public/icons/
 # SCSS/CSS compiled files
 *.css.map
 *.scss.map 
+
+# Quarantined Velzon template surface. Production routes/features are maintained
+# separately and remain part of the formatting gate.
+src/app/(with-layout)/**
+src/app/(with-nonlayout)/**
+src/assets/**
+src/common/**
+src/helpers/**
+src/layouts/**
+src/slices/**
+src/types/**
+src/utils/fakeBackendInit.ts
+src/hooks/useRedux.ts
+src/lib/react-apexcharts-safe.tsx
+src/providers/index.tsx
+src/components/**
+!src/components/ClientProviders.tsx
+!src/components/Dashboard/UsersByDevice.tsx
+!src/components/Dashboard/LiveUsers.tsx
+!src/components/DashboardBlog/DashboardBlogCharts.tsx
+public/scss/**
+public/images/**
+README.md

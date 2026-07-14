@@ -1,13 +1,18 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHONPATH=/app:/app/backend
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY backend/requirements.in /tmp/requirements.in
+RUN pip install --no-cache-dir -r /tmp/requirements.in
 
-COPY . .
+COPY backend /app/backend
+COPY ai_layer /app/ai_layer
+COPY domains /app/domains
 
-# Expose FastAPI port
+WORKDIR /app/backend
+RUN useradd --create-home appuser && mkdir -p /data && chown -R appuser:appuser /app /data
+USER appuser
+
 EXPOSE 8000
-
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
