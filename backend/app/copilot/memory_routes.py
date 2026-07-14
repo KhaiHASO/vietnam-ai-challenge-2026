@@ -33,7 +33,7 @@ def _scope(principal: Principal, domain_id: str):
 
 @router.get("")
 async def get_memory(
-    domain_id: Annotated[str, Query(min_length=1)] = "agriculture",
+    domain_id: Annotated[str, Query(min_length=1)] = "education-mathpath",
     principal: Principal = Depends(get_current_user),
     service: Any = Depends(get_memory_service),
 ):
@@ -44,7 +44,7 @@ async def get_memory(
 async def patch_memory(
     fact_id: str,
     updates: MemoryUpdate,
-    domain_id: Annotated[str, Query(min_length=1)] = "agriculture",
+    domain_id: Annotated[str, Query(min_length=1)] = "education-mathpath",
     principal: Principal = Depends(get_current_user),
     service: Any = Depends(get_memory_service),
 ):
@@ -59,7 +59,7 @@ async def patch_memory(
 @router.delete("/{fact_id}")
 async def delete_memory(
     fact_id: str,
-    domain_id: Annotated[str, Query(min_length=1)] = "agriculture",
+    domain_id: Annotated[str, Query(min_length=1)] = "education-mathpath",
     principal: Principal = Depends(get_current_user),
     service: Any = Depends(get_memory_service),
 ):

@@ -112,7 +112,7 @@ class CopilotService:
             tenant_id=tenant_id,
             user_id=user_id,
             session_id=session_id,
-            domain_id=request_body.get("domain_id") or "agriculture",
+            domain_id=request_body.get("domain_id") or "education-mathpath",
             query=query,
             expected_conversation_revision=expected_revision,
             idempotency_key=idempotency_key

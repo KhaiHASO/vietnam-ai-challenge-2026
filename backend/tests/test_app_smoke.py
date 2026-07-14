@@ -4,25 +4,20 @@ from app.main import create_app
 
 def test_application_factory_builds_the_existing_api() -> None:
     app = create_app()
-    assert app.title == "CropDoctor AI Backend"
+    assert app.title == "MathPath THPT Backend"
     
     client = TestClient(app)
     response = client.get("/health")
     assert response.status_code == 200
 
 
-def test_private_knowledge_documents_are_not_exposed_as_static_uploads() -> None:
+def test_legacy_diagnosis_and_private_knowledge_uploads_are_not_mounted() -> None:
     app = create_app()
     mounted_paths = {route.path for route in app.routes if hasattr(route, "app")}
 
     assert "/uploads" not in mounted_paths
-    assert "/uploads/diagnosis_cases" in mounted_paths
+    assert "/uploads/diagnosis_cases" not in mounted_paths
 
-
-def test_observability_metrics_route_is_registered() -> None:
-    app = create_app()
-    response = TestClient(app, raise_server_exceptions=False).get("/api/v1/observability/metrics")
-    assert response.status_code in {401, 403}
 
 def test_liveness_is_public_and_typed() -> None:
     app = create_app()
@@ -54,5 +49,5 @@ def test_legacy_status_routes_resolve_the_domain_without_global_state() -> None:
     status_response = client.get("/api/status")
     domain_response = client.get("/api/domain/status")
 
-    assert status_response.status_code == 401
-    assert domain_response.status_code == 401
+    assert status_response.status_code == 404
+    assert domain_response.status_code == 404

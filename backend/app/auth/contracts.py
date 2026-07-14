@@ -7,6 +7,8 @@ class Role(StrEnum):
     ADMIN = "admin"
     EXPERT = "expert"
     OPERATOR = "operator"
+    TEACHER = "teacher"
+    STUDENT = "student"
 
 
 class Principal(BaseModel):

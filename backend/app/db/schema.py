@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+
 logger = logging.getLogger("backend.mongo_schema")
 
 ASCENDING = 1
@@ -25,503 +26,439 @@ class CollectionSpec:
 
 
 def _json_schema(
-    required: list[str],
-    properties: dict[str, dict[str, Any]],
+    required: list[str], properties: dict[str, dict[str, Any]]
 ) -> dict[str, Any]:
     return {
         "$jsonSchema": {
             "bsonType": "object",
             "required": required,
             "additionalProperties": True,
-            "properties": properties,
+            "properties": {
+                "created_at": {"bsonType": ["date", "string"]},
+                "updated_at": {"bsonType": ["date", "string"]},
+                **properties,
+            },
         }
     }
 
 
-def _base_props() -> dict[str, dict[str, Any]]:
-    return {
-        "created_at": {"bsonType": ["date", "string"]},
-        "updated_at": {"bsonType": ["date", "string"]},
-    }
+def _string_fields(*names: str) -> dict[str, dict[str, Any]]:
+    return {name: {"bsonType": "string"} for name in names}
 
 
 COLLECTION_SPECS: tuple[CollectionSpec, ...] = (
     CollectionSpec(
-        name="farms",
+        name="students",
         validator=_json_schema(
-            required=["farm_id", "name", "created_at"],
-            properties={
-                **_base_props(),
-                "farm_id": {"bsonType": "string"},
-                "owner_id": {"bsonType": "string"},
-                "name": {"bsonType": "string"},
-                "location": {"bsonType": ["object", "string"]},
-                "crop_types": {"bsonType": "array"},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="diagnosis_cases",
-        validator=_json_schema(
-            required=["case_id", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "case_id": {"bsonType": "string"},
-                "farm_id": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "crop": {"bsonType": "string"},
-                "risk_level": {"bsonType": "string"},
-                "summary": {"bsonType": "string"},
+            ["tenant_id", "student_id", "pseudonym", "created_at"],
+            {
+                **_string_fields("tenant_id", "student_id", "pseudonym"),
+                "grade": {"bsonType": ["int", "long"]},
+                "class_ids": {"bsonType": "array"},
             },
         ),
         indexes=(
             IndexSpec(
-                name="idx_diagnosis_cases_case_id",
-                keys=(("case_id", ASCENDING),),
+                "idx_students_scope",
+                (("tenant_id", ASCENDING), ("student_id", ASCENDING)),
+                {"unique": True},
             ),
             IndexSpec(
-                name="idx_diagnosis_cases_status",
-                keys=(("status", ASCENDING),),
-            ),
-            IndexSpec(
-                name="idx_diagnosis_cases_created_at",
-                keys=(("created_at", DESCENDING),),
+                "idx_students_pseudonym",
+                (("tenant_id", ASCENDING), ("pseudonym", ASCENDING)),
+                {"unique": True},
             ),
         ),
     ),
     CollectionSpec(
-        name="case_images",
+        name="classes",
         validator=_json_schema(
-            required=["image_id", "case_id", "uri", "created_at"],
-            properties={
-                **_base_props(),
-                "image_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "uri": {"bsonType": "string"},
-                "content_type": {"bsonType": "string"},
-                "metadata": {"bsonType": "object"},
+            ["tenant_id", "class_id", "teacher_ids", "created_at"],
+            {
+                **_string_fields("tenant_id", "class_id", "name"),
+                "teacher_ids": {"bsonType": "array"},
             },
         ),
+        indexes=(
+            IndexSpec(
+                "idx_classes_scope",
+                (("tenant_id", ASCENDING), ("class_id", ASCENDING)),
+                {"unique": True},
+            ),
+        ),
     ),
     CollectionSpec(
-        name="vision_results",
+        name="class_enrollments",
         validator=_json_schema(
-            required=["result_id", "case_id", "created_at"],
-            properties={
-                **_base_props(),
-                "result_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "image_id": {"bsonType": "string"},
-                "model_name": {"bsonType": "string"},
-                "predictions": {"bsonType": "array"},
+            ["tenant_id", "class_id", "student_id", "created_at"],
+            _string_fields("tenant_id", "class_id", "student_id"),
+        ),
+        indexes=(
+            IndexSpec(
+                "idx_enrollment_scope",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("class_id", ASCENDING),
+                    ("student_id", ASCENDING),
+                ),
+                {"unique": True},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="questions",
+        validator=_json_schema(
+            ["tenant_id", "question_id", "skill_ids", "version", "created_at"],
+            {
+                **_string_fields("tenant_id", "question_id", "version", "status"),
+                "skill_ids": {"bsonType": "array"},
+                "prompt": {"bsonType": "string"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                "idx_questions_version",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("question_id", ASCENDING),
+                    ("version", ASCENDING),
+                ),
+                {"unique": True},
+            ),
+            IndexSpec(
+                "idx_questions_skills",
+                (("tenant_id", ASCENDING), ("skill_ids", ASCENDING)),
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="practice_sessions",
+        validator=_json_schema(
+            [
+                "tenant_id",
+                "session_id",
+                "student_id",
+                "target_skill_id",
+                "versions",
+                "created_at",
+            ],
+            {
+                **_string_fields(
+                    "tenant_id", "session_id", "student_id", "target_skill_id", "status"
+                ),
+                "versions": {"bsonType": "object"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                "idx_practice_sessions_scope",
+                (("tenant_id", ASCENDING), ("session_id", ASCENDING)),
+                {"unique": True},
+            ),
+            IndexSpec(
+                "idx_practice_sessions_student",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("student_id", ASCENDING),
+                    ("created_at", DESCENDING),
+                ),
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="attempt_events",
+        validator=_json_schema(
+            [
+                "attempt_id",
+                "tenant_id",
+                "student_id",
+                "session_id",
+                "question_id",
+                "skill_id",
+                "verification_status",
+                "idempotency_key",
+                "created_at",
+            ],
+            {
+                **_string_fields(
+                    "attempt_id",
+                    "tenant_id",
+                    "student_id",
+                    "session_id",
+                    "question_id",
+                    "skill_id",
+                    "verification_status",
+                    "idempotency_key",
+                    "graph_version",
+                    "question_version",
+                    "policy_version",
+                    "model_version",
+                ),
+                "step_index": {"bsonType": ["int", "long"]},
+                "raw_step": {"bsonType": "string"},
+                "evidence": {"bsonType": "object"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                "idx_attempt_events_tenant_idempotency",
+                (("tenant_id", ASCENDING), ("idempotency_key", ASCENDING)),
+                {"unique": True},
+            ),
+            IndexSpec(
+                "idx_attempt_events_id",
+                (("tenant_id", ASCENDING), ("attempt_id", ASCENDING)),
+                {"unique": True},
+            ),
+            IndexSpec(
+                "idx_attempt_events_student_skill",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("student_id", ASCENDING),
+                    ("skill_id", ASCENDING),
+                    ("created_at", ASCENDING),
+                ),
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="learner_state_events",
+        validator=_json_schema(
+            [
+                "event_id",
+                "tenant_id",
+                "student_id",
+                "skill_id",
+                "event_type",
+                "resulting_revision",
+                "occurred_at",
+            ],
+            {
+                **_string_fields(
+                    "event_id", "tenant_id", "student_id", "skill_id", "event_type"
+                ),
+                "source_attempt_id": {"bsonType": ["string", "null"]},
+                "resulting_revision": {"bsonType": ["int", "long"]},
+                "occurred_at": {"bsonType": ["date", "string"]},
+                "payload": {"bsonType": "object"},
+            },
+        ),
+        indexes=(
+            IndexSpec(
+                "idx_learner_state_events_id",
+                (("tenant_id", ASCENDING), ("event_id", ASCENDING)),
+                {"unique": True},
+            ),
+            IndexSpec(
+                "idx_learner_state_events_source",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("student_id", ASCENDING),
+                    ("skill_id", ASCENDING),
+                    ("event_type", ASCENDING),
+                    ("source_attempt_id", ASCENDING),
+                ),
+                {"unique": True, "sparse": True},
+            ),
+        ),
+    ),
+    CollectionSpec(
+        name="learner_state_snapshots",
+        validator=_json_schema(
+            [
+                "tenant_id",
+                "student_id",
+                "skill_id",
+                "mastery",
+                "confidence",
+                "evidence_count",
+                "revision",
+                "updated_at",
+            ],
+            {
+                **_string_fields(
+                    "tenant_id", "student_id", "skill_id", "graph_version", "model_version"
+                ),
+                "mastery": {"bsonType": ["double", "int", "long", "decimal"]},
                 "confidence": {"bsonType": ["double", "int", "long", "decimal"]},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="symptom_questions",
-        validator=_json_schema(
-            required=["question_id", "case_id", "text", "created_at"],
-            properties={
-                **_base_props(),
-                "question_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "text": {"bsonType": "string"},
-                "options": {"bsonType": "array"},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="symptom_answers",
-        validator=_json_schema(
-            required=["answer_id", "question_id", "case_id", "created_at"],
-            properties={
-                **_base_props(),
-                "answer_id": {"bsonType": "string"},
-                "question_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "answer": {"bsonType": ["string", "object", "array"]},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="treatment_plans",
-        validator=_json_schema(
-            required=["plan_id", "case_id", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "plan_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "recommendations": {"bsonType": "array"},
-                "safety_notes": {"bsonType": "array"},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="expert_reviews",
-        validator=_json_schema(
-            required=["review_id", "case_id", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "review_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "reviewer_id": {"bsonType": "string"},
-                "notes": {"bsonType": "string"},
+                "evidence_count": {"bsonType": ["int", "long"]},
+                "revision": {"bsonType": ["int", "long"]},
+                "source_attempt_ids": {"bsonType": "array"},
+                "recent_misconceptions": {"bsonType": "object"},
             },
         ),
         indexes=(
             IndexSpec(
-                name="idx_expert_reviews_status",
-                keys=(("status", ASCENDING),),
+                "idx_learner_state_scope",
+                (
+                    ("tenant_id", ASCENDING),
+                    ("student_id", ASCENDING),
+                    ("skill_id", ASCENDING),
+                ),
+                {"unique": True},
             ),
-        ),
-    ),
-    CollectionSpec(
-        name="agent_logs",
-        validator=_json_schema(
-            required=["log_id", "case_id", "agent", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "log_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "agent": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "trace": {"bsonType": ["array", "object"]},
-                "duration_ms": {"bsonType": ["double", "int", "long", "decimal"]},
-            },
-        ),
-        indexes=(
-            IndexSpec(
-                name="idx_agent_logs_case_id",
-                keys=(("case_id", ASCENDING),),
-            ),
-        ),
-    ),
-    CollectionSpec(
-        name="season_logs",
-        validator=_json_schema(
-            required=["season_log_id", "farm_id", "created_at"],
-            properties={
-                **_base_props(),
-                "season_log_id": {"bsonType": "string"},
-                "farm_id": {"bsonType": "string"},
-                "season": {"bsonType": "string"},
-                "notes": {"bsonType": "string"},
-                "metrics": {"bsonType": "object"},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="reminders",
-        validator=_json_schema(
-            required=["reminder_id", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "reminder_id": {"bsonType": "string"},
-                "farm_id": {"bsonType": "string"},
-                "case_id": {"bsonType": "string"},
-                "due_at": {"bsonType": ["date", "string"]},
-                "status": {"bsonType": "string"},
-                "message": {"bsonType": "string"},
-            },
-        ),
-    ),
-    CollectionSpec(
-        name="model_reports",
-        validator=_json_schema(
-            required=["report_id", "model_name", "created_at"],
-            properties={
-                **_base_props(),
-                "report_id": {"bsonType": "string"},
-                "model_name": {"bsonType": "string"},
-                "model_version": {"bsonType": "string"},
-                "metrics": {"bsonType": "object"},
-                "notes": {"bsonType": "string"},
-            },
         ),
     ),
     CollectionSpec(
         name="users",
         validator=_json_schema(
-            required=["user_id", "tenant_id", "username", "normalized_username", "hashed_password", "roles", "created_at"],
-            properties={
-                **_base_props(),
-                "user_id": {"bsonType": "string"},
-                "tenant_id": {"bsonType": "string"},
-                "username": {"bsonType": "string"},
-                "normalized_username": {"bsonType": "string"},
+            [
+                "user_id",
+                "tenant_id",
+                "username",
+                "normalized_username",
+                "hashed_password",
+                "roles",
+                "created_at",
+            ],
+            {
+                **_string_fields(
+                    "user_id", "tenant_id", "username", "normalized_username", "hashed_password"
+                ),
                 "email": {"bsonType": ["string", "null"]},
-                "hashed_password": {"bsonType": "string"},
                 "roles": {"bsonType": "array"},
                 "is_active": {"bsonType": "bool"},
             },
         ),
         indexes=(
             IndexSpec(
-                name="idx_users_username_unique",
-                keys=(("tenant_id", ASCENDING), ("normalized_username", ASCENDING)),
-                options={"unique": True},
+                "idx_users_username_unique",
+                (("tenant_id", ASCENDING), ("normalized_username", ASCENDING)),
+                {"unique": True},
             ),
             IndexSpec(
-                name="idx_users_email_unique",
-                keys=(("tenant_id", ASCENDING), ("email", ASCENDING)),
-                options={"unique": True, "sparse": True},
+                "idx_users_email_unique",
+                (("tenant_id", ASCENDING), ("email", ASCENDING)),
+                {"unique": True, "sparse": True},
             ),
         ),
     ),
     CollectionSpec(
         name="refresh_sessions",
         validator=_json_schema(
-            required=["token_id", "family_id", "user_id", "tenant_id", "hashed_token", "expires_at", "created_at"],
-            properties={
-                **_base_props(),
-                "token_id": {"bsonType": "string"},
-                "family_id": {"bsonType": "string"},
-                "user_id": {"bsonType": "string"},
-                "tenant_id": {"bsonType": "string"},
-                "hashed_token": {"bsonType": "string"},
+            ["token_id", "family_id", "user_id", "tenant_id", "hashed_token", "expires_at", "created_at"],
+            {
+                **_string_fields("token_id", "family_id", "user_id", "tenant_id", "hashed_token"),
                 "expires_at": {"bsonType": "date"},
                 "revoked": {"bsonType": "bool"},
                 "consumed_at": {"bsonType": ["date", "null"]},
             },
         ),
         indexes=(
-            IndexSpec(
-                name="idx_refresh_sessions_token_hash_unique",
-                keys=(("hashed_token", ASCENDING),),
-                options={"unique": True},
-            ),
-            IndexSpec(
-                name="idx_refresh_sessions_family_id",
-                keys=(("family_id", ASCENDING),),
-            ),
-            IndexSpec(
-                name="idx_refresh_sessions_user_id",
-                keys=(("user_id", ASCENDING),),
-            ),
-            IndexSpec(
-                name="idx_refresh_sessions_expiry_ttl",
-                keys=(("expires_at", ASCENDING),),
-                options={"expireAfterSeconds": 0},
-            ),
+            IndexSpec("idx_refresh_token_hash", (("hashed_token", ASCENDING),), {"unique": True}),
+            IndexSpec("idx_refresh_expiry_ttl", (("expires_at", ASCENDING),), {"expireAfterSeconds": 0}),
         ),
     ),
     CollectionSpec(
         name="refresh_families",
         validator=_json_schema(
-            required=["family_id", "revoked", "updated_at"],
-            properties={
-                **_base_props(),
-                "family_id": {"bsonType": "string"},
-                "revoked": {"bsonType": "bool"},
-                "revoked_at": {"bsonType": ["date", "null"]},
-            },
+            ["family_id", "revoked", "updated_at"],
+            {**_string_fields("family_id"), "revoked": {"bsonType": "bool"}},
         ),
-        indexes=(
-            IndexSpec(
-                name="idx_refresh_families_id_unique",
-                keys=(("family_id", ASCENDING),),
-                options={"unique": True},
-            ),
-        ),
+        indexes=(IndexSpec("idx_refresh_family", (("family_id", ASCENDING),), {"unique": True}),),
     ),
     CollectionSpec(
         name="audit_events",
         validator=_json_schema(
-            required=["event_id", "event_type", "occurred_at"],
-            properties={
-                "event_id": {"bsonType": "string"},
-                "event_type": {"bsonType": "string"},
-                "occurred_at": {"bsonType": "date"},
-                "tenant_id": {"bsonType": "string"},
-                "user_id": {"bsonType": "string"},
-                "actor_id": {"bsonType": "string"},
-            },
+            ["event_id", "event_type", "occurred_at"],
+            {**_string_fields("event_id", "event_type", "tenant_id", "user_id")},
         ),
-        indexes=(
-            IndexSpec(
-                name="idx_audit_events_occurred_at",
-                keys=(("occurred_at", DESCENDING),),
-            ),
-        ),
+        indexes=(IndexSpec("idx_audit_time", (("occurred_at", DESCENDING),)),),
     ),
     CollectionSpec(
         name="jobs",
         validator=_json_schema(
-            required=["job_id", "job_type", "idempotency_key", "payload", "attempts", "status", "next_run_at"],
-            properties={
-                **_base_props(),
-                "job_id": {"bsonType": "string"},
-                "job_type": {"bsonType": "string"},
-                "idempotency_key": {"bsonType": "string"},
+            ["job_id", "job_type", "idempotency_key", "payload", "attempts", "status", "next_run_at"],
+            {
+                **_string_fields("job_id", "job_type", "idempotency_key", "status"),
                 "payload": {"bsonType": "object"},
                 "attempts": {"bsonType": ["int", "long"]},
-                "status": {"bsonType": "string"},
                 "next_run_at": {"bsonType": "date"},
-                "last_error": {"bsonType": ["string", "null"]},
             },
         ),
         indexes=(
-            IndexSpec(name="idx_jobs_id_unique", keys=(("job_id", ASCENDING),), options={"unique": True}),
-            IndexSpec(name="idx_jobs_idempotency_unique", keys=(("idempotency_key", ASCENDING),), options={"unique": True}),
-            IndexSpec(name="idx_jobs_ready", keys=(("status", ASCENDING), ("next_run_at", ASCENDING))),
+            IndexSpec("idx_jobs_id", (("job_id", ASCENDING),), {"unique": True}),
+            IndexSpec("idx_jobs_idempotency", (("idempotency_key", ASCENDING),), {"unique": True}),
+            IndexSpec("idx_jobs_ready", (("status", ASCENDING), ("next_run_at", ASCENDING))),
         ),
     ),
     CollectionSpec(
         name="approvals",
         validator=_json_schema(
-            required=["approval_id", "policy", "requester", "status"],
-            properties={
-                **_base_props(),
-                "approval_id": {"bsonType": "string"},
-                "policy": {"bsonType": "string"},
+            ["approval_id", "policy", "requester", "status"],
+            {
+                **_string_fields("approval_id", "policy", "requester", "status"),
                 "proposed_action": {"bsonType": "object"},
                 "evidence": {"bsonType": "array"},
-                "requester": {"bsonType": "string"},
-                "required_roles": {"bsonType": "array"},
-                "status": {"bsonType": "string"},
-                "decision_actor": {"bsonType": ["string", "null"]},
-                "decision_time": {"bsonType": ["date", "null"]},
-                "trace_id": {"bsonType": ["string", "null"]},
             },
         ),
-        indexes=(
-            IndexSpec(name="idx_approvals_id_unique", keys=(("approval_id", ASCENDING),), options={"unique": True}),
-            IndexSpec(name="idx_approvals_requester_status", keys=(("requester", ASCENDING), ("status", ASCENDING))),
-        ),
+        indexes=(IndexSpec("idx_approvals_id", (("approval_id", ASCENDING),), {"unique": True}),),
     ),
     CollectionSpec(
         name="memory_facts",
         validator=_json_schema(
-            required=["fact_id", "tenant_id", "domain_id", "user_id", "key", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "fact_id": {"bsonType": "string"},
-                "tenant_id": {"bsonType": "string"},
-                "domain_id": {"bsonType": "string"},
-                "user_id": {"bsonType": "string"},
-                "key": {"bsonType": "string"},
-                "value": {},
-                "source_type": {"bsonType": "string"},
-                "source_message_id": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "consent": {"bsonType": "bool"},
-                "expires_at": {"bsonType": ["date", "null"]},
-            },
+            ["fact_id", "tenant_id", "domain_id", "user_id", "key", "status", "created_at"],
+            _string_fields("fact_id", "tenant_id", "domain_id", "user_id", "key", "status"),
         ),
         indexes=(
-            IndexSpec(name="idx_memory_facts_id_unique", keys=(("fact_id", ASCENDING),), options={"unique": True}),
-            IndexSpec(name="idx_memory_facts_scope", keys=(("tenant_id", ASCENDING), ("domain_id", ASCENDING), ("user_id", ASCENDING))),
+            IndexSpec("idx_memory_id", (("fact_id", ASCENDING),), {"unique": True}),
+            IndexSpec("idx_memory_scope", (("tenant_id", ASCENDING), ("domain_id", ASCENDING), ("user_id", ASCENDING))),
         ),
     ),
     CollectionSpec(
         name="idempotency_records",
         validator=_json_schema(
-            required=["idempotency_key", "request_hash", "status", "created_at"],
-            properties={
-                **_base_props(),
-                "idempotency_key": {"bsonType": "string"},
-                "request_hash": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "response": {"bsonType": ["object", "null"]},
-            },
+            ["idempotency_key", "request_hash", "status", "created_at"],
+            _string_fields("idempotency_key", "request_hash", "status"),
         ),
         indexes=(
-            IndexSpec(
-                name="idx_idempotency_key",
-                keys=(("idempotency_key", ASCENDING),),
-                options={"unique": True},
-            ),
-            IndexSpec(
-                name="idx_idempotency_ttl",
-                keys=(("created_at", ASCENDING),),
-                options={"expireAfterSeconds": 86400},
-            ),
+            IndexSpec("idx_idempotency_key", (("idempotency_key", ASCENDING),), {"unique": True}),
+            IndexSpec("idx_idempotency_ttl", (("created_at", ASCENDING),), {"expireAfterSeconds": 86400}),
         ),
     ),
     CollectionSpec(
         name="copilot_sessions",
         validator=_json_schema(
-            required=["session_id", "tenant_id", "user_id", "revision", "created_at"],
-            properties={
-                **_base_props(),
-                "session_id": {"bsonType": "string"},
-                "tenant_id": {"bsonType": "string"},
-                "user_id": {"bsonType": "string"},
-                "revision": {"bsonType": ["int", "long", "double", "decimal"]},
-                "title": {"bsonType": "string"},
+            ["session_id", "tenant_id", "user_id", "revision", "created_at"],
+            {
+                **_string_fields("session_id", "tenant_id", "user_id"),
+                "revision": {"bsonType": ["int", "long"]},
             },
         ),
-        indexes=(
-            IndexSpec(
-                name="idx_copilot_sessions_session_id",
-                keys=(("session_id", ASCENDING),),
-                options={"unique": True},
-            ),
-            IndexSpec(
-                name="idx_copilot_sessions_user_id",
-                keys=(("tenant_id", ASCENDING), ("user_id", ASCENDING)),
-            ),
-        ),
+        indexes=(IndexSpec("idx_copilot_session", (("session_id", ASCENDING),), {"unique": True}),),
     ),
     CollectionSpec(
         name="copilot_messages",
         validator=_json_schema(
-            required=["message_id", "session_id", "sequence", "role", "content", "created_at"],
-            properties={
-                **_base_props(),
-                "message_id": {"bsonType": "string"},
-                "session_id": {"bsonType": "string"},
-                "sequence": {"bsonType": ["int", "long", "double", "decimal"]},
-                "role": {"bsonType": "string"},
-                "content": {"bsonType": "string"},
-                "status": {"bsonType": "string"},
-                "trace": {"bsonType": ["object", "null"]},
+            ["message_id", "session_id", "sequence", "role", "content", "created_at"],
+            {
+                **_string_fields("message_id", "session_id", "role", "content"),
+                "sequence": {"bsonType": ["int", "long"]},
             },
         ),
-        indexes=(
-            IndexSpec(
-                name="idx_copilot_messages_session_seq",
-                keys=(("session_id", ASCENDING), ("sequence", ASCENDING)),
-                options={"unique": True},
-            ),
-        ),
+        indexes=(IndexSpec("idx_copilot_message_seq", (("session_id", ASCENDING), ("sequence", ASCENDING)), {"unique": True}),),
     ),
     CollectionSpec(
         name="copilot_events",
         validator=_json_schema(
-            required=["event_id", "session_id", "sequence", "type", "timestamp"],
-            properties={
-                **_base_props(),
-                "event_id": {"bsonType": "string"},
-                "session_id": {"bsonType": "string"},
-                "sequence": {"bsonType": ["int", "long", "double", "decimal"]},
-                "type": {"bsonType": "string"},
-                "payload": {"bsonType": ["object", "null"]},
+            ["event_id", "session_id", "sequence", "type", "timestamp"],
+            {
+                **_string_fields("event_id", "session_id", "type"),
+                "sequence": {"bsonType": ["int", "long"]},
                 "timestamp": {"bsonType": "date"},
             },
         ),
-        indexes=(
-            IndexSpec(
-                name="idx_copilot_events_session_seq",
-                keys=(("session_id", ASCENDING), ("sequence", ASCENDING)),
-            ),
-        ),
+        indexes=(IndexSpec("idx_copilot_event_seq", (("session_id", ASCENDING), ("sequence", ASCENDING))),),
     ),
 )
+
 
 REQUIRED_COLLECTION_NAMES = tuple(spec.name for spec in COLLECTION_SPECS)
 
 
 async def ensure_mongo_schema(database: Any) -> dict[str, Any]:
     existing_collections = set(await database.list_collection_names())
-    report: dict[str, Any] = {
-        "collections": [],
-        "indexes": {},
-        "errors": [],
-    }
+    report: dict[str, Any] = {"collections": [], "indexes": {}, "errors": []}
 
     for spec in COLLECTION_SPECS:
         if spec.name not in existing_collections:
@@ -548,12 +485,9 @@ async def ensure_mongo_schema(database: Any) -> dict[str, Any]:
 
         report["collections"].append(spec.name)
         report["indexes"][spec.name] = []
-
         for index in spec.indexes:
             await database[spec.name].create_index(
-                list(index.keys),
-                name=index.name,
-                **index.options,
+                list(index.keys), name=index.name, **index.options
             )
             report["indexes"][spec.name].append(index.name)
 

@@ -7,7 +7,6 @@ from ai_layer.rag.registries.catalog import RegistryCatalog
 
 from app.core.config import settings
 from app.db.mongo import mongo_status
-from app.services.status_service import get_health
 
 router = APIRouter(tags=["Health"])
 
@@ -62,7 +61,7 @@ def _chroma_ready() -> bool:
 
 
 def _registry_ready() -> bool:
-    return RegistryCatalog().resolve_request_context("agriculture", "single") is not None
+    return RegistryCatalog().resolve_request_context("education-mathpath", "single") is not None
 
 
 def _primary_provider_ready() -> bool:
@@ -85,4 +84,9 @@ def get_readiness_dependencies() -> dict[str, bool]:
 
 @router.get("/health")
 def health() -> dict[str, object]:
-    return get_health()
+    return {
+        "status": "ok",
+        "service": settings.app_name,
+        "version": settings.app_version,
+        "domain": "education-mathpath",
+    }

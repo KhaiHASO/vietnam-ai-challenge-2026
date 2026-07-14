@@ -24,7 +24,7 @@ def get_ingestion_service() -> KnowledgeIngestionService:
 @router.post("/ingestions", status_code=status.HTTP_202_ACCEPTED)
 async def create_ingestion(
     file: UploadFile = File(...),
-    domain_id: str = Form("agriculture"),
+    domain_id: str = Form("education-mathpath"),
     principal: Principal = Depends(require_roles([Role.ADMIN, Role.EXPERT])),
     service: KnowledgeIngestionService = Depends(get_ingestion_service),
 ) -> dict[str, str]:

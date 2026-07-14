@@ -10,14 +10,14 @@ DEVELOPMENT_JWT_SECRET = "super-secret-key-for-dev-only-change-in-prod"
 
 
 class Settings(BaseSettings):
-    app_name: str = "CropDoctor AI Backend"
+    app_name: str = "MathPath THPT Backend"
     app_version: str = "1.0.0"
     api_prefix: str = "/api"
 
     environment: Literal["development", "test", "production"] = "development"
 
     mongodb_uri: str = "mongodb://localhost:27017"
-    database_name: str = "cropdoctor_ai"
+    database_name: str = "mathpath_thpt"
     redis_url: str = "redis://localhost:6379/0"
     chroma_url: str = "http://localhost:8000"
 
