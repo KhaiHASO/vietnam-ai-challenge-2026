@@ -30,7 +30,7 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 def health():
     return {
         "status": "healthy",
-        "mode": "no_training_pretrained_api_mvp",
+        "mode": "production_no_fallback",
         "vision_engine": vision_agent.hf_agent.model_name,
         "reasoning_engine": reasoning_agent.model,
         "fallback_active": False
@@ -40,9 +40,10 @@ def health():
 async def diagnose(
     image: UploadFile = File(...),
     crop_hint: str = Form(""),
-    symptoms: str = Form("")
+    symptoms: str = Form(""),
+    user_answers: str = Form("")
 ):
-    logger.info(f"Received diagnosis request. Crop hint: {crop_hint}, Symptoms length: {len(symptoms)}")
+    logger.info(f"Received diagnosis request. Crop hint: {crop_hint}, Symptoms length: {len(symptoms)}, User answers length: {len(user_answers)}")
     
     # Validate file type
     if not image.filename:
@@ -76,14 +77,18 @@ async def diagnose(
         vision_status = "done"
     except Exception as e:
         logger.error(f"Error in Vision Consensus Agent: {e}")
-        vision_result = {
-            "error": str(e),
-            "final_disease_label": "Unknown",
-            "final_disease_vi": "Không xác định do lỗi kỹ thuật",
-            "confidence": 0.0,
-            "decision_status": "low_confidence_need_better_image_or_expert"
+        raise HTTPException(status_code=500, detail=f"Vision Consensus Agent failed: {e}")
+
+    # Guardrail: Check if image is blurry or rejected
+    if vision_result.get("decision_status") == "quality_failed" or vision_result.get("image_quality", 1.0) < 0.5:
+        return {
+            "status": "quality_failed",
+            "message": "Không thể phân tích ảnh do chất lượng ảnh kém. Vui lòng chụp lại cận cảnh và rõ nét hơn.",
+            "vision": vision_result,
+            "agent_logs": [
+                {"id": "vision", "agent": "Vision Agent", "status": "failed", "details": "Image quality check failed."}
+            ]
         }
-        vision_status = "failed"
 
     # Derive crop_hint if not provided or empty
     if not crop_hint or crop_hint.lower() == "other":
@@ -114,12 +119,7 @@ async def diagnose(
         symptom_result = symptom_agent.parse_symptoms(symptoms)
     except Exception as e:
         logger.error(f"Error in Symptom Agent: {e}")
-        symptom_result = {
-            "rain_after": "unknown",
-            "fruit_spots": False,
-            "spread_speed": "unknown",
-            "raw_text": symptoms
-        }
+        raise HTTPException(status_code=500, detail=f"Symptom Agent failed: {e}")
 
     # Step 3: Run Context Agent
     try:
@@ -127,38 +127,21 @@ async def diagnose(
         context_result = context_agent.get_context(crop_hint)
     except Exception as e:
         logger.error(f"Error in Context Agent: {e}")
-        context_result = {
-            "humidity": "unknown",
-            "rainfall": "unknown",
-            "spray_gap": "unknown",
-            "location": "Đồng Nai"
-        }
+        raise HTTPException(status_code=500, detail=f"Context Agent failed: {e}")
 
     # Step 4: Run DeepSeek Reasoning Agent
     try:
-        logger.info(f"Step 4: Running DeepSeek Reasoning Agent with derived crop: {crop_hint}...")
+        logger.info(f"Step 4: Running DeepSeek Reasoning Agent...")
         reasoning_result = reasoning_agent.reason(
             vision_result=vision_result,
             symptoms=symptoms,
-            crop_hint=crop_hint
+            crop_hint=crop_hint,
+            user_answers=user_answers
         )
         reasoning_status = "done"
     except Exception as e:
         logger.error(f"Error in DeepSeek Reasoning Agent: {e}")
-        reasoning_result = {
-            "error": str(e),
-            "content": {
-                "diagnosis_level": "low_confidence",
-                "short_diagnosis": "Không thể phân tích lập luận bệnh",
-                "top_possibilities": ["Lỗi phân tích hệ thống"],
-                "why": ["Lỗi gọi mô hình lập luận DeepSeek"],
-                "questions_to_confirm": ["Vui lòng kiểm tra lại kết nối mạng"],
-                "safe_recommendations": ["Hãy dọn dẹp vệ sinh vườn và tỉa lá bệnh sơ bộ"],
-                "when_to_call_expert": ["Nếu bệnh lây lan rộng hại chết cây"],
-                "disclaimer": "Lỗi kết nối hoặc API bị gián đoạn."
-            }
-        }
-        reasoning_status = "failed"
+        raise HTTPException(status_code=500, detail=f"DeepSeek Reasoning Agent failed: {e}")
 
     # Step 5: Run Safety Agent
     try:
@@ -169,25 +152,12 @@ async def diagnose(
         )
     except Exception as e:
         logger.error(f"Error in Safety Agent: {e}")
-        safety_result = {
-            "ipm_first": True,
-            "chemical_advice": "deferred",
-            "expert_needed": False
-        }
+        raise HTTPException(status_code=500, detail=f"Safety Agent failed: {e}")
 
-    # Step 6: Run Diary Agent
-    try:
-        logger.info("Step 6: Running Diary Agent...")
-        diary_result = diary_agent.log_diary()
-    except Exception as e:
-        logger.error(f"Error in Diary Agent: {e}")
-        diary_result = {
-            "case_saved": True,
-            "reminder": "48h",
-            "farm_log": "created"
-        }
+    # Step 6: Diary Agent auto-save removed per Spec-driven UX.
+    # The diary log will only be created when the user explicitly saves the plan.
 
-    # Construct execution logs matching user's exact specification
+    # Construct execution logs
     agent_logs = [
         {
             "id": "vision",
@@ -218,24 +188,16 @@ async def diagnose(
             "agent": "Safety Agent",
             "status": "done",
             "details": f"ipm_first={str(safety_result.get('ipm_first')).lower()}, chemical_advice={safety_result.get('chemical_advice')}, expert_needed={str(safety_result.get('expert_needed')).lower()}"
-        },
-        {
-            "id": "diary",
-            "agent": "Diary Agent",
-            "status": "done",
-            "details": f"case_saved={str(diary_result.get('case_saved')).lower()}, reminder={diary_result.get('reminder')}, farm_log={diary_result.get('farm_log')}"
         }
     ]
 
     return {
         "status": "success",
-        "mode": "no_training_pretrained_api_mvp",
         "image_path": temp_file_path,
         "vision": vision_result,
         "symptoms_parsed": symptom_result,
         "context": context_result,
         "reasoning": reasoning_result,
         "safety": safety_result,
-        "diary": diary_result,
         "agent_logs": agent_logs
     }

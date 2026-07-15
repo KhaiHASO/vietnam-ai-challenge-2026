@@ -1,6 +1,6 @@
 # PyTorch Award Strategy: Impact Triage Engine
 
-Tài liệu này trình bày chi tiết kiến trúc và chiến lược kỹ thuật sử dụng mô hình PyTorch trong giải pháp **AI-Native Operations Copilot** để tranh giải **Best PyTorch Award**.
+Tài liệu này trình bày chi tiết kiến trúc và chiến lược kỹ thuật sử dụng mô hình PyTorch trong giải pháp **CropDoctor AI** để tranh giải **Best PyTorch Award**.
 
 ## 1. Why PyTorch? (Tại sao cần PyTorch mà không dùng LLM hết?)
 - **Hiệu năng & Chi phí**: LLM hoạt động xuất sắc trong việc hiểu ngôn ngữ tự nhiên và lập kế hoạch (planning), nhưng cực kỳ đắt đỏ và có độ trễ lớn (2-5 giây) khi phân loại hoặc đưa ra các điểm số rủi ro nghiệp vụ liên tục.
@@ -10,7 +10,7 @@ Tài liệu này trình bày chi tiết kiến trúc và chiến lược kỹ th
 ## 2. Kiến trúc Mô hình (Model Architecture)
 Mô hình được viết kế thừa lớp `torch.nn.Module` trong tệp `ai_layer/pytorch_engine/model.py`:
 - **Đầu vào**:
-  - `tab_features` ($1 \times 10$): Tập hợp các chỉ số định lượng của hệ thống (ví dụ: giá trị đơn hàng, tỷ lệ chuyên cần, phần trăm thiệt hại lá).
+  - `tab_features` ($1 \times 10$): Tập hợp các chỉ số định lượng của hệ thống (ví dụ: phần trăm thiệt hại lá, nhiệt độ bối cảnh, độ ẩm đất).
   - `text_embeddings` ($1 \times 384$): Feature vector được trích xuất từ tin nhắn/yêu cầu bằng SentenceTransformer.
 - **Lớp mạng chung (Shared Layers)**:
   - Linear layer kết hợp Batch Normalization, Activation ReLU và Dropout (rate=0.3) nhằm hạn chế Overfitting.

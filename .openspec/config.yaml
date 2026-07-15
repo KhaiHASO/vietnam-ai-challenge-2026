@@ -1,0 +1,14 @@
+version: "1.2"
+active_schema: "intent-driven"
+profiles:
+  default:
+    commands:
+      - propose
+      - continue
+      - apply
+      - archive
+      - verify
+git_discipline:
+  enabled: true
+  enforced_branch: "main"
+skills_dir: ".agents/skills"

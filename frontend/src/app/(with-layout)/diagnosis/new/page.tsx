@@ -276,60 +276,11 @@ export default function DiagnosisNew() {
       } else {
         throw new Error("Không thể chẩn đoán ảnh.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      // Offline mock fallback if backend is down or network fails
-      const progressInterval = setInterval(() => {
-        setAnalysisProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(progressInterval);
-            return 100;
-          }
-          return prev + 15;
-        });
-      }, 100);
-
-      const mockResult = {
-        status: "success",
-        image_path: previewUrl,
-        vision: {
-          final_disease_vi: "Thán thư (Anthracnose)",
-          final_disease_label: "Tomato___Anthracnose",
-          confidence: 0.89,
-        },
-        reasoning: {
-          content: {
-            safe_recommendations: [
-              "Tỉa và tiêu hủy lá, quả bị bệnh",
-              "Giảm tưới, cải thiện thông gió vườn trồng",
-              "Bổ sung phân bón trung vi lượng để tăng sức đề kháng",
-            ],
-            questions_to_confirm: [
-              "Vết bệnh có lan nhanh sau mưa không?",
-              "Có xuất hiện vết lõm khô trên quả già không?",
-            ],
-            when_to_call_expert: [
-              "Khi bệnh lây lan rộng trên 30% số cây",
-              "Khi đã phun trị bằng chế phẩm sinh học 7 ngày không thuyên giảm",
-            ]
-          }
-        },
-        agent_logs: agentSteps,
-      };
-
-      setTimeout(async () => {
-        clearInterval(progressInterval);
-        setAnalysisProgress(100);
-        setDiagnosisResult(mockResult);
-        
-        // Auto save mock case to database history!
-        await saveCase(mockResult);
-
-        setTimeout(() => {
-          setIsAnalyzing(false);
-          setStep(2);
-        }, 300);
-      }, 800);
+      setIsAnalyzing(false);
+      const errMsg = err?.response?.data?.detail || err?.message || "Không thể kết nối đến máy chủ AI CropDoctor. Hãy chắc chắn backend đang hoạt động và API key đã được cấu hình.";
+      alert(`Lỗi chẩn đoán: ${errMsg}`);
     }
   };
 

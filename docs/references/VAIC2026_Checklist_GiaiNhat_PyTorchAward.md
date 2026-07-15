@@ -88,33 +88,26 @@ Pain thật
 
 ---
 
-## 2. Quyết định lớn: bỏ “đặt sân” khỏi định vị
-
-Repo hiện tại có thể giữ làm core, nhưng **không được pitch là app đặt sân**.
+## 2. Định vị dự án nông nghiệp
 
 ### 2.1. Cách nói đúng
 
-- [ ] “Đặt sân chỉ là kịch bản test kỹ thuật ban đầu.”
+- [ ] “CropDoctor AI là hệ thống chẩn đoán cây trồng AI-native và hỗ trợ vận hành nông trại.”
 - [ ] “Core của chúng em là AI-native workflow cockpit.”
-- [ ] “Khi nhận đề thật, chúng em thay domain pack, data schema, tool nghiệp vụ và policy base.”
 - [ ] “Nền tảng này dùng để biến dữ liệu rời rạc thành hành động có kiểm soát.”
 
 ### 2.2. Cách sửa README/repo
 
-- [ ] Xóa hoặc giảm nổi bật wording quá hẹp như “booking court”.
 - [ ] Đổi positioning thành:
 
 ```text
-AI-Native Workflow Copilot
-A domain-adaptable product skeleton for solving real business workflows with:
+AI-Native Agriculture Copilot
+A product skeleton for solving agricultural workflows with:
 RAG + PyTorch risk/triage model + tool execution + human approval + telemetry + pilot metrics.
 ```
 
-- [ ] Tách use case đặt sân thành `examples/booking_demo/`.
-- [ ] Tạo 3 domain pack chính:
-  - [ ] `domains/education/`
+- [ ] Tạo domain pack chính:
   - [ ] `domains/agriculture/`
-  - [ ] `domains/sme/`
 - [ ] Tạo `docs/product_positioning.md`.
 - [ ] Tạo `docs/demo_strategy.md`.
 - [ ] Tạo `docs/pytorch_award_strategy.md`.
@@ -167,18 +160,6 @@ vietnam-ai-challenge-2026/
 │       └── results/
 │
 ├── domains/
-│   ├── education/
-│   │   ├── README.md
-│   │   ├── problem_brief.md
-│   │   ├── product_canvas.md
-│   │   ├── pilot_plan.md
-│   │   ├── risk_plan.md
-│   │   ├── demo_script.md
-│   │   ├── data/
-│   │   ├── policies/
-│   │   ├── prompts/
-│   │   └── eval_cases.json
-│   │
 │   ├── agriculture/
 │   │   ├── README.md
 │   │   ├── problem_brief.md
@@ -190,19 +171,6 @@ vietnam-ai-challenge-2026/
 │   │   ├── policies/
 │   │   ├── prompts/
 │   │   └── eval_cases.json
-│   │
-│   └── sme/
-│       ├── README.md
-│       ├── problem_brief.md
-│       ├── product_canvas.md
-│       ├── pilot_plan.md
-│       ├── risk_plan.md
-│       ├── demo_script.md
-│       ├── data/
-│       ├── policies/
-│       ├── prompts/
-│       └── eval_cases.json
-│
 ├── docs/
 │   ├── 00_competition_strategy.md
 │   ├── 01_architecture.md
@@ -281,8 +249,8 @@ cd vietnam-ai-challenge-2026
 cp .env.example .env
 
 make setup
-make seed DOMAIN=education
-make train-fast DOMAIN=education
+make seed DOMAIN=agriculture
+make train-fast DOMAIN=agriculture
 make dev
 ```
 
@@ -332,113 +300,9 @@ Nếu chưa trả lời được 3 câu này, chưa code chính.
 
 ---
 
-## 6. Bộ 3 domain pack cần chuẩn bị trước
+## 6. Domain Pack Nông nghiệp
 
-# 6.1. Domain Pack A — Giáo dục
-
-## 6.1.1. Hướng thắng
-
-```text
-AI Student Success Copilot
-Phát hiện sớm sinh viên có nguy cơ rớt môn, giải thích nguyên nhân,
-gợi ý kế hoạch can thiệp cá nhân hóa và để giảng viên duyệt trước khi gửi.
-```
-
-## 6.1.2. Pain
-
-- [ ] Giảng viên không đủ thời gian theo dõi từng sinh viên.
-- [ ] Sinh viên yếu thường bị phát hiện quá muộn.
-- [ ] Dữ liệu điểm, chuyên cần, bài nộp nằm rời rạc.
-- [ ] Cố vấn học tập khó biết ai cần ưu tiên.
-- [ ] Sinh viên cần gợi ý học tập chứ không cần đáp án để chép.
-
-## 6.1.3. Data cần có
-
-```text
-domains/education/data/
-├── students.csv
-├── attendance.csv
-├── grades.csv
-├── assignments.csv
-├── lms_activity.csv
-├── student_messages.csv
-├── intervention_history.csv
-└── synthetic_data_readme.md
-```
-
-### Cột gợi ý
-
-`students.csv`
-
-- [ ] `student_id`
-- [ ] `class_id`
-- [ ] `major`
-- [ ] `semester`
-- [ ] `prior_gpa`
-- [ ] `learning_style`
-- [ ] `support_note`
-
-`attendance.csv`
-
-- [ ] `student_id`
-- [ ] `week`
-- [ ] `present`
-- [ ] `late`
-- [ ] `absent_reason`
-
-`grades.csv`
-
-- [ ] `student_id`
-- [ ] `lab_score`
-- [ ] `quiz_score`
-- [ ] `assignment_score`
-- [ ] `midterm_score`
-- [ ] `late_submission_count`
-
-`student_messages.csv`
-
-- [ ] `student_id`
-- [ ] `message`
-- [ ] `timestamp`
-- [ ] `channel`
-
-## 6.1.4. PyTorch task cho giáo dục
-
-```text
-Student Risk & Intervention Triage Model
-Input: điểm + chuyên cần + bài nộp + embedding phản hồi
-Output: risk_level, dropout_risk, recommended_intervention_type, confidence
-```
-
-- [ ] Model PyTorch dự đoán `risk_level`: low / medium / high.
-- [ ] Model PyTorch dự đoán `intervention_type`: nhắc học, gợi ý tài liệu, gặp giảng viên, cố vấn học tập.
-- [ ] LLM giải thích và soạn kế hoạch, nhưng PyTorch model tạo tín hiệu dự đoán lõi.
-- [ ] UI hiển thị “PyTorch Risk Engine: High risk, confidence 0.84”.
-- [ ] HITL: giảng viên duyệt trước khi gửi tin nhắn.
-
-## 6.1.5. Demo 7 phút
-
-- [ ] Upload/seed dữ liệu lớp.
-- [ ] Hỏi: “Tuần này sinh viên nào có nguy cơ rớt môn?”
-- [ ] PyTorch risk engine xếp hạng 5 sinh viên rủi ro.
-- [ ] RAG truy xuất rubric/chính sách môn học.
-- [ ] AI giải thích nguyên nhân từng sinh viên.
-- [ ] AI đề xuất kế hoạch can thiệp 7 ngày.
-- [ ] Giảng viên duyệt/chỉnh tin nhắn.
-- [ ] Dashboard hiển thị metric: số sinh viên rủi ro, thời gian tiết kiệm, trạng thái can thiệp.
-
-## 6.1.6. Câu pitch
-
-```text
-AI không làm bài thay sinh viên. AI giúp giảng viên phát hiện sớm người học cần hỗ trợ,
-đưa ra can thiệp cá nhân hóa và luôn để giảng viên duyệt quyết định cuối cùng.
-```
-
----
-
-# 6.2. Domain Pack B — Nông nghiệp
-
-## 6.2.1. Hướng thắng
+## 6.1. Hướng thắng
 
 ```text
 CropCare AI Copilot
@@ -446,14 +310,14 @@ Hỗ trợ nông dân/chủ vườn phân tích tình trạng cây trồng từ 
 thời tiết và tri thức nông nghiệp; sau đó tạo kế hoạch chăm sóc có kiểm soát.
 ```
 
-## 6.2.2. Pain
+## 6.2. Pain
 
 - [ ] Nông dân phát hiện bệnh/chăm sóc sai thời điểm.
 - [ ] Tri thức phân tán: kinh nghiệm cá nhân, hội nhóm, đại lý vật tư, chuyên gia.
 - [ ] Khuyến nghị nếu sai có thể gây thiệt hại mùa vụ.
 - [ ] Cần lịch hành động, không chỉ cần câu trả lời “cây bị gì”.
 
-## 6.2.3. Data cần có
+## 6.3. Data cần có
 
 ```text
 domains/agriculture/data/
@@ -466,7 +330,7 @@ domains/agriculture/data/
 └── synthetic_data_readme.md
 ```
 
-## 6.2.4. PyTorch task cho nông nghiệp
+## 6.4. PyTorch task cho nông nghiệp
 
 ```text
 Plant Symptom Triage Model
@@ -481,7 +345,7 @@ Output: symptom_group, severity_level, confidence
 - [ ] LLM/RAG tạo kế hoạch chăm sóc dựa trên output + knowledge base.
 - [ ] HITL: khuyến nghị hóa chất/thuốc phải cần chuyên gia xác nhận.
 
-## 6.2.5. Demo 7 phút
+## 6.5. Demo 7 phút
 
 - [ ] Upload ảnh lá/cây hoặc chọn ảnh mẫu.
 - [ ] PyTorch model phân loại triệu chứng/mức độ.
@@ -491,77 +355,11 @@ Output: symptom_group, severity_level, confidence
 - [ ] Nếu severity cao, tạo action “gửi chuyên gia duyệt”.
 - [ ] Dashboard hiển thị nhật ký theo dõi.
 
-## 6.2.6. Câu pitch
+## 6.6. Câu pitch
 
 ```text
 AI không chỉ nói cây bị gì. AI biến dấu hiệu ban đầu thành kế hoạch chăm sóc,
 nhật ký theo dõi và cơ chế chuyển chuyên gia khi rủi ro cao.
-```
-
----
-
-# 6.3. Domain Pack C — SME
-
-## 6.3.1. Hướng thắng
-
-```text
-SME Operations Copilot
-Đọc dữ liệu bán hàng, tồn kho, phản hồi khách, ticket và chính sách nội bộ;
-sau đó phát hiện vấn đề, ưu tiên xử lý và đề xuất hành động cho chủ doanh nghiệp.
-```
-
-## 6.3.2. Pain
-
-- [ ] Chủ SME có dữ liệu nhưng nằm rời rạc trong Excel, Zalo, inbox, hóa đơn.
-- [ ] Không có đội vận hành/BI chuyên nghiệp.
-- [ ] Phản hồi khách bị bỏ sót.
-- [ ] Tồn kho, khiếu nại, hoàn tiền, nhân sự, doanh thu cần được ưu tiên xử lý hằng ngày.
-- [ ] Chủ doanh nghiệp cần “hôm nay xử lý gì trước”, không cần thêm dashboard rối.
-
-## 6.3.3. Data cần có
-
-```text
-domains/sme/data/
-├── orders.csv
-├── inventory.csv
-├── customer_messages.csv
-├── tickets.csv
-├── refunds.csv
-├── staff_schedule.csv
-├── daily_revenue.csv
-└── synthetic_data_readme.md
-```
-
-## 6.3.4. PyTorch task cho SME
-
-```text
-Customer Issue Priority Model
-Input: message text embedding + order value + customer history + SLA info
-Output: issue_type, priority_level, escalation_required, confidence
-```
-
-- [ ] PyTorch model phân loại intent/priority/risk.
-- [ ] LLM tạo phản hồi và action plan.
-- [ ] Tool executor tạo ticket/task/report.
-- [ ] HITL cho hoàn tiền, giảm giá, hủy đơn, khiếu nại nghiêm trọng.
-- [ ] UI show “AI đề xuất — Chủ doanh nghiệp duyệt”.
-
-## 6.3.5. Demo 7 phút
-
-- [ ] Seed dữ liệu bán hàng + feedback khách.
-- [ ] Hỏi: “Hôm nay có vấn đề gì cần xử lý trước?”
-- [ ] PyTorch model ưu tiên ticket rủi ro.
-- [ ] RAG truy xuất chính sách SLA/refund.
-- [ ] AI tạo danh sách 5 hành động ưu tiên.
-- [ ] Người dùng duyệt một hành động.
-- [ ] Hệ thống tạo task/ticket/tin nhắn.
-- [ ] Dashboard hiển thị thời gian tiết kiệm và ticket ưu tiên.
-
-## 6.3.6. Câu pitch
-
-```text
-SME không thiếu dữ liệu. Họ thiếu một trợ lý vận hành biết gom dữ liệu,
-hiểu chính sách, ưu tiên vấn đề và đề xuất hành động có kiểm soát.
 ```
 
 ---
@@ -580,7 +378,7 @@ Hoặc:
 PyTorch Risk & Priority Engine
 ```
 
-Lý do: tên này dùng được cho cả giáo dục, nông nghiệp, SME.
+Lý do: tên này dùng cho nông nghiệp.
 
 ## 7.2. Vai trò trong kiến trúc
 
@@ -621,9 +419,7 @@ ai_layer/pytorch_engine/
 ├── benchmark.py
 ├── explain.py
 ├── configs/
-│   ├── education.yaml
-│   ├── agriculture.yaml
-│   └── sme.yaml
+│   └── agriculture.yaml
 ├── checkpoints/
 ├── results/
 │   ├── metrics.json
@@ -660,7 +456,7 @@ ai_layer/pytorch_engine/
 
 ## 7.7. `train.py` cần có gì
 
-- [ ] CLI argument: `--domain education|agriculture|sme`.
+- [ ] CLI argument: `--domain agriculture`.
 - [ ] Set seed.
 - [ ] Load config.
 - [ ] Train loop rõ ràng.
@@ -945,27 +741,11 @@ Bây giờ em sẽ demo một luồng chính: từ dữ liệu đầu vào đế
 
 ## 10.4. Một “wow moment” nên có
 
-Chọn 1 trong 3:
-
-### Wow moment giáo dục
-
-```text
-AI phát hiện 5 sinh viên có nguy cơ rớt môn trước khi điểm cuối kỳ xảy ra,
-giải thích nguyên nhân từng người và tạo kế hoạch can thiệp cá nhân hóa.
-```
-
 ### Wow moment nông nghiệp
 
 ```text
 AI không kết luận vội từ ảnh; nó kết hợp ảnh + thời tiết + nhật ký chăm sóc,
 sau đó tạo lịch theo dõi 7 ngày và yêu cầu chuyên gia duyệt khi rủi ro cao.
-```
-
-### Wow moment SME
-
-```text
-AI đọc bán hàng + tồn kho + phản hồi khách, phát hiện 3 vấn đề ưu tiên hôm nay,
-rồi tạo action cho chủ doanh nghiệp duyệt.
 ```
 
 ---
@@ -1455,11 +1235,8 @@ Khi pilot cần dữ liệu thật từ...
 
 ## T-9 đến T-7
 
-- [ ] Hoàn thiện domain education.
-- [ ] Hoàn thiện domain SME.
 - [ ] Hoàn thiện domain agriculture.
-- [ ] Test switch domain.
-- [ ] Test PyTorch model với 3 domain.
+- [ ] Test PyTorch model với domain agriculture.
 - [ ] Tạo model card.
 - [ ] Tạo benchmark.
 - [ ] Tạo evaluation report mẫu.

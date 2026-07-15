@@ -247,30 +247,11 @@ Các đội thi đứng đầu sẽ có cơ hội nhận lời mời tham dự C
 # Chương 2: Thể lệ và Đề bài
 
 <!-- Trang 15 -->
-Vietnam AI Innovation Challenge 2026 – VAIC 2026 là cuộc thi hackathon AI diễn ra trong vòng 48 giờ, nơi các đội thi cùng nhau phát triển các giải pháp công nghệ nhằm giải quyết những bài toán thực tế đến từ doanh nghiệp, tổ chức và hệ sinh thái đổi mới sáng tạo. Tại VAIC 2026, các đội thi sẽ lựa chọn 01 trong 08 chủ đề thử thách. Mỗi chủ đề đại diện cho một nhóm vấn đề có tiềm năng ứng dụng AI để tạo ra tác động thiết thực, từ tối ưu hóa vận hành, nâng cao trải nghiệm người dùng, hỗ trợ ra quyết định cho đến phát triển các mô hình sản phẩm, dịch vụ và kinh doanh mới. Cuộc thi không chỉ đánh giá đội thi dựa trên năng lực lập trình hay mức độ hoàn thiện kỹ thuật, mà còn xem xét toàn diện nhiều yếu tố: khả năng hiểu đúng bài toán, tư duy sản phẩm, mức độ sáng tạo, trải nghiệm người dùng, tiềm năng ứng dụng thực tế và cách đội truyền tải giá trị của giải pháp. Thông qua VAIC 2026, các đội thi được thử thách để không chỉ tạo ra một ý tưởng hay, mà còn biến ý tưởng đó thành một sản phẩm mẫu có thể demo, có logic triển khai rõ ràng và có khả năng phát triển xa hơn sau cuộc thi. Ứng dụng AI trong chăm sóc sức khỏe: hỗ trợ chẩn đoán, tối ưu vận hành và nâng cao chất lượng dịch vụ y tế. Phát triển sản phẩm mới, cải tiến quy trình và ứng dụng phương pháp đổi mới sáng tạo. Xây dựng AI agent cách mạng hóa vận hành cho doanh nghiệp vừa và nhỏ (SME). Giải pháp cho thành phố thông minh và dịch vụ công số. Tối ưu chuỗi cung ứng, canh tác chính xác và thích ứng biến đổi khí hậu. Cá nhân hóa việc học, tối ưu tài nguyên giáo dục và hỗ trợ định hướng phát triển cho người học. Dự báo, mô hình hóa và xây dựng giải pháp ứng phó — phục hồi trước thiên tai.
+Vietnam AI Innovation Challenge 2026 – VAIC 2026 là cuộc thi hackathon AI diễn ra trong vòng 48 giờ, nơi các đội thi cùng nhau phát triển các giải pháp công nghệ nhằm giải quyết những bài toán thực tế đến từ doanh nghiệp, tổ chức và hệ sinh thái đổi mới sáng tạo. Tại VAIC 2026, các đội thi sẽ lựa chọn chủ đề thử thách. Chủ đề đại diện cho một nhóm vấn đề có tiềm năng ứng dụng AI để tạo ra tác động thiết thực, từ tối ưu hóa vận hành, nâng cao trải nghiệm người dùng, hỗ trợ ra quyết định cho đến phát triển các mô hình sản phẩm, dịch vụ và kinh doanh mới. Cuộc thi không chỉ đánh giá đội thi dựa trên năng lực lập trình hay mức độ hoàn thiện kỹ thuật, mà còn xem xét toàn diện nhiều yếu tố: khả năng hiểu đúng bài toán, tư duy sản phẩm, mức độ sáng tạo, trải nghiệm người dùng, tiềm năng ứng dụng thực tế và cách đội truyền tải giá trị của giải pháp. Thông qua VAIC 2026, các đội thi được thử thách để không chỉ tạo ra một ý tưởng hay, mà còn biến ý tưởng đó thành một sản phẩm mẫu có thể demo, có logic triển khai rõ ràng và có khả năng phát triển xa hơn sau cuộc thi.
 
-## 2.1. Tổng quan thể lệ cuộc thi
+- Nông Nghiệp: Tối ưu chuỗi cung ứng, canh tác chính xác và thích ứng biến đổi khí hậu.
 
-Thông tin chi tiết của từng đề bài, bao gồm bối cảnh, yêu cầu đầu ra, tài nguyên hỗ trợ và tiêu chí đánh giá cụ thể, sẽ được công bố vào 11:00 sáng ngày 17/07/2026.
-
-- Y Tế & Sức Khỏe
-- Đổi Mới Sáng Tạo
-Năng Suất Doanh Nghiệp Vừa & Nhỏ
-
-- Chính Phủ Thông
-Minh
-
-- Nông Nghiệp
-- Giáo Dục &
-- Đào Tạo
-- Phòng Chống
-- Thiên Tai
-- Ngân hàng &
-- Tài chính
-Ứng dụng AI để tái định
-
-- hình ngành tài chính, từ
-tự động hóa vận hành, quản trị rủi ro, nâng cao trải nghiệm khách hàng.
+---
 
 ---
 

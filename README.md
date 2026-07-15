@@ -1,8 +1,8 @@
-# 🚀 VAIC 2026: AI-Native SME Copilot & CropDoctor AI Platform
+# 🚀 VAIC 2026: CropDoctor AI Platform
 
 ## 🇻🇳 Vietnam AI Innovation Challenge 2026 - Dự Án Đi Thi Cấp Độ Chuyên Nghiệp (Professional Track)
 
-Hệ thống phần mềm chuẩn mực được thiết kế theo kiến trúc **AI-Native Software (Maturity Level 5-6 LLMOps)** phục vụ cho cuộc thi **VAIC 2026**. Dự án tích hợp hai phân hệ chính giúp giải quyết triệt để các bài toán tối ưu vận hành doanh nghiệp đa lĩnh vực và chẩn đoán lâm sàng nông nghiệp công nghệ cao.
+Hệ thống phần mềm chuẩn mực được thiết kế theo kiến trúc **AI-Native Software (Maturity Level 5-6 LLMOps)** phục vụ cho cuộc thi **VAIC 2026**. Dự án tập trung giải quyết triệt để bài toán tối ưu vận hành nông trang và chẩn đoán lâm sàng nông nghiệp công nghệ cao.
 
 ---
 
@@ -36,7 +36,7 @@ vietnam-ai-challenge-2026/
 │   ├── src/
 │   │   ├── app/                           # Cấu trúc App Router của Next.js
 │   │   │   ├── (with-layout)/
-│   │   │   │   ├── ai-copilot/            # Phân hệ SME & Multidomain Copilot
+│   │   │   │   ├── ai-copilot/            # Phân hệ Copilot Vận Hành Nông Trại
 │   │   │   │   ├── diagnosis/             # Phân hệ CropDoctor AI Diagnosis Cockpit
 │   │   │   │   ├── farms/                 # Quản lý nông trang vận hành thật
 │   │   │   │   ├── cooperative/           # Bản đồ phân bố dịch bệnh khu vực
@@ -49,9 +49,9 @@ vietnam-ai-challenge-2026/
 
 ---
 
-## 🧱 1. Phân Hệ 1: AI-Native Operations Copilot (SME & Multidomain)
+## 🧱 1. Phân Hệ 1: AI-Native Operations Copilot (Agriculture)
 
-Giải pháp điều phối nghiệp vụ thông minh cho 3 lĩnh vực: **SME (Thanh toán & Đặt sân)**, **Giáo dục (Cảnh báo rớt môn)**, và **Nông nghiệp (Vận hành nông trại)**.
+Giải pháp điều phối nghiệp vụ thông minh cho lĩnh vực **Nông nghiệp (Vận hành nông trại)**.
 
 ### Luồng Vận Hành 9 Bước (Trace Flow)
 ```mermaid
@@ -59,20 +59,20 @@ graph TD
     A[1. Input Capture & PII Scan] -->|Ẩn thông tin cá nhân| B[2. Input Safety Guardrail]
     B -->|Chặn SQL/Prompt Injection| C[3. Semantic Model Router]
     C -->|FAQ Cache / Agent routing| D[4. CUDA Vector Search - RAG]
-    D -->|Nạp tri thức chính sách| E[5. PyTorch Triage Engine]
+    D -->|Nạp tri thức kỹ thuật & quy chuẩn| E[5. PyTorch Triage Engine]
     E -->|Chấm điểm Rủi ro & Priority| F[6. Agent Planner - ReAct]
     F -->|Đề xuất gọi API| G[7. Tool Executor]
     G -->|Nếu rủi ro cao hoặc cần duyệt| H[8. Human-in-the-Loop Queue]
-    H -->|Quản trị viên phê duyệt| I[9. Output Guardrail Check]
+    H -->|Chuyên gia/Quản trị viên phê duyệt| I[9. Output Guardrail Check]
     E -->|Nếu câu hỏi thường gặp FAQ| I
     I -->|Quét ảo tưởng Hallucination| J[Smart Response Dispatcher]
     J -->|Phục hồi PII & Trả về UI| UI[Next.js Cockpit UI]
 ```
 
 ### Các Tính Năng Cốt Lõi:
-1.  **Semantic Domain Switching**: Chuyển nhanh toàn bộ bối cảnh tri thức RAG, cấu trúc CSDL và tập lệnh API chỉ với 1 click ngay trên thanh tiêu đề.
-2.  **PyTorch ImpactTriageNet Engine**: Mô hình mạng thần kinh đa nhiệm tự động chấm điểm mức độ rủi ro của yêu cầu (< 2ms). Nếu độ rủi ro vượt ngưỡng an toàn, hệ thống tự động đưa vào hàng đợi phê duyệt của con người (**Human-in-the-Loop**).
-3.  **Hàng đợi phê duyệt (HitL Queue)**: Cho phép quản trị viên xem xét các hành động nhạy cảm như hoàn tiền Momo, điều chỉnh điểm số sinh viên hoặc đề xuất phun hóa chất, trước khi CSDL thật được cập nhật.
+1.  **Semantic Agriculture Context**: Tự động nhận diện và cập nhật tri thức RAG, cấu trúc CSDL nông trại và tập lệnh API nông nghiệp.
+2.  **PyTorch ImpactTriageNet Engine**: Mô hình mạng thần kinh đa nhiệm tự động chấm điểm mức độ rủi ro của yêu cầu (< 2ms). Nếu độ rủi ro vượt ngưỡng an toàn (ví dụ: bùng phát dịch bệnh lớn hoặc đề xuất thuốc hóa học độc hại), hệ thống tự động đưa vào hàng đợi phê duyệt của chuyên gia (**Human-in-the-Loop**).
+3.  **Hàng đợi phê duyệt (HitL Queue)**: Cho phép chuyên gia nông nghiệp xem xét các hành động nhạy cảm như đề xuất phun hóa chất độc hại hoặc cập nhật nhật ký bệnh án trước khi CSDL thật được cập nhật.
 
 ---
 
@@ -130,8 +130,8 @@ Set-ExecutionPolicy Bypass -Scope Process -Force
 
 ### Huấn luyện và nạp dữ liệu hạt giống (Seed & Train):
 ```bash
-# Nạp dữ liệu hạt giống cho cả 3 domain và huấn luyện mạng PyTorch
-python scripts/seed_domain.py --domain all --train
+# Nạp dữ liệu hạt giống cho nông nghiệp và huấn luyện mạng PyTorch
+python scripts/seed_domain.py --domain agriculture --train
 ```
 
 ### Huấn luyện lại mạng thần kinh PyTorch nghiệp vụ:
@@ -141,5 +141,5 @@ python -m ai_layer.pytorch_engine.train --domain agriculture --epochs 20
 
 ### Đo đạc hiệu năng mô hình (Benchmark):
 ```bash
-python -m ai_layer.pytorch_engine.benchmark --domain sme
+python -m ai_layer.pytorch_engine.benchmark --domain agriculture
 ```

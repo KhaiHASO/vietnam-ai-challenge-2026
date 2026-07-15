@@ -101,3 +101,12 @@ async def update_case_notes(
     service: DiagnosisService = Depends(get_diagnosis_service),
 ) -> dict[str, object]:
     return await service.update_case_notes(case_id, notes)
+
+
+@router.post("/cases/{case_id}/follow-up", status_code=201)
+async def create_follow_up(
+    case_id: str,
+    image: UploadFile = File(...),
+    service: DiagnosisService = Depends(get_diagnosis_service),
+) -> dict[str, object]:
+    return await service.create_follow_up(case_id, image)

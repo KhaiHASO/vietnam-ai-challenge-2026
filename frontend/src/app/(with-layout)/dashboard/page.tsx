@@ -447,10 +447,10 @@ export default function Dashboard() {
                       <i className="ri-error-warning-line text-white fs-14"></i>
                     </span>
                     <Badge color="danger" className="text-uppercase fw-semibold">
-                      Æ¯u tiÃªn cao
+                      Ưu tiên cao
                     </Badge>
                     <span className="text-danger-emphasis fw-medium fs-13">
-                      á»” dá»‹ch cáº§n theo dÃµi
+                      Ổ dịch cần theo dõi
                     </span>
                   </div>
                   <div>

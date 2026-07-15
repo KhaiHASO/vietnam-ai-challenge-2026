@@ -17,4 +17,4 @@ Tài liệu này định nghĩa các quy tắc bắt buộc mà mọi AI Agent k
 
 ## 3. Quy tắc liên kết tệp tin (File Link Conventions)
 * Tất cả các tham chiếu đến tệp tin trong tài liệu hoặc phản hồi phải sử dụng liên kết markdown có thể click được (clickable links) với giao thức `file://` và đường dẫn tuyệt đối (sử dụng dấu gạch chéo `/` ngay cả trên Windows).
-  * Ví dụ đúng: `[page.tsx](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/frontend/src/app/%28with-layout%29/ai-copilot/page.tsx)`
+  * Ví dụ đúng: `[page.tsx](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/frontend/src/app/%28with-layout%29/diagnosis/page.tsx)`

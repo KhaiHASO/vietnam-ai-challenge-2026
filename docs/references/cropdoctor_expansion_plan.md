@@ -66,7 +66,7 @@ Khi nông dân gửi ảnh chụp lá/quả bệnh lên hệ thống, luồng ch
 6.  **Nhật ký kiểm toán AI (`/ai/agent-logs`):**
     *   Trang chuyên dụng cho kỹ sư hệ thống kiểm tra chi tiết input/output, thời gian chạy (latency) và các bằng chứng thực nghiệm (evidence) của từng Agent. Hỗ trợ tự động định vị trace của ca bệnh khi bấm chuyển từ danh sách lịch sử.
 7.  **AI-Native Operations Copilot (`/ai-copilot`):**
-    *   Bàn điều khiển hoạt động đa lĩnh vực (SME - đặt sân, Education - sinh viên nguy cơ rớt môn, Agriculture - vận hành vườn). Tích hợp chấm điểm rủi ro qua mô hình học sâu PyTorch và hàng đợi duyệt Human-in-the-Loop.
+    *   Bàn điều khiển hoạt động thông minh hỗ trợ vận hành nông trại. Tích hợp chấm điểm rủi ro qua mô hình học sâu PyTorch và hàng đợi duyệt Human-in-the-Loop.
 
 ---
 

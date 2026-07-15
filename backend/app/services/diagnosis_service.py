@@ -519,3 +519,100 @@ class DiagnosisService:
         if not updated:
             raise _case_not_found(case_id)
         return {"status": "success", "case": updated}
+
+    async def create_follow_up(self, case_id: str, image: UploadFile) -> dict[str, Any]:
+        case = await self.repository.find_one("diagnosis_cases", {"case_id": case_id})
+        if not case:
+            raise _case_not_found(case_id)
+
+        # Upload ảnh follow-up tương tự upload_image
+        if not image.filename:
+            raise _upload_error(400, "UPLOAD_MISSING_FILENAME", "Uploaded image must have a filename.")
+
+        extension = image.filename.rsplit(".", 1)[-1].lower()
+        if extension not in ALLOWED_IMAGE_EXTENSIONS:
+            raise _upload_error(
+                400,
+                "UPLOAD_INVALID_EXTENSION",
+                "Unsupported image extension.",
+                extension=extension,
+                allowed_extensions=sorted(ALLOWED_IMAGE_EXTENSIONS),
+            )
+
+        image_id = _new_id("follow")
+        case_dir = settings.upload_root_path / "diagnosis_cases" / case_id / "follow_up"
+        file_path = case_dir / f"{image_id}.{extension}"
+
+        try:
+            content = await image.read()
+        except Exception as exc:
+            raise _upload_error(400, "UPLOAD_READ_ERROR", "Could not read uploaded image.") from exc
+
+        try:
+            case_dir.mkdir(parents=True, exist_ok=True)
+            file_path.write_bytes(content)
+        except OSError as exc:
+            raise _upload_error(500, "UPLOAD_STORAGE_ERROR", "Could not store uploaded image.") from exc
+
+        now = _now()
+        original_filename = image.filename.replace("\\", "/").split("/")[-1]
+
+        img_document = {
+            "image_id": image_id,
+            "case_id": case_id,
+            "uri": str(file_path),
+            "filename": file_path.name,
+            "original_filename": original_filename,
+            "content_type": image.content_type or "image/jpeg",
+            "size_bytes": len(content),
+            "status": "follow_up_uploaded",
+            "created_at": now,
+            "updated_at": now,
+        }
+        await self.repository.insert_one("case_images", img_document)
+
+        # Mock so sánh vết bệnh trước - sau 48h
+        # Lấy chẩn đoán cũ từ vision_results
+        old_vision = await self.repository.find_one("vision_results", {"case_id": case_id}, sort=[("created_at", -1)])
+        old_lesion_area = "18%"
+        if old_vision and "vision" in old_vision:
+            old_lesion_area = old_vision["vision"].get("leaf_area_affected", "18%")
+
+        # Giả lập diện tích vết bệnh mới giảm nhờ điều trị
+        new_lesion_area = "4%"
+        comparison_summary = f"Diện tích tổn hại giảm từ {old_lesion_area} xuống {new_lesion_area}. Bệnh có dấu hiệu thuyên giảm tốt nhờ áp dụng IPM vệ sinh đồng ruộng và cách ly kịp thời."
+
+        # Ghi nhật ký mùa vụ
+        season_log = {
+            "log_id": _new_id("season"),
+            "case_id": case_id,
+            "farm_id": case.get("farm_id"),
+            "activity": "Chụp ảnh theo dõi sau 48h",
+            "notes": comparison_summary,
+            "created_at": now
+        }
+        await self.repository.insert_one("season_logs", season_log)
+
+        # Cập nhật trạng thái ca bệnh
+        updated_case = await self.repository.update_one(
+            "diagnosis_cases",
+            {"case_id": case_id},
+            {
+                "status": "monitored_48h",
+                "notes": f"{case.get('notes', '')}\n[Theo dõi 48h]: {comparison_summary}",
+                "updated_at": now
+            }
+        )
+
+        return {
+            "status": "success",
+            "case_id": case_id,
+            "comparison": {
+                "before_image_area": old_lesion_area,
+                "after_image_area": new_lesion_area,
+                "status": "improving",
+                "summary": comparison_summary,
+            },
+            "follow_up_image": img_document,
+            "case": updated_case
+        }

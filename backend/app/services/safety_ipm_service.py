@@ -89,6 +89,16 @@ class SafetyIpmService:
         risk_level: str,
     ) -> list[str]:
         content = (reasoning_result or {}).get("content", {})
+        
+        # Thử lấy từ ipm_plan (tầng 1 + tầng 2)
+        ipm_plan = content.get("ipm_plan")
+        if isinstance(ipm_plan, dict):
+            im_acts = ipm_plan.get("immediate_actions") or []
+            mo_acts = ipm_plan.get("monitoring_actions") or []
+            if im_acts or mo_acts:
+                return [str(a) for a in im_acts] + [str(a) for a in mo_acts]
+
+        # Fallback cũ
         recommendations = content.get("safe_recommendations")
         if isinstance(recommendations, list) and recommendations:
             return [str(action) for action in recommendations]
@@ -105,7 +115,13 @@ class SafetyIpmService:
         self,
         risk_level: str,
         recommended_actions: list[str] | None = None,
+        ipm_plan: dict[str, Any] | None = None,
     ) -> bool:
+        # Nếu có hành động hóa học mạnh cần duyệt
+        if ipm_plan and isinstance(ipm_plan, dict):
+            approval_actions = ipm_plan.get("expert_approval_actions") or []
+            if approval_actions:
+                return True
         return self.requires_expert_review(risk_level, recommended_actions or [])
 
     def build_diagnosis(
@@ -123,6 +139,8 @@ class SafetyIpmService:
             or "Không xác định",
             "diagnosis_level": content.get("diagnosis_level"),
             "consensus_achieved": vision_result.get("consensus_achieved", False),
+            "evidence_for": content.get("evidence_for", []),
+            "evidence_against": content.get("evidence_against", []),
         }
 
     def build_ai_response(
@@ -135,6 +153,9 @@ class SafetyIpmService:
         vision_result = vision_report.get("raw", {})
         risk_level = triage_result.get("risk_level", "medium")
         recommended_actions = self.build_recommended_actions(reasoning_result, risk_level)
+        content = (reasoning_result or {}).get("content", {})
+        ipm_plan = content.get("ipm_plan")
+        
         fallback_sources = []
         if vision_result.get("fallback_used"):
             fallback_sources.append("vision")
@@ -142,15 +163,23 @@ class SafetyIpmService:
             fallback_sources.append("pytorch")
         if (reasoning_result or {}).get("fallback_used"):
             fallback_sources.append("reasoning")
+            
+        expert_needed = self.expert_required(risk_level, recommended_actions, ipm_plan)
+        
         return {
             "image_quality": vision_report.get("image_quality", {}),
             "top_predictions": vision_report.get("top_predictions", []),
             "diagnosis": self.build_diagnosis(vision_result, reasoning_result),
             "recommended_actions": recommended_actions,
+            "ipm_plan": ipm_plan or {
+                "immediate_actions": recommended_actions,
+                "monitoring_actions": ["Theo dõi sát sao diễn biến bệnh trong 48 giờ tới."],
+                "expert_approval_actions": []
+            },
             "follow_up_questions": self.build_follow_up_questions(vision_result, reasoning_result),
             "risk_level": risk_level,
             "confidence": vision_result.get("confidence", triage_result.get("confidence", 0.0)),
-            "expert_required": self.expert_required(risk_level, recommended_actions),
+            "expert_required": expert_needed,
             "fallback_used": bool(fallback_sources),
             "fallback_sources": fallback_sources,
             "agent_logs": agent_logs or [],
@@ -165,7 +194,14 @@ class SafetyIpmService:
         content = reasoning_result.get("content", {})
         now = _now()
         recommendations = self.build_recommended_actions(reasoning_result, risk_level)
-        needs_approval = self.expert_required(risk_level, recommendations)
+        ipm_plan = content.get("ipm_plan") or {
+            "immediate_actions": recommendations,
+            "monitoring_actions": ["Theo dõi sát sao diễn biến bệnh trong 48 giờ tới."],
+            "expert_approval_actions": []
+        }
+        
+        needs_approval = self.expert_required(risk_level, recommendations, ipm_plan)
+        
         return {
             "plan_id": _new_id("plan"),
             "case_id": case_id,
@@ -173,8 +209,9 @@ class SafetyIpmService:
             "diagnosis_level": content.get("diagnosis_level", "uncertain"),
             "short_diagnosis": content.get("short_diagnosis", "Chưa đủ dữ liệu chẩn đoán"),
             "recommendations": recommendations,
+            "ipm_plan": ipm_plan,
             "approval_required": needs_approval,
-            "approval_reasons": self.expert_review_reasons(risk_level, recommendations),
+            "approval_reasons": self.expert_review_reasons(risk_level, recommendations) + (["strong_chemical_recommendation"] if ipm_plan.get("expert_approval_actions") else []),
             "safety_notes": content.get("why", []),
             "when_to_call_expert": content.get("when_to_call_expert", []),
             "disclaimer": content.get("disclaimer", ""),

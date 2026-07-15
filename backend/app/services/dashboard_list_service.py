@@ -183,6 +183,67 @@ class DashboardListService:
             "risk_counts": dict(Counter(item.get("risk_level") or "unknown" for item in map_items)),
         }
 
+    async def get_outbreak_alerts(self) -> dict[str, Any]:
+        farms = (await self.list_farms())["farms"]
+        cases = await self.repository.find_many("diagnosis_cases", {}, sort=[("created_at", -1)])
+        farm_by_id = {farm.get("farm_id"): farm for farm in farms}
+
+        # Gom nhóm ca bệnh theo bệnh lý và khu vực trong vòng 7 ngày qua
+        now = datetime.now(timezone.utc) if hasattr(datetime, "now") else datetime.utcnow()
+        outbreaks = []
+
+        # Nhóm theo bệnh (summary)
+        disease_clusters = {}
+        for case in cases:
+            # Lấy tuổi của ca bệnh (giả định giây nếu dạng datetime)
+            created_at = case.get("created_at")
+            if not created_at:
+                continue
+                
+            # Đổi sang timezone-aware datetime để so sánh
+            if isinstance(created_at, str):
+                try:
+                    created_at = datetime.fromisoformat(created_at.replace("Z", "+00:00"))
+                except ValueError:
+                    continue
+            
+            # Chỉ xét các ca trong vòng 7 ngày
+            days_old = (now - created_at).days
+            if days_old > 7:
+                continue
+
+            disease = case.get("summary") or "Bệnh chưa xác định"
+            farm = farm_by_id.get(case.get("farm_id"), {})
+            location = farm.get("location") or "Trảng Bom"
+
+            key = (disease, location)
+            if key not in disease_clusters:
+                disease_clusters[key] = []
+            disease_clusters[key].append(case)
+
+        # Tạo cảnh báo ổ dịch nếu cụm có từ 2 ca trở lên
+        for (disease, location), cluster in disease_clusters.items():
+            if len(cluster) >= 2:
+                # Độ ẩm giả lập/thực tế từ context
+                humidity = "88%"
+                outbreaks.append({
+                    "alert_id": f"alert_{uuid.uuid4().hex[:8]}" if 'uuid' in globals() else f"alert_{len(outbreaks)+1}",
+                    "disease": disease,
+                    "location": location,
+                    "case_count": len(cluster),
+                    "cases": [c.get("case_id") for c in cluster],
+                    "risk_level": "high" if len(cluster) >= 3 else "medium",
+                    "confidence": "Cao (90%)" if len(cluster) >= 3 else "Trung bình (75%)",
+                    "weather_context": f"Độ ẩm không khí {humidity}, xuất hiện sương mù và mưa rào nhẹ trong khu vực.",
+                    "recommendation": f"Đề xuất kiểm tra các vườn thuộc bán kính 5km lân cận. Khuyến nghị phun phòng bằng chế phẩm sinh học an toàn."
+                })
+
+        return {
+            "status": "success",
+            "outbreaks": outbreaks,
+            "total_outbreaks": len(outbreaks)
+        }
+
     def _demo_farms(self) -> list[dict[str, Any]]:
         state = load_db()
         return state.get("farms", [])

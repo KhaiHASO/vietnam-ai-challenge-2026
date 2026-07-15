@@ -13,7 +13,7 @@ Từ giờ trở đi, những thứ này **không ưu tiên**:
 * thêm cây trồng mới;
 * thêm quá nhiều loại bệnh;
 * thêm dashboard phức tạp;
-* mở rộng SME Copilot;
+* mở rộng các phân hệ khác;
 * thêm role/phân quyền;
 * thêm mobile;
 * thêm map quá sâu;

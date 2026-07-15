@@ -3,7 +3,7 @@
 Tài liệu này tổng hợp chiến lược toàn diện của đội **FPT Polytechnic Đồng Nai** nhằm mục tiêu đạt Giải Nhất chung cuộc và giải thưởng PyTorch xuất sắc nhất.
 
 ## 1. Định vị Giải pháp (Product Positioning)
-- **Positioning**: *"AI-Native Workflow Copilot"* – Hệ thống biến các dữ liệu rời rạc tại SME thành các hành động được kiểm soát.
+- **Positioning**: *"AI-Native Agriculture Copilot"* – Hệ thống biến các dữ liệu rời rạc tại nông trại thành các hành động được kiểm soát.
 - **Tính năng nổi bật**:
   - Không phải là chatbot đơn giản hỏi đáp.
   - Phân loại rủi ro nghiệp vụ siêu tốc bằng PyTorch Deep Learning.
@@ -11,10 +11,8 @@ Tài liệu này tổng hợp chiến lược toàn diện của đội **FPT Po
   - Tích hợp 9 bước bảo vệ và truy vết Trace Flow.
 
 ## 2. Chiến lược Chinh phục Giám khảo (Judge Engagement)
-1. **Domain-Specific Pitch**: Đóng gói sẵn 3 kịch bản nghiệp vụ thực tế phục vụ mọi đề bài:
-   - **[SME Domain](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/domains/sme/)**: Hoàn hủy đặt sân thể thao, sự cố ví MoMo.
-   - **[Education Domain](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/domains/education/)**: Dự báo và can thiệp sinh viên rớt môn.
-   - **[Agriculture Domain](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/domains/agriculture/)**: Chẩn đoán và phê duyệt phun thuốc bảo vệ thực vật.
+1. **Domain-Specific Pitch**: Tập trung giải quyết kịch bản nghiệp vụ thực tế trong nông nghiệp:
+   - **[Agriculture Domain](file:///C:/Users/Admin/Desktop/github/vietnam-ai-challenge-2026/domains/agriculture/)**: Chẩn đoán dịch bệnh cây trồng, đề xuất giải pháp IPM và phê duyệt đơn thuốc bảo vệ thực vật.
 2. **Demo Trực quan (WOW Moment)**: Trình diễn Cockpit Dashboard hiển thị thời gian thực độ trễ của từng bước (PII, PyTorch, RAG, ReAct) và nút phê duyệt HITL.
 3. **Pilot Pathway đáng tin**: Đề xuất lộ trình triển khai 4 giai đoạn chi tiết có đo đạc và quản trị rủi ro thay vì hứa hẹn mơ hồ.
 

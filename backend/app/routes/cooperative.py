@@ -14,3 +14,10 @@ async def disease_map(
     service: DashboardListService = Depends(get_dashboard_list_service),
 ) -> dict[str, object]:
     return await service.cooperative_disease_map()
+
+
+@router.get("/outbreaks")
+async def cooperative_outbreaks(
+    service: DashboardListService = Depends(get_dashboard_list_service),
+) -> dict[str, object]:
+    return await service.get_outbreak_alerts()
